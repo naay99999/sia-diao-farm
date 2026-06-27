@@ -14,6 +14,14 @@ export type FruitVariety = {
     fruit_type?: FruitType;
 };
 
+export type ActivityType = {
+    id: number;
+    name: string;
+    activities_count?: number;
+    created_at: string | null;
+    updated_at: string | null;
+};
+
 export type CropCycleStage =
     | 'soil_prep'
     | 'flowering'
