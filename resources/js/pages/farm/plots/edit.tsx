@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import PlotController from '@/actions/App/Http/Controllers/Farm/PlotController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -13,10 +13,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { index, show } from '@/routes/plots';
+import { edit, index, show } from '@/routes/plots';
 import type { FruitVariety, Plot } from '@/types/farm';
 
 export default function PlotEdit({ plot, fruitVarieties }: { plot: Plot; fruitVarieties: FruitVariety[] }) {
+    setLayoutProps({
+        breadcrumbs: [
+            { title: 'แปลงผลไม้', href: index() },
+            { title: plot.name, href: show(plot.id) },
+            { title: 'แก้ไขแปลง', href: edit(plot.id) },
+        ],
+    });
+
     return (
         <div className="flex h-full flex-1 flex-col gap-6 p-4">
             <Head title="แก้ไขแปลง" />
@@ -83,6 +91,16 @@ export default function PlotEdit({ plot, fruitVarieties }: { plot: Plot; fruitVa
                                     <InputError message={errors.area_rai} />
                                 </div>
                             </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="notes">หมายเหตุ</Label>
+                                <Input
+                                    id="notes"
+                                    name="notes"
+                                    placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"
+                                    defaultValue={plot.notes ?? ''}
+                                />
+                                <InputError message={errors.notes} />
+                            </div>
                             <Button disabled={processing}>บันทึก</Button>
                         </>
                     )}
@@ -92,9 +110,3 @@ export default function PlotEdit({ plot, fruitVarieties }: { plot: Plot; fruitVa
     );
 }
 
-PlotEdit.layout = {
-    breadcrumbs: [
-        { title: 'แปลงผลไม้', href: index() },
-        { title: 'แก้ไขแปลง', href: show(0) },
-    ],
-};

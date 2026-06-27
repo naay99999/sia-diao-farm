@@ -58,6 +58,14 @@ test('a user can view a single plot', function () {
         ->assertOk();
 });
 
+test('a user can view the edit plot page', function () {
+    $plot = Plot::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('plots.edit', $plot))
+        ->assertOk();
+});
+
 test('a user can update a plot', function () {
     $plot = Plot::factory()->create(['tree_count' => 10]);
 

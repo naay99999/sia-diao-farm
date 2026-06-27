@@ -1,13 +1,20 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import PlotController from '@/actions/App/Http/Controllers/Farm/PlotController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { edit, index } from '@/routes/plots';
+import { edit, index, show } from '@/routes/plots';
 import { cropCycleStageLabels, type Plot } from '@/types/farm';
 
 export default function PlotShow({ plot }: { plot: Plot }) {
+    setLayoutProps({
+        breadcrumbs: [
+            { title: 'แปลงผลไม้', href: index() },
+            { title: plot.name, href: show(plot.id) },
+        ],
+    });
+
     return (
         <div className="flex h-full flex-1 flex-col gap-6 p-4">
             <Head title={plot.name} />
@@ -78,6 +85,3 @@ export default function PlotShow({ plot }: { plot: Plot }) {
     );
 }
 
-PlotShow.layout = {
-    breadcrumbs: [{ title: 'แปลงผลไม้', href: index() }],
-};

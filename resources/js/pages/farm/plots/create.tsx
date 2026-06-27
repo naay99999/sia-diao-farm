@@ -13,7 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { index } from '@/routes/plots';
+import { create, index } from '@/routes/plots';
 import type { FruitVariety } from '@/types/farm';
 
 export default function PlotCreate({ fruitVarieties }: { fruitVarieties: FruitVariety[] }) {
@@ -64,6 +64,11 @@ export default function PlotCreate({ fruitVarieties }: { fruitVarieties: FruitVa
                                     <InputError message={errors.area_rai} />
                                 </div>
                             </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="notes">หมายเหตุ</Label>
+                                <Input id="notes" name="notes" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" />
+                                <InputError message={errors.notes} />
+                            </div>
                             <Button disabled={processing}>บันทึก</Button>
                         </>
                     )}
@@ -76,6 +81,6 @@ export default function PlotCreate({ fruitVarieties }: { fruitVarieties: FruitVa
 PlotCreate.layout = {
     breadcrumbs: [
         { title: 'แปลงผลไม้', href: index() },
-        { title: 'เพิ่มแปลง', href: index() },
+        { title: 'เพิ่มแปลง', href: create() },
     ],
 };
