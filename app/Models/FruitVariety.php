@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -30,13 +29,5 @@ class FruitVariety extends Model
     public function fruitType(): BelongsTo
     {
         return $this->belongsTo(FruitType::class);
-    }
-
-    /**
-     * @return HasMany<Plot, $this>
-     */
-    public function plots(): HasMany
-    {
-        return $this->hasMany(Plot::class);
     }
 }
