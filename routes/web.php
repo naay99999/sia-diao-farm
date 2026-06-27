@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Farm\ActivityTypeController;
 use App\Http\Controllers\Farm\CropCycleController;
+use App\Http\Controllers\Farm\ExpenseCategoryController;
 use App\Http\Controllers\Farm\FruitTypeController;
 use App\Http\Controllers\Farm\FruitVarietyController;
 use App\Http\Controllers\Farm\PlotController;
@@ -17,6 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('fruit-varieties', FruitVarietyController::class)
         ->only(['index', 'store', 'update', 'destroy']);
     Route::resource('activity-types', ActivityTypeController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('expense-categories', ExpenseCategoryController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
     Route::resource('plots', PlotController::class);

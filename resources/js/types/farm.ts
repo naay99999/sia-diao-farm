@@ -59,6 +59,21 @@ export type Plot = {
     crop_cycles?: CropCycle[];
 };
 
+export type ExpenseScope = 'direct' | 'overhead';
+
+export const expenseScopeLabels: Record<ExpenseScope, string> = {
+    direct: 'ต้นทุนตรง (ผูกรอบการผลิต)',
+    overhead: 'ค่าส่วนกลาง',
+};
+
+export type ExpenseCategory = {
+    id: number;
+    name: string;
+    default_scope: ExpenseScope;
+    created_at: string | null;
+    updated_at: string | null;
+};
+
 export const cropCycleStageLabels: Record<CropCycleStage, string> = {
     soil_prep: 'บำรุงดิน',
     flowering: 'ออกดอก',
