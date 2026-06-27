@@ -18,15 +18,15 @@ export default function Security(props: Props) {
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title="ตั้งค่าความปลอดภัย" />
 
-            <h1 className="sr-only">Security settings</h1>
+            <h1 className="sr-only">ตั้งค่าความปลอดภัย</h1>
 
             <div className="space-y-6">
                 <Heading
                     variant="small"
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
+                    title="อัปเดตรหัสผ่าน"
+                    description="ใช้รหัสผ่านที่ยาวและสุ่มเพื่อความปลอดภัยของบัญชี"
                 />
 
                 <Form
@@ -55,7 +55,7 @@ export default function Security(props: Props) {
                         <>
                             <div className="grid gap-2">
                                 <Label htmlFor="current_password">
-                                    Current password
+                                    รหัสผ่านปัจจุบัน
                                 </Label>
 
                                 <PasswordInput
@@ -64,14 +64,14 @@ export default function Security(props: Props) {
                                     name="current_password"
                                     className="mt-1 block w-full"
                                     autoComplete="current-password"
-                                    placeholder="Current password"
+                                    placeholder="รหัสผ่านปัจจุบัน"
                                 />
 
                                 <InputError message={errors.current_password} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
+                                <Label htmlFor="password">รหัสผ่านใหม่</Label>
 
                                 <PasswordInput
                                     id="password"
@@ -79,7 +79,7 @@ export default function Security(props: Props) {
                                     name="password"
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
-                                    placeholder="New password"
+                                    placeholder="รหัสผ่านใหม่"
                                     passwordrules={props.passwordRules}
                                 />
 
@@ -88,7 +88,7 @@ export default function Security(props: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">
-                                    Confirm password
+                                    ยืนยันรหัสผ่าน
                                 </Label>
 
                                 <PasswordInput
@@ -96,7 +96,7 @@ export default function Security(props: Props) {
                                     name="password_confirmation"
                                     className="mt-1 block w-full"
                                     autoComplete="new-password"
-                                    placeholder="Confirm password"
+                                    placeholder="ยืนยันรหัสผ่าน"
                                     passwordrules={props.passwordRules}
                                 />
 
@@ -110,7 +110,7 @@ export default function Security(props: Props) {
                                     disabled={processing}
                                     data-test="update-password-button"
                                 >
-                                    Save
+                                    บันทึก
                                 </Button>
                             </div>
                         </>
@@ -124,7 +124,7 @@ export default function Security(props: Props) {
 Security.layout = {
     breadcrumbs: [
         {
-            title: 'Security settings',
+            title: 'ตั้งค่าความปลอดภัย',
             href: edit(),
         },
     ],
