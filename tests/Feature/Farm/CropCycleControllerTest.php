@@ -6,6 +6,20 @@ use App\Models\FruitVariety;
 use App\Models\Plot;
 use App\Models\User;
 
+test('guests cannot create a crop cycle', function () {
+    $plot = Plot::factory()->create();
+
+    $this->post(route('plots.crop-cycles.store', $plot), [])
+        ->assertRedirect(route('login'));
+});
+
+test('guests cannot update a crop cycle', function () {
+    $cycle = CropCycle::factory()->create();
+
+    $this->patch(route('crop-cycles.update', $cycle), [])
+        ->assertRedirect(route('login'));
+});
+
 test('a user can create a crop cycle for a plot', function () {
     $variety = FruitVariety::factory()->create();
     $plot = Plot::factory()->for($variety)->create();
