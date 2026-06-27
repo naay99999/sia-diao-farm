@@ -1,5 +1,6 @@
 import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
 import ActivityController, { store as activityStore } from '@/actions/App/Http/Controllers/Farm/ActivityController';
+import ExpenseController, { storeForCycle as expenseStoreForCycle } from '@/actions/App/Http/Controllers/Farm/ExpenseController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -166,13 +167,76 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, activityType
                                         {expense.description ? ` · ${expense.description}` : ''}
                                     </p>
                                 </div>
-                                <p className="font-medium">
-                                    {Number(expense.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท
-                                </p>
+                                <div className="flex items-center gap-3">
+                                    <p className="font-medium">
+                                        {Number(expense.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท
+                                    </p>
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => {
+                                            if (confirm('ลบค่าใช้จ่ายนี้?')) {
+                                                router.delete(ExpenseController.destroy.url(expense.id));
+                                            }
+                                        }}
+                                    >
+                                        ลบ
+                                    </Button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 )}
+
+                <div className="mt-4 border-t pt-4">
+                    <p className="mb-3 text-sm font-medium">บันทึกค่าใช้จ่ายของรอบนี้</p>
+                    <Form
+                        action={expenseStoreForCycle.url(cropCycle.id)}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                        resetOnSuccess
+                        className="grid gap-3 sm:grid-cols-4 sm:items-end"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="expense_category_id_direct">หมวด</Label>
+                                    <Select name="expense_category_id">
+                                        <SelectTrigger id="expense_category_id_direct">
+                                            <SelectValue placeholder="เลือกหมวด" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {expenseCategories.map((category) => (
+                                                <SelectItem key={category.id} value={String(category.id)}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.expense_category_id} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="amount_direct">จำนวนเงิน (บาท)</Label>
+                                    <Input id="amount_direct" name="amount" type="number" step="0.01" min={0.01} required />
+                                    <InputError message={errors.amount} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="spent_on_direct">วันที่จ่าย</Label>
+                                    <Input id="spent_on_direct" name="spent_on" type="date" required />
+                                    <InputError message={errors.spent_on} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="description_direct">รายละเอียด</Label>
+                                    <Input id="description_direct" name="description" placeholder="เช่น ค่าแรงเก็บผลผลิต" />
+                                    <InputError message={errors.description} />
+                                </div>
+                                <div className="sm:col-span-4">
+                                    <Button disabled={processing}>บันทึกค่าใช้จ่าย</Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </Card>
         </div>
     );

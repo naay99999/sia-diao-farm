@@ -4,6 +4,7 @@ use App\Http\Controllers\Farm\ActivityController;
 use App\Http\Controllers\Farm\ActivityTypeController;
 use App\Http\Controllers\Farm\CropCycleController;
 use App\Http\Controllers\Farm\ExpenseCategoryController;
+use App\Http\Controllers\Farm\ExpenseController;
 use App\Http\Controllers\Farm\FruitTypeController;
 use App\Http\Controllers\Farm\FruitVarietyController;
 use App\Http\Controllers\Farm\PlotController;
@@ -36,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('crop-cycles.activities.store');
     Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])
         ->name('activities.destroy');
+
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::post('crop-cycles/{cropCycle}/expenses', [ExpenseController::class, 'storeForCycle'])
+        ->name('crop-cycles.expenses.store');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 });
 
 require __DIR__.'/settings.php';
