@@ -1,0 +1,24 @@
+<?php
+
+use Inertia\Testing\AssertableInertia as Assert;
+
+test('inertia shares app name and description', function () {
+    config([
+        'app.name' => 'เสี่ยเดียวฟาร์ม',
+        'app.description' => 'internal farm ERP',
+    ]);
+
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('name', 'เสี่ยเดียวฟาร์ม')
+            ->where('description', 'internal farm ERP'),
+        );
+});
+
+test('appearance defaults to light when no cookie is present', function () {
+    $this->get(route('home'))
+        ->assertOk();
+
+    expect(view()->shared('appearance'))->toBe('light');
+});
