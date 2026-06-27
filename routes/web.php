@@ -10,6 +10,7 @@ use App\Http\Controllers\Farm\FruitVarietyController;
 use App\Http\Controllers\Farm\GradeController;
 use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\PlotController;
+use App\Http\Controllers\Farm\SaleController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -46,6 +47,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('crop-cycles.harvests.store');
     Route::delete('harvests/{harvest}', [HarvestController::class, 'destroy'])
         ->name('harvests.destroy');
+
+    Route::post('crop-cycles/{cropCycle}/sales', [SaleController::class, 'store'])
+        ->name('crop-cycles.sales.store');
+    Route::delete('sales/{sale}', [SaleController::class, 'destroy'])
+        ->name('sales.destroy');
 
     Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');

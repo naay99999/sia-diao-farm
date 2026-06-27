@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import ActivityController, { store as activityStore } from '@/actions/App/Http/Controllers/Farm/ActivityController';
 import ExpenseController, { storeForCycle as expenseStoreForCycle } from '@/actions/App/Http/Controllers/Farm/ExpenseController';
 import HarvestController, { store as harvestStore } from '@/actions/App/Http/Controllers/Farm/HarvestController';
+import SaleController, { store as saleStore } from '@/actions/App/Http/Controllers/Farm/SaleController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +52,8 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
 
     const [harvestRowIds, setHarvestRowIds] = useState<number[]>([0]);
     const nextHarvestRowId = useRef(1);
+    const [saleRowIds, setSaleRowIds] = useState<number[]>([0]);
+    const nextSaleRowId = useRef(1);
 
     return (
         <div className="flex h-full flex-1 flex-col gap-6 p-4">
@@ -400,7 +403,20 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
                             <div key={sale.id} className="rounded-md border p-3">
                                 <div className="flex items-center justify-between">
                                     <p className="font-medium">{sale.buyer_name}</p>
-                                    <p className="text-muted-foreground text-sm">{sale.sold_on}</p>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-muted-foreground text-sm">{sale.sold_on}</p>
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => {
+                                                if (confirm('ลบการขายนี้?')) {
+                                                    router.delete(SaleController.destroy.url(sale.id));
+                                                }
+                                            }}
+                                        >
+                                            ลบ
+                                        </Button>
+                                    </div>
                                 </div>
                                 <div className="text-muted-foreground mt-1 grid gap-1 text-sm">
                                     {sale.items?.map((item) => (
@@ -415,6 +431,108 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
                         ))}
                     </div>
                 )}
+
+                <div className="mt-4 border-t pt-4">
+                    <p className="mb-3 text-sm font-medium">บันทึกการขายใหม่</p>
+                    <Form
+                        action={saleStore.url(cropCycle.id)}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                        resetOnSuccess
+                        onSuccess={() => {
+                            setSaleRowIds([0]);
+                            nextSaleRowId.current = 1;
+                        }}
+                        className="grid gap-3"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-3 sm:grid-cols-2 sm:items-end">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="buyer_name">ผู้ซื้อ / ล้ง</Label>
+                                        <Input id="buyer_name" name="buyer_name" required placeholder="เช่น ล้งเจ๊แดง" />
+                                        <InputError message={errors.buyer_name} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="sold_on">วันที่ขาย</Label>
+                                        <Input id="sold_on" name="sold_on" type="date" required />
+                                        <InputError message={errors.sold_on} />
+                                    </div>
+                                    <div className="grid gap-2 sm:col-span-2">
+                                        <Label htmlFor="sale_notes">หมายเหตุ</Label>
+                                        <Input id="sale_notes" name="notes" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" />
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>รายการขายตามเกรด</Label>
+                                    {saleRowIds.map((rowId, idx) => (
+                                        <div key={rowId} className="flex items-end gap-2">
+                                            <div className="grid flex-1 gap-1">
+                                                <Select name={`items[${idx}][grade_id]`}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="เกรด" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {grades.map((grade) => (
+                                                            <SelectItem key={grade.id} value={String(grade.id)}>
+                                                                {grade.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError message={errors[`items.${idx}.grade_id`]} />
+                                            </div>
+                                            <div className="grid flex-1 gap-1">
+                                                <Input
+                                                    name={`items[${idx}][weight_kg]`}
+                                                    type="number"
+                                                    step="0.01"
+                                                    min={0.01}
+                                                    placeholder="น้ำหนัก (กก.)"
+                                                    required
+                                                />
+                                                <InputError message={errors[`items.${idx}.weight_kg`]} />
+                                            </div>
+                                            <div className="grid flex-1 gap-1">
+                                                <Input
+                                                    name={`items[${idx}][price_per_kg]`}
+                                                    type="number"
+                                                    step="0.01"
+                                                    min={0.01}
+                                                    placeholder="ราคา/กก."
+                                                    required
+                                                />
+                                                <InputError message={errors[`items.${idx}.price_per_kg`]} />
+                                            </div>
+                                            {saleRowIds.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setSaleRowIds((ids) => ids.filter((id) => id !== rowId))}
+                                                >
+                                                    ลบ
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <InputError message={errors.items} />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-fit"
+                                        onClick={() => setSaleRowIds((ids) => [...ids, nextSaleRowId.current++])}
+                                    >
+                                        + เพิ่มเกรด
+                                    </Button>
+                                </div>
+                                <div>
+                                    <Button disabled={processing}>บันทึกการขาย</Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </Card>
         </div>
     );
