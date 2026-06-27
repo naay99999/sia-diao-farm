@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Models;
+
+use Database\Factories\HarvestFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+
+/**
+ * @property int $id
+ * @property int $crop_cycle_id
+ * @property Carbon $harvested_on
+ * @property string|null $notes
+ * @property int $recorded_by
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+#[Fillable(['crop_cycle_id', 'harvested_on', 'notes', 'recorded_by'])]
+class Harvest extends Model
+{
+    /** @use HasFactory<HarvestFactory> */
+    use HasFactory;
+
+    protected function casts(): array
+    {
+        return [
+            'harvested_on' => 'date',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<CropCycle, $this>
+     */
+    public function cropCycle(): BelongsTo
+    {
+        return $this->belongsTo(CropCycle::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function recordedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    /**
+     * @return HasMany<HarvestItem, $this>
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(HarvestItem::class);
+    }
+}
