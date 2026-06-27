@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\CropCycleStatus;
+use App\Models\CropCycle;
 use App\Models\FruitVariety;
 use App\Models\Plot;
 
@@ -22,4 +24,12 @@ test('tree age is null when planted_at is missing', function () {
     $plot = Plot::factory()->create(['planted_at' => null]);
 
     expect($plot->tree_age_years)->toBeNull();
+});
+
+test('active crop cycle returns the active cycle not a newer closed one', function () {
+    $plot = Plot::factory()->create();
+    $active = CropCycle::factory()->for($plot)->create(['status' => CropCycleStatus::Active]);
+    CropCycle::factory()->for($plot)->create(['status' => CropCycleStatus::Closed]);
+
+    expect($plot->activeCropCycle->id)->toBe($active->id);
 });

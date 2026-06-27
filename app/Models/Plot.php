@@ -60,8 +60,7 @@ class Plot extends Model
     public function activeCropCycle(): HasOne
     {
         return $this->hasOne(CropCycle::class)
-            ->where('status', CropCycleStatus::Active)
-            ->latestOfMany();
+            ->ofMany(['id' => 'max'], fn ($query) => $query->where('status', CropCycleStatus::Active));
     }
 
     /**
@@ -70,9 +69,7 @@ class Plot extends Model
     protected function treeAgeYears(): Attribute
     {
         return Attribute::get(
-            fn (): ?int => $this->planted_at?->diffInYears(now()) !== null
-                ? (int) $this->planted_at->diffInYears(now())
-                : null
+            fn (): ?int => $this->planted_at?->diffInYears(now())
         );
     }
 }
