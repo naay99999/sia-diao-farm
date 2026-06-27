@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('plots.crop-cycles.store');
     Route::patch('crop-cycles/{cropCycle}', [CropCycleController::class, 'update'])
         ->name('crop-cycles.update');
+    Route::get('crop-cycles/{cropCycle}', [CropCycleController::class, 'show'])
+        ->name('crop-cycles.show');
 });
 
 require __DIR__.'/settings.php';

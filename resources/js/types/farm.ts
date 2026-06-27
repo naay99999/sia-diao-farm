@@ -43,6 +43,10 @@ export type CropCycle = {
     started_at: string;
     closed_at: string | null;
     notes: string | null;
+    plot?: Plot;
+    fruit_variety?: FruitVariety;
+    activities?: Activity[];
+    expenses?: Expense[];
 };
 
 export type Plot = {
@@ -72,6 +76,27 @@ export type ExpenseCategory = {
     default_scope: ExpenseScope;
     created_at: string | null;
     updated_at: string | null;
+};
+
+export type Activity = {
+    id: number;
+    crop_cycle_id: number;
+    activity_type_id: number;
+    performed_on: string;
+    notes: string | null;
+    activity_type?: ActivityType;
+};
+
+export type Expense = {
+    id: number;
+    expense_category_id: number;
+    amount: string;
+    spent_on: string;
+    description: string | null;
+    crop_cycle_id: number | null;
+    activity_id: number | null;
+    scope: ExpenseScope;
+    expense_category?: ExpenseCategory;
 };
 
 export const cropCycleStageLabels: Record<CropCycleStage, string> = {

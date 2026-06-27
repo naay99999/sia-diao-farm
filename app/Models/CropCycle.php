@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -67,6 +68,22 @@ class CropCycle extends Model
     public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    /**
+     * @return HasMany<Activity, $this>
+     */
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    /**
+     * @return HasMany<Expense, $this>
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
     }
 
     /**

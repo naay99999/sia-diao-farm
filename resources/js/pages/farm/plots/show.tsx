@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { show as cropCycleShow } from '@/routes/crop-cycles';
 import { edit, index, show } from '@/routes/plots';
 import { cropCycleStageLabels, type Plot } from '@/types/farm';
 
@@ -70,14 +71,14 @@ export default function PlotShow({ plot }: { plot: Plot }) {
                         {plot.crop_cycles?.map((cycle) => (
                             <div key={cycle.id} className="rounded-md border p-3">
                                 <div className="flex items-center justify-between">
-                                    <div>
+                                    <Link href={cropCycleShow(cycle.id)} className="hover:underline">
                                         <p className="font-medium">{cycle.label}</p>
                                         <p className="text-muted-foreground text-sm">
                                             {cycle.expected_harvest_date
                                                 ? `คาดเก็บเกี่ยว ${cycle.expected_harvest_date}`
                                                 : 'ยังไม่บันทึกวันดอกบาน'}
                                         </p>
-                                    </div>
+                                    </Link>
                                     <Badge variant="secondary">{cropCycleStageLabels[cycle.stage]}</Badge>
                                 </div>
                                 <Form

@@ -78,3 +78,17 @@ test('a user can update the stage of a cycle', function () {
 
     expect($cycle->refresh()->stage)->toBe(CropCycleStage::Fruiting);
 });
+
+test('guests cannot view a crop cycle', function () {
+    $cycle = CropCycle::factory()->create();
+
+    $this->get(route('crop-cycles.show', $cycle))->assertRedirect(route('login'));
+});
+
+test('a user can view a crop cycle detail page', function () {
+    $cycle = CropCycle::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('crop-cycles.show', $cycle))
+        ->assertOk();
+});
