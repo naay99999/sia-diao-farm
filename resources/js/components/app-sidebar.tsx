@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { BookOpen, FolderGit2, Leaf, LayoutGrid, Sprout, Trees } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,6 +14,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as plotsIndex } from '@/routes/plots';
+import { index as fruitTypesIndex } from '@/routes/fruit-types';
+import { index as fruitVarietiesIndex } from '@/routes/fruit-varieties';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -21,6 +24,21 @@ const mainNavItems: NavItem[] = [
         title: 'แดชบอร์ด',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'แปลงผลไม้',
+        href: plotsIndex(),
+        icon: Trees,
+    },
+    {
+        title: 'ชนิดผลไม้',
+        href: fruitTypesIndex(),
+        icon: Sprout,
+    },
+    {
+        title: 'พันธุ์ผลไม้',
+        href: fruitVarietiesIndex(),
+        icon: Leaf,
     },
 ];
 
