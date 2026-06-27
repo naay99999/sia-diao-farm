@@ -28,4 +28,12 @@ class FruitType extends Model
     {
         return $this->hasMany(FruitVariety::class);
     }
+
+    /**
+     * @return HasMany<Grade, $this>
+     */
+    public function grades(): HasMany
+    {
+        return $this->hasMany(Grade::class)->orderBy('sort_order');
+    }
 }
