@@ -1,7 +1,19 @@
-import { Head, setLayoutProps } from '@inertiajs/react';
+import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
+import ActivityController, { store as activityStore } from '@/actions/App/Http/Controllers/Farm/ActivityController';
 import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { index as plotsIndex, show as plotShow } from '@/routes/plots';
 import { cropCycleStageLabels, type Activity, type CropCycle, type Expense } from '@/types/farm';
 
@@ -12,7 +24,7 @@ type PageProps = {
     expenseCategories: { id: number; name: string }[];
 };
 
-export default function CropCycleShow({ cropCycle, totalDirectCost }: PageProps) {
+export default function CropCycleShow({ cropCycle, totalDirectCost, activityTypes, expenseCategories }: PageProps) {
     const plotName = cropCycle.plot?.name ?? 'แปลง';
 
     setLayoutProps({
@@ -56,10 +68,87 @@ export default function CropCycleShow({ cropCycle, totalDirectCost }: PageProps)
                                         {activity.notes ? ` · ${activity.notes}` : ''}
                                     </p>
                                 </div>
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => {
+                                        if (confirm('ลบกิจกรรมนี้?')) {
+                                            router.delete(ActivityController.destroy.url(activity.id));
+                                        }
+                                    }}
+                                >
+                                    ลบ
+                                </Button>
                             </div>
                         ))}
                     </div>
                 )}
+
+                <div className="mt-4 border-t pt-4">
+                    <p className="mb-3 text-sm font-medium">บันทึกกิจกรรมใหม่</p>
+                    <Form
+                        action={activityStore.url(cropCycle.id)}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                        resetOnSuccess
+                        className="grid gap-3 sm:grid-cols-2"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="activity_type_id">ประเภทกิจกรรม</Label>
+                                    <Select name="activity_type_id">
+                                        <SelectTrigger id="activity_type_id">
+                                            <SelectValue placeholder="เลือกประเภท" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {activityTypes.map((type) => (
+                                                <SelectItem key={type.id} value={String(type.id)}>
+                                                    {type.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.activity_type_id} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="performed_on">วันที่ทำ</Label>
+                                    <Input id="performed_on" name="performed_on" type="date" required />
+                                    <InputError message={errors.performed_on} />
+                                </div>
+                                <div className="grid gap-2 sm:col-span-2">
+                                    <Label htmlFor="notes">รายละเอียด</Label>
+                                    <Input id="notes" name="notes" placeholder="เช่น ปุ๋ยสูตร 15-15-15 2 กระสอบ" />
+                                    <InputError message={errors.notes} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="expense_category_id">หมวดค่าใช้จ่าย (ถ้ามี)</Label>
+                                    <Select name="expense_category_id">
+                                        <SelectTrigger id="expense_category_id">
+                                            <SelectValue placeholder="ไม่บันทึกค่าใช้จ่าย" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {expenseCategories.map((category) => (
+                                                <SelectItem key={category.id} value={String(category.id)}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.expense_category_id} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="cost">ค่าใช้จ่าย (บาท)</Label>
+                                    <Input id="cost" name="cost" type="number" step="0.01" min={0} placeholder="0.00" />
+                                    <InputError message={errors.cost} />
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <Button disabled={processing}>บันทึกกิจกรรม</Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </Card>
 
             <Card className="p-4">

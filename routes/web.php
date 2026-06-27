@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Farm\ActivityController;
 use App\Http\Controllers\Farm\ActivityTypeController;
 use App\Http\Controllers\Farm\CropCycleController;
 use App\Http\Controllers\Farm\ExpenseCategoryController;
@@ -30,6 +31,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('crop-cycles.update');
     Route::get('crop-cycles/{cropCycle}', [CropCycleController::class, 'show'])
         ->name('crop-cycles.show');
+
+    Route::post('crop-cycles/{cropCycle}/activities', [ActivityController::class, 'store'])
+        ->name('crop-cycles.activities.store');
+    Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])
+        ->name('activities.destroy');
 });
 
 require __DIR__.'/settings.php';
