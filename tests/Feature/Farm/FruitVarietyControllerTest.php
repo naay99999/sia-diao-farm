@@ -4,6 +4,10 @@ use App\Models\FruitType;
 use App\Models\FruitVariety;
 use App\Models\User;
 
+test('guests cannot view fruit varieties', function () {
+    $this->get(route('fruit-varieties.index'))->assertRedirect(route('login'));
+});
+
 test('a user can view the varieties page', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('fruit-varieties.index'))
