@@ -1,6 +1,8 @@
 import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
+import { useRef, useState } from 'react';
 import ActivityController, { store as activityStore } from '@/actions/App/Http/Controllers/Farm/ActivityController';
 import ExpenseController, { storeForCycle as expenseStoreForCycle } from '@/actions/App/Http/Controllers/Farm/ExpenseController';
+import HarvestController, { store as harvestStore } from '@/actions/App/Http/Controllers/Farm/HarvestController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +48,9 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
     const harvests: Harvest[] = cropCycle.harvests ?? [];
     const sales: Sale[] = cropCycle.sales ?? [];
     const formatBaht = (value: number) => value.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+    const [harvestRowIds, setHarvestRowIds] = useState<number[]>([0]);
+    const nextHarvestRowId = useRef(1);
 
     return (
         <div className="flex h-full flex-1 flex-col gap-6 p-4">
@@ -271,7 +276,20 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
                     <div className="grid gap-2">
                         {harvests.map((harvest) => (
                             <div key={harvest.id} className="rounded-md border p-3">
-                                <p className="font-medium">{harvest.harvested_on}</p>
+                                <div className="flex items-center justify-between">
+                                    <p className="font-medium">{harvest.harvested_on}</p>
+                                    <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => {
+                                            if (confirm('ลบการเก็บเกี่ยวนี้?')) {
+                                                router.delete(HarvestController.destroy.url(harvest.id));
+                                            }
+                                        }}
+                                    >
+                                        ลบ
+                                    </Button>
+                                </div>
                                 <div className="text-muted-foreground mt-1 grid gap-1 text-sm">
                                     {harvest.items?.map((item) => (
                                         <span key={item.id}>
@@ -284,6 +302,92 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
                         ))}
                     </div>
                 )}
+
+                <div className="mt-4 border-t pt-4">
+                    <p className="mb-3 text-sm font-medium">บันทึกการเก็บเกี่ยวใหม่</p>
+                    <Form
+                        action={harvestStore.url(cropCycle.id)}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                        resetOnSuccess
+                        onSuccess={() => {
+                            setHarvestRowIds([0]);
+                            nextHarvestRowId.current = 1;
+                        }}
+                        className="grid gap-3"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <div className="grid gap-3 sm:grid-cols-2 sm:items-end">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="harvested_on">วันที่เก็บเกี่ยว</Label>
+                                        <Input id="harvested_on" name="harvested_on" type="date" required />
+                                        <InputError message={errors.harvested_on} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="harvest_notes">หมายเหตุ</Label>
+                                        <Input id="harvest_notes" name="notes" placeholder="เช่น เก็บรอบแรก" />
+                                    </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>ผลผลิตตามเกรด</Label>
+                                    {harvestRowIds.map((rowId, idx) => (
+                                        <div key={rowId} className="flex items-end gap-2">
+                                            <div className="grid flex-1 gap-1">
+                                                <Select name={`items[${idx}][grade_id]`}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="เลือกเกรด" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {grades.map((grade) => (
+                                                            <SelectItem key={grade.id} value={String(grade.id)}>
+                                                                {grade.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError message={errors[`items.${idx}.grade_id`]} />
+                                            </div>
+                                            <div className="grid flex-1 gap-1">
+                                                <Input
+                                                    name={`items[${idx}][weight_kg]`}
+                                                    type="number"
+                                                    step="0.01"
+                                                    min={0.01}
+                                                    placeholder="น้ำหนัก (กก.)"
+                                                    required
+                                                />
+                                                <InputError message={errors[`items.${idx}.weight_kg`]} />
+                                            </div>
+                                            {harvestRowIds.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setHarvestRowIds((ids) => ids.filter((id) => id !== rowId))}
+                                                >
+                                                    ลบ
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <InputError message={errors.items} />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-fit"
+                                        onClick={() => setHarvestRowIds((ids) => [...ids, nextHarvestRowId.current++])}
+                                    >
+                                        + เพิ่มเกรด
+                                    </Button>
+                                </div>
+                                <div>
+                                    <Button disabled={processing}>บันทึกการเก็บเกี่ยว</Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </Card>
 
             <Card className="p-4">

@@ -8,6 +8,7 @@ use App\Http\Controllers\Farm\ExpenseController;
 use App\Http\Controllers\Farm\FruitTypeController;
 use App\Http\Controllers\Farm\FruitVarietyController;
 use App\Http\Controllers\Farm\GradeController;
+use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\PlotController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('crop-cycles.activities.store');
     Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])
         ->name('activities.destroy');
+
+    Route::post('crop-cycles/{cropCycle}/harvests', [HarvestController::class, 'store'])
+        ->name('crop-cycles.harvests.store');
+    Route::delete('harvests/{harvest}', [HarvestController::class, 'destroy'])
+        ->name('harvests.destroy');
 
     Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
