@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, ClipboardList, FolderGit2, Leaf, LayoutGrid, Sprout, Tags, Trees, Wallet } from 'lucide-react';
+import { Award, BookOpen, ClipboardList, FolderGit2, Leaf, LayoutGrid, Sprout, Tags, Trees, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -17,6 +17,7 @@ import { dashboard } from '@/routes';
 import { index as plotsIndex } from '@/routes/plots';
 import { index as fruitTypesIndex } from '@/routes/fruit-types';
 import { index as fruitVarietiesIndex } from '@/routes/fruit-varieties';
+import { index as gradesIndex } from '@/routes/grades';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as activityTypesIndex } from '@/routes/activity-types';
 import { index as expenseCategoriesIndex } from '@/routes/expense-categories';
@@ -42,6 +43,11 @@ const mainNavItems: NavItem[] = [
         title: 'พันธุ์ผลไม้',
         href: fruitVarietiesIndex(),
         icon: Leaf,
+    },
+    {
+        title: 'เกรดผลไม้',
+        href: gradesIndex(),
+        icon: Award,
     },
     {
         title: 'ค่าใช้จ่ายส่วนกลาง',
