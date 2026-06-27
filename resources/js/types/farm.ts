@@ -14,6 +14,14 @@ export type FruitVariety = {
     fruit_type?: FruitType;
 };
 
+export type Grade = {
+    id: number;
+    fruit_type_id: number;
+    name: string;
+    sort_order: number;
+    fruit_type?: FruitType;
+};
+
 export type ActivityType = {
     id: number;
     name: string;
