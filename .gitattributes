@@ -1,0 +1,26 @@
+* text=auto eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.js diff=javascript
+*.jsx diff=javascript
+*.md diff=markdown
+*.php diff=php
+*.ts diff=typescript
+*.tsx diff=typescript
+
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.otf binary
+*.png binary
+*.ttf binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore
