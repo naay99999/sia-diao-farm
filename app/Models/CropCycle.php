@@ -87,6 +87,22 @@ class CropCycle extends Model
     }
 
     /**
+     * @return HasMany<Harvest, $this>
+     */
+    public function harvests(): HasMany
+    {
+        return $this->hasMany(Harvest::class);
+    }
+
+    /**
+     * @return HasMany<Sale, $this>
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
      * Record the flowering date and forecast the harvest date.
      */
     public function recordFlowering(Carbon $floweringDate): void

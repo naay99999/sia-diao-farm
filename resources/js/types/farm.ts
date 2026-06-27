@@ -55,6 +55,8 @@ export type CropCycle = {
     fruit_variety?: FruitVariety;
     activities?: Activity[];
     expenses?: Expense[];
+    harvests?: Harvest[];
+    sales?: Sale[];
 };
 
 export type Plot = {
@@ -93,6 +95,41 @@ export type Activity = {
     performed_on: string;
     notes: string | null;
     activity_type?: ActivityType;
+};
+
+export type HarvestItem = {
+    id: number;
+    harvest_id: number;
+    grade_id: number;
+    weight_kg: string;
+    grade?: Grade;
+};
+
+export type Harvest = {
+    id: number;
+    crop_cycle_id: number;
+    harvested_on: string;
+    notes: string | null;
+    items?: HarvestItem[];
+};
+
+export type SaleItem = {
+    id: number;
+    sale_id: number;
+    grade_id: number;
+    weight_kg: string;
+    price_per_kg: string;
+    subtotal: string;
+    grade?: Grade;
+};
+
+export type Sale = {
+    id: number;
+    crop_cycle_id: number;
+    buyer_name: string;
+    sold_on: string;
+    notes: string | null;
+    items?: SaleItem[];
 };
 
 export type Expense = {

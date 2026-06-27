@@ -2,8 +2,15 @@
 
 use App\Enums\CropCycleStage;
 use App\Models\CropCycle;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\FruitVariety;
+use App\Models\Grade;
+use App\Models\Harvest;
+use App\Models\HarvestItem;
 use App\Models\Plot;
+use App\Models\Sale;
+use App\Models\SaleItem;
 use App\Models\User;
 
 test('guests cannot create a crop cycle', function () {
@@ -91,4 +98,35 @@ test('a user can view a crop cycle detail page', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('crop-cycles.show', $cycle))
         ->assertOk();
+});
+
+test('the crop cycle page exposes yield, revenue, cost-per-kg and profit', function () {
+    $cycle = CropCycle::factory()->create();
+
+    $harvest = Harvest::factory()->for($cycle)->create();
+    $grade = Grade::factory()->create();
+    HarvestItem::factory()->for($harvest)->for($grade)->create(['weight_kg' => 200]);
+
+    $sale = Sale::factory()->for($cycle)->create();
+    SaleItem::factory()->for($sale)->for($grade)->create([
+        'weight_kg' => 200,
+        'price_per_kg' => 50,
+        'subtotal' => 10000,
+    ]);
+
+    Expense::factory()->for($cycle)->create([
+        'expense_category_id' => ExpenseCategory::factory(),
+        'amount' => 4000,
+    ]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('crop-cycles.show', $cycle))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('totalYield', fn ($value) => (float) $value === 200.0)
+            ->where('revenue', fn ($value) => (float) $value === 10000.0)
+            ->where('totalDirectCost', fn ($value) => (float) $value === 4000.0)
+            ->where('costPerKg', fn ($value) => (float) $value === 20.0)
+            ->where('profit', fn ($value) => (float) $value === 6000.0)
+        );
 });

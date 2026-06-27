@@ -16,16 +16,21 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { index as plotsIndex, show as plotShow } from '@/routes/plots';
-import { cropCycleStageLabels, type Activity, type CropCycle, type Expense } from '@/types/farm';
+import { cropCycleStageLabels, type Activity, type CropCycle, type Expense, type Harvest, type Sale } from '@/types/farm';
 
 type PageProps = {
     cropCycle: CropCycle;
     totalDirectCost: number;
+    totalYield: number;
+    revenue: number;
+    costPerKg: number | null;
+    profit: number;
     activityTypes: { id: number; name: string }[];
     expenseCategories: { id: number; name: string }[];
+    grades: { id: number; name: string }[];
 };
 
-export default function CropCycleShow({ cropCycle, totalDirectCost, activityTypes, expenseCategories }: PageProps) {
+export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, revenue, costPerKg, profit, activityTypes, expenseCategories, grades }: PageProps) {
     const plotName = cropCycle.plot?.name ?? 'แปลง';
 
     setLayoutProps({
@@ -38,6 +43,9 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, activityType
 
     const activities: Activity[] = cropCycle.activities ?? [];
     const expenses: Expense[] = cropCycle.expenses ?? [];
+    const harvests: Harvest[] = cropCycle.harvests ?? [];
+    const sales: Sale[] = cropCycle.sales ?? [];
+    const formatBaht = (value: number) => value.toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
     return (
         <div className="flex h-full flex-1 flex-col gap-6 p-4">
@@ -47,12 +55,28 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, activityType
                 <Badge variant="secondary">{cropCycleStageLabels[cropCycle.stage]}</Badge>
             </div>
 
-            <Card className="p-4">
-                <p className="text-muted-foreground text-sm">ต้นทุนตรงรวมของรอบนี้</p>
-                <p className="text-2xl font-semibold">
-                    {totalDirectCost.toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท
-                </p>
-            </Card>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <Card className="p-4">
+                    <p className="text-muted-foreground text-sm">ผลผลิตรวม</p>
+                    <p className="text-2xl font-semibold">{totalYield.toLocaleString('th-TH')} กก.</p>
+                </Card>
+                <Card className="p-4">
+                    <p className="text-muted-foreground text-sm">รายรับ</p>
+                    <p className="text-2xl font-semibold">{formatBaht(revenue)} บาท</p>
+                </Card>
+                <Card className="p-4">
+                    <p className="text-muted-foreground text-sm">ต้นทุนตรง</p>
+                    <p className="text-2xl font-semibold">{formatBaht(totalDirectCost)} บาท</p>
+                </Card>
+                <Card className="p-4">
+                    <p className="text-muted-foreground text-sm">ต้นทุน/กก.</p>
+                    <p className="text-2xl font-semibold">{costPerKg !== null ? `${formatBaht(costPerKg)} บาท` : '—'}</p>
+                </Card>
+                <Card className="p-4">
+                    <p className="text-muted-foreground text-sm">กำไร</p>
+                    <p className={`text-2xl font-semibold ${profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{formatBaht(profit)} บาท</p>
+                </Card>
+            </div>
 
             <Card className="p-4">
                 <p className="mb-3 font-medium">กิจกรรม</p>
@@ -237,6 +261,56 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, activityType
                         )}
                     </Form>
                 </div>
+            </Card>
+
+            <Card className="p-4">
+                <p className="mb-3 font-medium">การเก็บเกี่ยว</p>
+                {harvests.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">ยังไม่มีการเก็บเกี่ยว</p>
+                ) : (
+                    <div className="grid gap-2">
+                        {harvests.map((harvest) => (
+                            <div key={harvest.id} className="rounded-md border p-3">
+                                <p className="font-medium">{harvest.harvested_on}</p>
+                                <div className="text-muted-foreground mt-1 grid gap-1 text-sm">
+                                    {harvest.items?.map((item) => (
+                                        <span key={item.id}>
+                                            {item.grade?.name}: {Number(item.weight_kg).toLocaleString('th-TH')} กก.
+                                        </span>
+                                    ))}
+                                </div>
+                                {harvest.notes ? <p className="text-muted-foreground mt-1 text-sm">{harvest.notes}</p> : null}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Card>
+
+            <Card className="p-4">
+                <p className="mb-3 font-medium">การขาย</p>
+                {sales.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">ยังไม่มีการขาย</p>
+                ) : (
+                    <div className="grid gap-2">
+                        {sales.map((sale) => (
+                            <div key={sale.id} className="rounded-md border p-3">
+                                <div className="flex items-center justify-between">
+                                    <p className="font-medium">{sale.buyer_name}</p>
+                                    <p className="text-muted-foreground text-sm">{sale.sold_on}</p>
+                                </div>
+                                <div className="text-muted-foreground mt-1 grid gap-1 text-sm">
+                                    {sale.items?.map((item) => (
+                                        <span key={item.id}>
+                                            {item.grade?.name}: {Number(item.weight_kg).toLocaleString('th-TH')} กก. ×{' '}
+                                            {formatBaht(Number(item.price_per_kg))} = {formatBaht(Number(item.subtotal))} บาท
+                                        </span>
+                                    ))}
+                                </div>
+                                {sale.notes ? <p className="text-muted-foreground mt-1 text-sm">{sale.notes}</p> : null}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </Card>
         </div>
     );

@@ -8,6 +8,7 @@ use App\Http\Requests\Farm\UpdateCropCycleRequest;
 use App\Models\ActivityType;
 use App\Models\CropCycle;
 use App\Models\ExpenseCategory;
+use App\Models\Grade;
 use App\Models\Plot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
@@ -55,13 +56,28 @@ class CropCycleController extends Controller
             'fruitVariety.fruitType',
             'activities' => fn ($q) => $q->with('activityType')->latest('performed_on'),
             'expenses' => fn ($q) => $q->with('expenseCategory')->latest('spent_on'),
+            'harvests' => fn ($q) => $q->with('items.grade')->latest('harvested_on'),
+            'sales' => fn ($q) => $q->with('items.grade')->latest('sold_on'),
         ]);
+
+        $totalDirectCost = (float) $cropCycle->expenses->sum('amount');
+        $totalYield = (float) $cropCycle->harvests->sum(fn ($harvest) => $harvest->items->sum('weight_kg'));
+        $revenue = (float) $cropCycle->sales->sum(fn ($sale) => $sale->items->sum('subtotal'));
+        $costPerKg = $totalYield > 0 ? round($totalDirectCost / $totalYield, 2) : null;
+        $profit = $revenue - $totalDirectCost;
 
         return Inertia::render('farm/crop-cycles/show', [
             'cropCycle' => $cropCycle,
-            'totalDirectCost' => (float) $cropCycle->expenses->sum('amount'),
+            'totalDirectCost' => $totalDirectCost,
+            'totalYield' => $totalYield,
+            'revenue' => $revenue,
+            'costPerKg' => $costPerKg,
+            'profit' => $profit,
             'activityTypes' => ActivityType::orderBy('name')->get(['id', 'name']),
             'expenseCategories' => ExpenseCategory::orderBy('name')->get(),
+            'grades' => Grade::where('fruit_type_id', $cropCycle->fruitVariety->fruit_type_id)
+                ->orderBy('sort_order')
+                ->get(['id', 'name']),
         ]);
     }
 }
