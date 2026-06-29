@@ -72,7 +72,7 @@ class Expense extends Model
     }
 
     /**
-     * @return Attribute<ExpenseScope, never>
+     * @return Attribute<ExpenseScope::Direct|ExpenseScope::Overhead, never>
      */
     protected function scope(): Attribute
     {

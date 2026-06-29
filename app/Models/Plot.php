@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\CropCycleStatus;
 use Database\Factories\PlotFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -63,13 +62,12 @@ class Plot extends Model
             ->ofMany(['id' => 'max'], fn ($query) => $query->where('status', CropCycleStatus::Active));
     }
 
-    /**
-     * @return Attribute<int|null, never>
-     */
-    protected function treeAgeYears(): Attribute
+    public function getTreeAgeYearsAttribute(): ?int
     {
-        return Attribute::get(
-            fn (): ?int => $this->planted_at?->diffInYears(now())
-        );
+        if ($this->planted_at === null) {
+            return null;
+        }
+
+        return (int) $this->planted_at->diffInYears(now());
     }
 }
