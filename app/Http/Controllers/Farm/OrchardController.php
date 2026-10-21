@@ -39,6 +39,11 @@ class OrchardController extends Controller
                 ->orderBy('code')
                 ->get(),
             'showRemoved' => $showRemoved,
+            'currentSeason' => $orchard->currentSeason,
+            'seasons' => $orchard->seasons()
+                ->whereNotNull('ended_on')
+                ->orderByDesc('started_on')
+                ->get(),
         ]);
     }
 

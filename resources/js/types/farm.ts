@@ -14,3 +14,12 @@ export type Tree = {
     removed_on: string | null;
     notes: string | null;
 };
+
+export type Season = {
+    id: number;
+    orchard_id: number;
+    name: string;
+    started_on: string;
+    ended_on: string | null;
+    notes: string | null;
+};

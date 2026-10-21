@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Farm\OrchardController;
+use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('orchards', OrchardController::class)
         ->except(['create', 'edit']);
+
+    Route::post('orchards/{orchard}/seasons', [SeasonController::class, 'store'])->name('orchards.seasons.store');
+    Route::get('seasons/{season}', [SeasonController::class, 'show'])->name('seasons.show');
+    Route::patch('seasons/{season}', [SeasonController::class, 'update'])->name('seasons.update');
+    Route::patch('seasons/{season}/close', [SeasonController::class, 'close'])->name('seasons.close');
+    Route::delete('seasons/{season}', [SeasonController::class, 'destroy'])->name('seasons.destroy');
 
     Route::post('orchards/{orchard}/trees', [TreeController::class, 'store'])->name('orchards.trees.store');
     Route::post('orchards/{orchard}/trees/batch', [TreeController::class, 'storeBatch'])->name('orchards.trees.batch');

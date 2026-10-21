@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -29,5 +30,21 @@ class Orchard extends Model
     public function trees(): HasMany
     {
         return $this->hasMany(Tree::class);
+    }
+
+    /**
+     * @return HasMany<Season, $this>
+     */
+    public function seasons(): HasMany
+    {
+        return $this->hasMany(Season::class);
+    }
+
+    /**
+     * @return HasOne<Season, $this>
+     */
+    public function currentSeason(): HasOne
+    {
+        return $this->hasOne(Season::class)->whereNull('ended_on');
     }
 }

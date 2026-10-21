@@ -1,10 +1,12 @@
 import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import { useState } from 'react';
 import OrchardController from '@/actions/App/Http/Controllers/Farm/OrchardController';
+import SeasonController from '@/actions/App/Http/Controllers/Farm/SeasonController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import OrchardFormFields from '@/components/orchard-form-fields';
+import SeasonFormFields from '@/components/season-form-fields';
 import TreeFormFields from '@/components/tree-form-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,18 +21,34 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { index, show } from '@/routes/orchards';
+import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
-import type { Orchard, Tree } from '@/types/farm';
+import type { Orchard, Season, Tree } from '@/types/farm';
+
+function formatThaiDate(date: string): string {
+    return new Date(date).toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+}
 
 export default function OrchardShow({
     orchard,
     trees,
     showRemoved,
+    currentSeason,
+    seasons,
 }: {
     orchard: Orchard;
     trees: Tree[];
     showRemoved: boolean;
+    currentSeason: Season | null;
+    seasons: Season[];
 }) {
+    const [seasonDialog, setSeasonDialog] = useState<
+        'start' | 'edit' | null
+    >(null);
     const [editing, setEditing] = useState(false);
     const [addingOne, setAddingOne] = useState(false);
     const [addingMany, setAddingMany] = useState(false);
@@ -100,6 +118,115 @@ export default function OrchardShow({
             </div>
 
             {orchard.notes && <p className="text-sm">{orchard.notes}</p>}
+
+            <section className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-medium">รอบการผลิต</h2>
+                    {currentSeason ? (
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setSeasonDialog('edit')}
+                            >
+                                แก้ไขรอบ
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    if (confirm('ปิดรอบนี้ตั้งแต่วันนี้?')) {
+                                        router.patch(
+                                            SeasonController.close.url(
+                                                currentSeason.id,
+                                            ),
+                                        );
+                                    }
+                                }}
+                            >
+                                ปิดรอบ
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button onClick={() => setSeasonDialog('start')}>
+                            เริ่มรอบใหม่
+                        </Button>
+                    )}
+                </div>
+                {currentSeason ? (
+                    <Link
+                        href={showSeason(currentSeason.id)}
+                        className="block rounded-lg border p-3 transition hover:border-foreground/20"
+                    >
+                        <p className="font-medium">{currentSeason.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                            เริ่ม {formatThaiDate(currentSeason.started_on)} —
+                            ยังไม่ปิดรอบ
+                        </p>
+                    </Link>
+                ) : (
+                    <p className="text-sm text-muted-foreground">
+                        ยังไม่มีรอบที่เปิดอยู่
+                    </p>
+                )}
+                {seasons.length > 0 && (
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {seasons.map((season) => (
+                            <Link
+                                key={season.id}
+                                href={showSeason(season.id)}
+                                className="rounded-lg border p-3 transition hover:border-foreground/20"
+                            >
+                                <p className="font-medium">{season.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {formatThaiDate(season.started_on)} —{' '}
+                                    {season.ended_on
+                                        ? formatThaiDate(season.ended_on)
+                                        : ''}
+                                </p>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+                <Dialog
+                    open={seasonDialog !== null}
+                    onOpenChange={(open) => !open && setSeasonDialog(null)}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {seasonDialog === 'edit'
+                                    ? 'แก้ไขรอบ'
+                                    : 'เริ่มรอบใหม่'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                กำหนดชื่อและช่วงวันของรอบการผลิต
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form
+                            {...(seasonDialog === 'edit' && currentSeason
+                                ? SeasonController.update.form(currentSeason.id)
+                                : SeasonController.store.form(orchard.id))}
+                            onSuccess={() => setSeasonDialog(null)}
+                            className="space-y-4"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <SeasonFormFields
+                                        season={
+                                            seasonDialog === 'edit'
+                                                ? (currentSeason ?? undefined)
+                                                : undefined
+                                        }
+                                        errors={errors}
+                                    />
+                                    <Button type="submit" disabled={processing}>
+                                        บันทึก
+                                    </Button>
+                                </>
+                            )}
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+            </section>
 
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-lg font-medium">ต้นไม้ ({trees.length})</h2>
