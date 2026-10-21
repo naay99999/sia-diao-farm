@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('inertia shares app name and description', function () {
@@ -8,7 +9,7 @@ test('inertia shares app name and description', function () {
         'app.description' => 'ระบบ ERP ภายในฟาร์ม',
     ]);
 
-    $this->get(route('home'))
+    $this->actingAs(User::factory()->create())->get(route('orchards.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('name', 'เสี่ยเดียวฟาร์ม')
