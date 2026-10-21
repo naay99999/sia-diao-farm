@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Trees } from 'lucide-react';
+import { Trees, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,6 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { index as expensesIndex } from '@/routes/expenses';
 import { index as orchardsIndex } from '@/routes/orchards';
 import type { NavItem } from '@/types';
 
@@ -20,6 +21,11 @@ const mainNavItems: NavItem[] = [
         title: 'สวน',
         href: orchardsIndex(),
         icon: Trees,
+    },
+    {
+        title: 'ค่าใช้จ่าย',
+        href: expensesIndex(),
+        icon: Wallet,
     },
 ];
 

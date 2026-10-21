@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Farm\CareRecordController;
+use App\Http\Controllers\Farm\ExpenseController;
 use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\OrchardController;
 use App\Http\Controllers\Farm\SaleController;
@@ -43,6 +44,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('orchards/{orchard}/sales', [SaleController::class, 'store'])->name('orchards.sales.store');
     Route::patch('sales/{sale}', [SaleController::class, 'update'])->name('sales.update');
     Route::delete('sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::patch('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 

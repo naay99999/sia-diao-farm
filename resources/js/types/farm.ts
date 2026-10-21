@@ -86,3 +86,21 @@ export type Sale = {
     amount: string;
     notes: string | null;
 };
+
+export type ExpenseCategory =
+    | 'fertilizer'
+    | 'pesticide'
+    | 'labor'
+    | 'utilities'
+    | 'equipment'
+    | 'other';
+
+export type Expense = {
+    id: number;
+    season_id: number | null;
+    category: ExpenseCategory;
+    spent_on: string;
+    amount: string;
+    notes: string | null;
+    season: (Season & { orchard: Orchard }) | null;
+};
