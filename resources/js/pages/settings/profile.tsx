@@ -24,8 +24,6 @@ export default function Profile() {
         <>
             <Head title="ตั้งค่าโปรไฟล์" />
 
-            <h1 className="sr-only">ตั้งค่าโปรไฟล์</h1>
-
             <div className="space-y-6">
                 <Heading
                     variant="small"

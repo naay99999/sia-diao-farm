@@ -4,8 +4,8 @@ import {
     CareRecordFields,
     TreePicker,
 } from '@/components/farm/care-record-form';
+import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import { index, show } from '@/routes/orchards';
 import type { Orchard, Tree } from '@/types/farm';
 
@@ -25,12 +25,9 @@ export default function CareRecordCreate({
     });
 
     return (
-        <div className="flex h-full flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 px-4 pt-5 md:px-6 md:pt-6">
             <Head title="บันทึกการดูแลหลายต้น" />
-            <Heading
-                title="บันทึกการดูแลหลายต้น"
-                description={orchard.name}
-            />
+            <Heading title="บันทึกการดูแลหลายต้น" description={orchard.name} />
             {trees.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                     ยังไม่มีต้นไม้ในสวนนี้
@@ -48,13 +45,9 @@ export default function CareRecordCreate({
                                 initialSelected={trees.map((tree) => tree.id)}
                                 errors={errors}
                             />
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="h-12 w-full text-base"
-                            >
-                                บันทึก
-                            </Button>
+                            <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] -mx-4 border-t bg-background px-4 py-3 md:bottom-0 md:-mx-6 md:px-6">
+                                <SubmitButton processing={processing} />
+                            </div>
                         </>
                     )}
                 </Form>

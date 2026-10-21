@@ -22,7 +22,9 @@ export function HarvestFields({
                     name="harvested_on"
                     type="date"
                     required
-                    defaultValue={harvest?.harvested_on.slice(0, 10) ?? todayIso()}
+                    defaultValue={
+                        harvest?.harvested_on.slice(0, 10) ?? todayIso()
+                    }
                 />
                 <InputError message={errors.harvested_on} />
             </div>
@@ -52,13 +54,13 @@ export function HarvestFields({
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="harvest-notes">บันทึก</Label>
+                <Label htmlFor="harvest-notes">หมายเหตุ</Label>
                 <textarea
                     id="harvest-notes"
                     name="notes"
                     rows={3}
                     defaultValue={harvest?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>

@@ -14,17 +14,31 @@ export default function OrchardFormFields({
         <>
             <div className="grid gap-2">
                 <Label htmlFor="name">ชื่อสวน</Label>
-                <Input id="name" name="name" required defaultValue={orchard?.name} placeholder="เช่น สวนบ้านล่าง" />
+                <Input
+                    id="name"
+                    name="name"
+                    required
+                    defaultValue={orchard?.name}
+                    placeholder="เช่น สวนบ้านล่าง"
+                />
                 <InputError message={errors.name} />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="location">ที่ตั้ง</Label>
-                <Input id="location" name="location" defaultValue={orchard?.location ?? ''} />
+                <Input
+                    id="location"
+                    name="location"
+                    defaultValue={orchard?.location ?? ''}
+                />
                 <InputError message={errors.location} />
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="notes">บันทึก</Label>
-                <Input id="notes" name="notes" defaultValue={orchard?.notes ?? ''} />
+                <Label htmlFor="notes">หมายเหตุ</Label>
+                <Input
+                    id="notes"
+                    name="notes"
+                    defaultValue={orchard?.notes ?? ''}
+                />
                 <InputError message={errors.notes} />
             </div>
         </>

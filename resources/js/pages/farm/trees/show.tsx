@@ -4,19 +4,34 @@ import { useState } from 'react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
 import HarvestController from '@/actions/App/Http/Controllers/Farm/HarvestController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
-import { CareRecordFields, TreePicker } from '@/components/farm/care-record-form';
+import { useConfirm } from '@/components/confirm-dialog';
+import {
+    CareRecordFields,
+    TreePicker,
+} from '@/components/farm/care-record-form';
+import { EmptyState } from '@/components/farm/empty-state';
 import { HarvestFields } from '@/components/farm/harvest-form';
+import { RowActions } from '@/components/farm/row-actions';
+import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import TreeFormFields from '@/components/tree-form-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { formatNumber } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
 import { index, show } from '@/routes/orchards';
 import { show as showTree } from '@/routes/trees';
@@ -41,11 +56,12 @@ export default function TreeShow({
     seasonYields: SeasonYield[];
     activeTrees: Pick<Tree, 'id' | 'code'>[];
 }) {
+    const confirm = useConfirm();
     const [editingEntry, setEditingEntry] = useState<TimelineEntry | null>(
         null,
     );
-    const pageErrors = usePage<{ errors?: Record<string, string> }>().props
-        .errors ?? {};
+    const pageErrors =
+        usePage<{ errors?: Record<string, string> }>().props.errors ?? {};
     const [harvesting, setHarvesting] = useState(false);
     const [editing, setEditing] = useState(false);
     const [careType, setCareType] = useState<CareType | null>(null);
@@ -60,57 +76,243 @@ export default function TreeShow({
     });
 
     return (
-        <div className="flex h-full flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
             <Head title={tree.code} />
-            <div className="flex items-start justify-between gap-2">
-                <div className="space-y-2">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-2">
                     <Heading
                         title={tree.code}
-                        description={[tree.orchard.name, tree.variety].filter(Boolean).join(' · ')}
+                        description={[tree.orchard.name, tree.variety]
+                            .filter(Boolean)
+                            .join(' · ')}
                     />
-                    {isRemoved && <Badge variant="secondary">ไม่อยู่แล้ว</Badge>}
+                    {isRemoved && (
+                        <Badge variant="secondary">
+                            ไม่อยู่แล้วตั้งแต่{' '}
+                            {formatThaiDate(tree.removed_on!)}
+                        </Badge>
+                    )}
                 </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" aria-label="เมนูต้นไม้">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="shrink-0"
+                            aria-label="ตัวเลือกของต้นไม้"
+                        >
                             <MoreVertical />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setEditing(true)}>แก้ไข</DropdownMenuItem>
-                        <DropdownMenuItem
-                            onSelect={() => {
-                                if (confirm('ลบต้นไม้นี้?')) {
-                                    router.delete(TreeController.destroy.url(tree.id));
-                                }
-                            }}
-                        >
-                            ลบต้นไม้
+                    <DropdownMenuContent align="end" className="min-w-56">
+                        <DropdownMenuItem onSelect={() => setEditing(true)}>
+                            แก้ไขข้อมูลต้น
                         </DropdownMenuItem>
                         {isRemoved ? (
-                            <DropdownMenuItem onSelect={() => router.patch(TreeController.restore.url(tree.id))}>
+                            <DropdownMenuItem
+                                onSelect={() =>
+                                    router.patch(
+                                        TreeController.restore.url(tree.id),
+                                    )
+                                }
+                            >
                                 กู้คืนต้นไม้
                             </DropdownMenuItem>
                         ) : (
                             <DropdownMenuItem
-                                onSelect={() => {
-                                    if (confirm('บันทึกว่าต้นนี้ไม่อยู่แล้ว?')) {
-                                        router.patch(TreeController.remove.url(tree.id));
+                                onSelect={async () => {
+                                    if (
+                                        await confirm({
+                                            title: `บันทึกว่า ${tree.code} ไม่อยู่แล้ว?`,
+                                            description:
+                                                'ใช้เมื่อต้นตายหรือถูกตัด ประวัติทั้งหมดยังเก็บไว้ และกู้คืนได้ภายหลัง',
+                                            confirmLabel:
+                                                'บันทึกว่าไม่อยู่แล้ว',
+                                        })
+                                    ) {
+                                        router.patch(
+                                            TreeController.remove.url(tree.id),
+                                        );
                                     }
                                 }}
                             >
-                                ต้นไม้ไม่อยู่แล้ว
+                                ต้นตายหรือถูกตัด
                             </DropdownMenuItem>
                         )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={async () => {
+                                if (
+                                    await confirm({
+                                        title: `ลบ ${tree.code} ถาวร?`,
+                                        description:
+                                            'ใช้เมื่อเพิ่มต้นผิด ลบได้เฉพาะต้นที่ยังไม่มีบันทึก',
+                                        confirmLabel: 'ลบถาวร',
+                                        destructive: true,
+                                    })
+                                ) {
+                                    router.delete(
+                                        TreeController.destroy.url(tree.id),
+                                    );
+                                }
+                            }}
+                        >
+                            ลบต้นไม้ถาวร
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+            </div>
+
+            {pageErrors.tree && (
+                <p role="alert" className="text-sm text-destructive">
+                    {pageErrors.tree}
+                </p>
+            )}
+
+            {tree.notes && (
+                <p className="-mt-3 text-base text-muted-foreground md:text-sm">
+                    {tree.notes}
+                </p>
+            )}
+
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <aside className="space-y-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1">
+                    {!isRemoved && (
+                        <section
+                            aria-label="บันทึกงานของต้นนี้"
+                            className="grid grid-cols-3 gap-2"
+                        >
+                            <Button
+                                className="col-span-3 h-14 text-base"
+                                onClick={() => setHarvesting(true)}
+                            >
+                                เก็บผลผลิต
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-14 text-base"
+                                onClick={() => setCareType('fertilizer')}
+                            >
+                                ใส่ปุ๋ย
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-14 text-base"
+                                onClick={() => setCareType('pesticide')}
+                            >
+                                ฉีดยา
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="h-14 text-base"
+                                onClick={() => setCareType('other')}
+                            >
+                                งานอื่น
+                            </Button>
+                        </section>
+                    )}
+
+                    <section className="space-y-3">
+                        <h2 className="text-base font-medium">
+                            ผลผลิตแต่ละรอบ
+                        </h2>
+                        {seasonYields.length === 0 ? (
+                            <EmptyState>ยังไม่มีรอบการผลิตในสวนนี้</EmptyState>
+                        ) : (
+                            <ul className="divide-y rounded-lg border bg-card">
+                                {seasonYields.map((item) => (
+                                    <li
+                                        key={item.seasonId}
+                                        className="flex items-baseline justify-between gap-3 px-4 py-3"
+                                    >
+                                        <span className="truncate text-base">
+                                            {item.seasonName}
+                                        </span>
+                                        <span className="shrink-0 text-right">
+                                            <span className="text-base font-medium">
+                                                {formatNumber(item.weightKg)}
+                                            </span>{' '}
+                                            <span className="text-sm text-muted-foreground">
+                                                กก.
+                                            </span>
+                                            {item.fruitCount > 0 && (
+                                                <span className="block text-sm text-muted-foreground">
+                                                    {formatNumber(
+                                                        item.fruitCount,
+                                                        0,
+                                                    )}{' '}
+                                                    ผล
+                                                </span>
+                                            )}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+                </aside>
+
+                <section className="min-w-0 space-y-3 lg:col-start-1 lg:row-start-1">
+                    <h2 className="text-base font-medium">ประวัติ</h2>
+                    {timeline.length === 0 ? (
+                        <EmptyState>ยังไม่มีบันทึกของต้นนี้</EmptyState>
+                    ) : (
+                        <ul className="divide-y rounded-lg border bg-card">
+                            {timeline.map((entry) => (
+                                <li
+                                    key={`${entry.kind}-${entry.id}`}
+                                    className="flex items-center gap-3 py-3 pr-3 pl-4"
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-base font-medium">
+                                            {entry.title}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {formatThaiDate(entry.date)}
+                                            {entry.detail &&
+                                                ` · ${entry.detail}`}
+                                        </p>
+                                    </div>
+                                    <RowActions
+                                        label={`${entry.title} ${formatThaiDate(entry.date)}`}
+                                        onEdit={() => setEditingEntry(entry)}
+                                        onDelete={async () => {
+                                            if (
+                                                await confirm({
+                                                    title: 'ลบบันทึกนี้?',
+                                                    description:
+                                                        entry.kind === 'care'
+                                                            ? `${entry.title} วันที่ ${formatThaiDate(entry.date)} จะถูกลบจากทุกต้นที่บันทึกไว้ด้วยกัน`
+                                                            : `${entry.title} วันที่ ${formatThaiDate(entry.date)}`,
+                                                    confirmLabel: 'ลบ',
+                                                    destructive: true,
+                                                })
+                                            ) {
+                                                router.delete(
+                                                    entry.kind === 'harvest'
+                                                        ? HarvestController.destroy.url(
+                                                              entry.id,
+                                                          )
+                                                        : CareRecordController.destroy.url(
+                                                              entry.id,
+                                                          ),
+                                                );
+                                            }
+                                        }}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
             </div>
 
             <Dialog open={editing} onOpenChange={setEditing}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>แก้ไขต้นไม้</DialogTitle>
-                        <DialogDescription>แก้ไขข้อมูลต้นไม้</DialogDescription>
+                        <DialogTitle>แก้ไขข้อมูลต้น</DialogTitle>
+                        <DialogDescription>{tree.code}</DialogDescription>
                     </DialogHeader>
                     <Form
                         {...TreeController.update.form(tree.id)}
@@ -120,51 +322,18 @@ export default function TreeShow({
                         {({ processing, errors }) => (
                             <>
                                 <TreeFormFields tree={tree} errors={errors} />
-                                <Button type="submit" disabled={processing}>
-                                    บันทึก
-                                </Button>
+                                <SubmitButton processing={processing} />
                             </>
                         )}
                     </Form>
                 </DialogContent>
             </Dialog>
 
-            {pageErrors.tree && (
-                <p role="alert" className="text-sm text-destructive">
-                    {pageErrors.tree}
-                </p>
-            )}
-
-            {tree.notes && <p className="text-sm">{tree.notes}</p>}
-
-            {!isRemoved && (
-                <div className="grid grid-cols-3 gap-2">
-                    <Button
-                        className="h-14 text-base"
-                        onClick={() => setCareType('fertilizer')}
-                    >
-                        ใส่ปุ๋ย
-                    </Button>
-                    <Button
-                        className="h-14 text-base"
-                        onClick={() => setCareType('pesticide')}
-                    >
-                        ฉีดยา
-                    </Button>
-                    <Button
-                        className="h-14 text-base"
-                        onClick={() => setHarvesting(true)}
-                    >
-                        ผลผลิต
-                    </Button>
-                </div>
-            )}
-
             <Dialog
                 open={careType !== null}
                 onOpenChange={(open) => !open && setCareType(null)}
             >
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>บันทึกการดูแล</DialogTitle>
                         <DialogDescription>{tree.code}</DialogDescription>
@@ -172,7 +341,9 @@ export default function TreeShow({
                     {careType && (
                         <Form
                             key={careType}
-                            {...CareRecordController.store.form(tree.orchard_id)}
+                            {...CareRecordController.store.form(
+                                tree.orchard_id,
+                            )}
                             transform={(data) => ({
                                 ...data,
                                 tree_ids: [tree.id],
@@ -187,13 +358,7 @@ export default function TreeShow({
                                         defaultType={careType}
                                         errors={errors}
                                     />
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="h-12 w-full text-base"
-                                    >
-                                        บันทึก
-                                    </Button>
+                                    <SubmitButton processing={processing} />
                                 </>
                             )}
                         </Form>
@@ -202,9 +367,9 @@ export default function TreeShow({
             </Dialog>
 
             <Dialog open={harvesting} onOpenChange={setHarvesting}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>บันทึกผลผลิต</DialogTitle>
+                        <DialogTitle>เก็บผลผลิต</DialogTitle>
                         <DialogDescription>{tree.code}</DialogDescription>
                     </DialogHeader>
                     <Form
@@ -215,13 +380,7 @@ export default function TreeShow({
                         {({ processing, errors }) => (
                             <>
                                 <HarvestFields errors={errors} />
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="h-12 w-full text-base"
-                                >
-                                    บันทึก
-                                </Button>
+                                <SubmitButton processing={processing} />
                             </>
                         )}
                     </Form>
@@ -232,7 +391,7 @@ export default function TreeShow({
                 open={editingEntry !== null}
                 onOpenChange={(open) => !open && setEditingEntry(null)}
             >
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
                             {editingEntry?.kind === 'harvest'
@@ -254,13 +413,7 @@ export default function TreeShow({
                                         harvest={editingEntry.record}
                                         errors={errors}
                                     />
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="h-12 w-full text-base"
-                                    >
-                                        บันทึก
-                                    </Button>
+                                    <SubmitButton processing={processing} />
                                 </>
                             )}
                         </Form>
@@ -268,8 +421,13 @@ export default function TreeShow({
                     {editingEntry?.kind === 'care' && (
                         <Form
                             key={`care-${editingEntry.id}`}
-                            {...CareRecordController.update.form(editingEntry.id)}
-                            transform={(data) => ({ ...data, return_to: 'tree' })}
+                            {...CareRecordController.update.form(
+                                editingEntry.id,
+                            )}
+                            transform={(data) => ({
+                                ...data,
+                                return_to: 'tree',
+                            })}
                             onSuccess={() => setEditingEntry(null)}
                             className="space-y-4"
                         >
@@ -281,95 +439,21 @@ export default function TreeShow({
                                     />
                                     <TreePicker
                                         trees={activeTrees}
-                                        attachedTrees={editingEntry.record.trees}
+                                        attachedTrees={
+                                            editingEntry.record.trees
+                                        }
                                         initialSelected={(
                                             editingEntry.record.trees ?? []
                                         ).map((item) => item.id)}
                                         errors={errors}
                                     />
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="h-12 w-full text-base"
-                                    >
-                                        บันทึก
-                                    </Button>
+                                    <SubmitButton processing={processing} />
                                 </>
                             )}
                         </Form>
                     )}
                 </DialogContent>
             </Dialog>
-
-            {seasonYields.length > 0 && (
-                <section className="space-y-3">
-                    <h2 className="text-lg font-medium">ผลผลิตแต่ละรอบ</h2>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                        {seasonYields.map((item) => (
-                            <div
-                                key={item.seasonId}
-                                className="rounded-lg border p-3"
-                            >
-                                <p className="font-medium">{item.seasonName}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {item.weightKg.toLocaleString('th-TH')} กก.
-                                    {item.fruitCount > 0 &&
-                                        ` · ${item.fruitCount.toLocaleString('th-TH')} ผล`}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
-
-            <section className="space-y-3">
-                <h2 className="text-lg font-medium">ประวัติ</h2>
-                {timeline.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                        ยังไม่มีบันทึก
-                    </p>
-                )}
-                <div className="grid gap-2">
-                    {timeline.map((entry) => (
-                        <div
-                            key={`${entry.kind}-${entry.id}`}
-                            className="flex items-start justify-between gap-2 rounded-lg border p-3"
-                        >
-                            <div className="min-w-0">
-                                <p className="font-medium">{entry.title}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {formatThaiDate(entry.date)}
-                                    {entry.detail && ` · ${entry.detail}`}
-                                </p>
-                            </div>
-                            <div className="flex shrink-0 gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setEditingEntry(entry)}
-                                >
-                                    แก้ไข
-                                </Button>
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => {
-                                        if (confirm('ลบบันทึกนี้?')) {
-                                            router.delete(
-                                                entry.kind === 'harvest'
-                                                    ? HarvestController.destroy.url(entry.id)
-                                                    : CareRecordController.destroy.url(entry.id),
-                                            );
-                                        }
-                                    }}
-                                >
-                                    ลบ
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
         </div>
     );
 }

@@ -35,7 +35,7 @@ export default function Login({ status }: Props) {
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="อีเมลของบัญชีเจ้าของสวน"
                                 />
                                 <InputError message={errors.email} />
                             </div>

@@ -7,7 +7,7 @@
         {{-- Inline style to set the HTML background color --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #f8f9f4;
             }
         </style>
 

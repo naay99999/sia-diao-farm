@@ -67,13 +67,13 @@ export function SaleFields({ sale, errors }: { sale?: Sale; errors: Errors }) {
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="sale-notes">บันทึก</Label>
+                <Label htmlFor="sale-notes">หมายเหตุ</Label>
                 <textarea
                     id="sale-notes"
                     name="notes"
                     rows={3}
                     defaultValue={sale?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>
