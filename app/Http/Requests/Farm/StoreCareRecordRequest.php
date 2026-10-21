@@ -3,10 +3,6 @@
 namespace App\Http\Requests\Farm;
 
 use App\Enums\CareType;
-use App\Models\CareRecord;
-use App\Models\Orchard;
-use App\Models\Tree;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -30,54 +26,9 @@ class StoreCareRecordRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'tree_ids' => ['required', 'array', 'min:1'],
             'tree_ids.*' => ['integer', 'distinct', 'exists:trees,id'],
+            'issue_ids' => ['nullable', 'array'],
+            'issue_ids.*' => ['integer', 'distinct', 'exists:tree_issues,id'],
             'return_to' => ['nullable', Rule::in(['tree', 'orchard'])],
         ];
-    }
-
-    /**
-     * @return array<int, callable(Validator): void>
-     */
-    public function after(): array
-    {
-        return [function (Validator $validator): void {
-            if ($validator->errors()->isNotEmpty()) {
-                return;
-            }
-
-            $orchardId = $this->orchardId();
-            $ids = array_values($this->validated('tree_ids'));
-
-            $careRecord = $this->route('care_record');
-            $attachedIds = $careRecord instanceof CareRecord
-                ? $careRecord->trees()->pluck('trees.id')->all()
-                : [];
-
-            $validIds = Tree::query()
-                ->where('orchard_id', $orchardId)
-                ->where(fn ($query) => $query->whereNull('removed_on')->orWhereIn('id', $attachedIds))
-                ->whereIn('id', $ids)
-                ->pluck('id')
-                ->all();
-
-            foreach ($ids as $index => $id) {
-                if (! in_array($id, $validIds, false)) {
-                    $validator->errors()->add("tree_ids.$index", 'ต้นไม้ไม่อยู่ในสวนนี้หรือไม่อยู่แล้ว');
-                }
-            }
-        }];
-    }
-
-    private function orchardId(): int
-    {
-        $careRecord = $this->route('care_record');
-
-        if ($careRecord instanceof CareRecord) {
-            return $careRecord->orchard_id;
-        }
-
-        $orchard = $this->route('orchard');
-        abort_unless($orchard instanceof Orchard, 404);
-
-        return $orchard->id;
     }
 }
