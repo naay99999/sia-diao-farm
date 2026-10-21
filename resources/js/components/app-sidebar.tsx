@@ -1,7 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { Award, BookOpen, ClipboardList, FolderGit2, Leaf, LayoutGrid, Sprout, Tags, Trees, Wallet } from 'lucide-react';
+import { Award, ClipboardList, Leaf, LayoutGrid, Sprout, Tags, Trees, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -14,13 +13,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { index as plotsIndex } from '@/routes/plots';
+import { index as activityTypesIndex } from '@/routes/activity-types';
+import { index as expenseCategoriesIndex } from '@/routes/expense-categories';
+import { index as expensesIndex } from '@/routes/expenses';
 import { index as fruitTypesIndex } from '@/routes/fruit-types';
 import { index as fruitVarietiesIndex } from '@/routes/fruit-varieties';
 import { index as gradesIndex } from '@/routes/grades';
-import { index as expensesIndex } from '@/routes/expenses';
-import { index as activityTypesIndex } from '@/routes/activity-types';
-import { index as expenseCategoriesIndex } from '@/routes/expense-categories';
+import { index as plotsIndex } from '@/routes/plots';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -66,19 +65,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'ที่เก็บโค้ด',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'เอกสารประกอบ',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -99,7 +85,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

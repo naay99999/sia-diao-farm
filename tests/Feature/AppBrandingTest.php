@@ -15,10 +15,3 @@ test('inertia shares app name and description', function () {
             ->where('description', 'ระบบ ERP ภายในฟาร์ม'),
         );
 });
-
-test('appearance defaults to light when no cookie is present', function () {
-    $this->get(route('home'))
-        ->assertOk();
-
-    expect(view()->shared('appearance'))->toBe('light');
-});
