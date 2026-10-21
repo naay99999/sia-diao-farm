@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreOrchardRequest;
 use App\Models\Orchard;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,10 +28,17 @@ class OrchardController extends Controller
         return to_route('orchards.show', $orchard);
     }
 
-    public function show(Orchard $orchard): Response
+    public function show(Request $request, Orchard $orchard): Response
     {
+        $showRemoved = $request->boolean('show_removed');
+
         return Inertia::render('farm/orchards/show', [
             'orchard' => $orchard,
+            'trees' => $orchard->trees()
+                ->when(! $showRemoved, fn ($query) => $query->active())
+                ->orderBy('code')
+                ->get(),
+            'showRemoved' => $showRemoved,
         ]);
     }
 
