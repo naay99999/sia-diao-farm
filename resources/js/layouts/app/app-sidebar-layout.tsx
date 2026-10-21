@@ -14,7 +14,7 @@ export default function AppSidebarLayout({
             <AppSidebar />
             <AppContent
                 variant="sidebar"
-                className="overflow-x-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0"
+                className="overflow-x-clip pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0"
             >
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col">

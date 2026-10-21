@@ -26,7 +26,7 @@ export default function Heading({
         <header className="min-w-0 space-y-1">
             <h1 className="text-2xl leading-[1.4] font-semibold">{title}</h1>
             {description && (
-                <p className="text-sm text-muted-foreground md:text-base">
+                <p className="text-base text-muted-foreground md:text-sm">
                     {description}
                 </p>
             )}

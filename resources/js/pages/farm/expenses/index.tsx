@@ -5,6 +5,7 @@ import { useConfirm } from '@/components/confirm-dialog';
 import { todayIso } from '@/components/farm/care-record-form';
 import { EmptyState } from '@/components/farm/empty-state';
 import { RowActions } from '@/components/farm/row-actions';
+import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -196,12 +197,10 @@ export default function ExpensesIndex({
                                         <span>{row.label}</span>
                                         <span>{formatBaht(row.total)}</span>
                                     </div>
-                                    <div
-                                        aria-hidden
-                                        className="mt-1 h-0.5 rounded-full bg-primary"
-                                        style={{
-                                            width: `${(Number(row.total) / largestCategory) * 100}%`,
-                                        }}
+                                    <ShareBar
+                                        value={Number(row.total)}
+                                        max={largestCategory}
+                                        className="mt-1"
                                     />
                                 </li>
                             ))}
@@ -233,13 +232,18 @@ export default function ExpensesIndex({
                                 defaultValue={filters.to ?? ''}
                             />
                         </div>
-                        <Button type="submit" variant="outline">
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            className="col-span-2 sm:col-auto"
+                        >
                             กรองตามวันที่
                         </Button>
                         {isFiltered && (
                             <Button
                                 type="button"
                                 variant="ghost"
+                                className="col-span-2 sm:col-auto"
                                 onClick={() => router.get(index.url())}
                             >
                                 ล้างตัวกรอง

@@ -29,17 +29,20 @@ export function AppBottomNav() {
                                 prefetch
                                 aria-current={isActive ? 'page' : undefined}
                                 className={cn(
-                                    'flex h-16 flex-col items-center justify-center gap-1 text-base text-muted-foreground transition-colors active:bg-accent md:text-sm',
+                                    'flex h-16 flex-col items-center justify-center gap-0.5 text-base text-muted-foreground transition-colors active:bg-accent md:text-sm',
                                     isActive && 'font-medium text-foreground',
                                 )}
                             >
                                 {item.icon && (
-                                    <item.icon
+                                    <span
                                         className={cn(
-                                            'size-6',
-                                            isActive && 'text-primary',
+                                            'flex h-8 w-14 items-center justify-center rounded-full transition-colors',
+                                            isActive &&
+                                                'bg-brand-soft text-primary',
                                         )}
-                                    />
+                                    >
+                                        <item.icon className="size-6" />
+                                    </span>
                                 )}
                                 {item.title}
                             </Link>

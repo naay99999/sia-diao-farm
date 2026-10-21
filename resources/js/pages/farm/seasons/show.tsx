@@ -1,5 +1,6 @@
 import { Head, Link, setLayoutProps } from '@inertiajs/react';
 import { EmptyState } from '@/components/farm/empty-state';
+import { ShareBar } from '@/components/farm/share-bar';
 import Heading from '@/components/heading';
 import { formatBaht, formatNumber } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
@@ -97,14 +98,21 @@ export default function SeasonShow({
                 aria-label="สรุปรอบ"
                 className="overflow-hidden rounded-lg border bg-card"
             >
-                <div className="bg-muted px-4 py-4">
-                    <p className="text-base text-muted-foreground md:text-sm">
+                <div
+                    className={cn(
+                        'px-4 py-4',
+                        profit < 0
+                            ? 'bg-muted'
+                            : 'bg-brand-soft text-brand-ink',
+                    )}
+                >
+                    <p className="text-base font-medium md:text-sm">
                         {profit < 0 ? 'ขาดทุนรอบนี้' : 'กำไรรอบนี้'}
                     </p>
                     <p
                         className={cn(
                             'text-3xl leading-[1.3] font-semibold',
-                            profit < 0 && 'text-destructive',
+                            profit < 0 ? 'text-destructive' : 'text-foreground',
                         )}
                     >
                         {profit < 0 ? '−' : ''}
@@ -113,7 +121,7 @@ export default function SeasonShow({
                             บาท
                         </span>
                     </p>
-                    <p className="text-base text-muted-foreground md:text-sm">
+                    <p className="text-base md:text-sm">
                         ยอดขาย {formatBaht(shownSales)} − ค่าใช้จ่าย{' '}
                         {formatBaht(shownExpenses)} บาท
                     </p>
@@ -135,7 +143,7 @@ export default function SeasonShow({
                         unit="กก."
                         detail={
                             averagePrice
-                                ? `เฉลี่ย ${averagePrice} บาท/กก.`
+                                ? `กก.ละ ${averagePrice} บาท`
                                 : undefined
                         }
                     />
@@ -180,15 +188,11 @@ export default function SeasonShow({
                                                 </span>
                                             </span>
                                         </div>
-                                        {row.weightKg > 0 && (
-                                            <div
-                                                aria-hidden
-                                                className="mt-2 h-1 rounded-full bg-primary"
-                                                style={{
-                                                    width: `${(row.weightKg / maxTreeYield) * 100}%`,
-                                                }}
-                                            />
-                                        )}
+                                        <ShareBar
+                                            value={row.weightKg}
+                                            max={maxTreeYield}
+                                            className="mt-2"
+                                        />
                                     </Link>
                                 </li>
                             ))}
