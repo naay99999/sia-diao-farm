@@ -6,6 +6,12 @@ use App\Mcp\Tools\GetFarmOverview;
 use App\Mcp\Tools\GetTreatmentOutcomes;
 use App\Mcp\Tools\GetTree;
 use App\Mcp\Tools\ListRecords;
+use App\Mcp\Tools\RecordFollowUp;
+use App\Mcp\Tools\RecordObservation;
+use App\Mcp\Tools\SaveCareRecord;
+use App\Mcp\Tools\SaveExpense;
+use App\Mcp\Tools\SaveHarvest;
+use App\Mcp\Tools\SaveSale;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -40,6 +46,12 @@ class FarmServer extends Server
         GetTree::class,
         ListRecords::class,
         GetTreatmentOutcomes::class,
+        SaveCareRecord::class,
+        RecordObservation::class,
+        RecordFollowUp::class,
+        SaveHarvest::class,
+        SaveSale::class,
+        SaveExpense::class,
     ];
 
     protected array $resources = [

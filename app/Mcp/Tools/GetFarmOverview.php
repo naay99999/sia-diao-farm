@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Date;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[Name('get_farm_overview')]
 #[Description('Call this first in every conversation. Returns the orchards (id, name, current season, active tree count), issues due for follow-up, all open issues (each with orchard_id), the known findings (id, name, kind) and today\'s date. Use the returned ids in other tools.')]
 #[IsReadOnly]
 class GetFarmOverview extends Tool

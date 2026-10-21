@@ -11,9 +11,11 @@ use Illuminate\JsonSchema\Types\Type;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[Name('get_tree')]
 #[Description('Look up one tree by its tree code (for example A-001). Returns the tree, its open issues, the latest growth stage, the 30 most recent timeline entries (care, harvests, observations; newest first, each with a record id) and harvest totals per season. Pass orchard_id when the farm has more than one orchard. Removed trees are returned too (removed_on is set).')]
 #[IsReadOnly]
 class GetTree extends Tool

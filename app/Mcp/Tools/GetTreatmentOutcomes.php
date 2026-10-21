@@ -10,9 +10,11 @@ use Illuminate\Support\Collection;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[Name('get_treatment_outcomes')]
 #[Description('The farm\'s own track record of treatments. For each combination of finding (problem name) and care product linked to an issue, returns issues_treated, resolved and avg_days_to_resolve (days from opening to resolving, resolved issues only; null when none resolved). Use it before recommending a treatment, and say how small the sample is. Pass finding (the exact name from get_farm_overview) to limit it to one problem.')]
 #[IsReadOnly]
 class GetTreatmentOutcomes extends Tool

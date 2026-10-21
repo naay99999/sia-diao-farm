@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Support\RecordSerializer;
 use App\Mcp\Support\TreeLookup;
 use App\Models\CareRecord;
 use App\Models\Expense;
@@ -19,9 +20,11 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
+#[Name('list_records')]
 #[Description('List farm records of one type, newest first. type is one of care, harvest, sale, expense, observation, issue. Optional filters: orchard_id (required with tree_code when the farm has several orchards), tree_code (care, harvest, observation and issue only), from and to (YYYY-MM-DD, inclusive, applied to the record\'s own date). Every record carries its id, which the save, delete and restore tools take. Deleted records are hidden unless include_deleted is true, and then carry deleted_at. At most 200 records per call (default 50); has_more tells you when to narrow the dates.')]
 #[IsReadOnly]
 class ListRecords extends Tool
@@ -92,7 +95,7 @@ class ListRecords extends Tool
         return Response::json([
             'type' => $type,
             'records' => $records->take($limit)
-                ->map(fn (Model $record): array => $this->serialize($record, $includeDeleted))
+                ->map(fn (Model $record): array => RecordSerializer::serialize($record, $includeDeleted))
                 ->values()
                 ->all(),
             'has_more' => $records->count() > $limit,
@@ -172,82 +175,5 @@ class ListRecords extends Tool
             'expense' => $query->whereIn('season_id', $orchard->seasons()->select('id')),
             default => $query->whereIn('tree_id', Tree::query()->where('orchard_id', $orchard->id)->select('id')),
         };
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function serialize(Model $record, bool $includeDeleted): array
-    {
-        $data = match (true) {
-            $record instanceof CareRecord => [
-                'id' => $record->id,
-                'orchard_id' => $record->orchard_id,
-                'type' => $record->type->value,
-                'performed_on' => $record->performed_on->toDateString(),
-                'product' => $record->product,
-                'quantity' => $record->quantity,
-                'notes' => $record->notes,
-                'tree_codes' => $record->trees->sortBy('code')->pluck('code')->values()->all(),
-                'issue_ids' => $record->issues->pluck('id')->sort()->values()->all(),
-            ],
-            $record instanceof Harvest => [
-                'id' => $record->id,
-                'tree_id' => $record->tree_id,
-                'tree_code' => $record->tree->code,
-                'harvested_on' => $record->harvested_on->toDateString(),
-                'weight_kg' => (float) $record->weight_kg,
-                'fruit_count' => $record->fruit_count,
-                'notes' => $record->notes,
-            ],
-            $record instanceof Sale => [
-                'id' => $record->id,
-                'orchard_id' => $record->orchard_id,
-                'sold_on' => $record->sold_on->toDateString(),
-                'buyer_name' => $record->buyer_name,
-                'weight_kg' => (float) $record->weight_kg,
-                'amount' => (float) $record->amount,
-                'notes' => $record->notes,
-            ],
-            $record instanceof Expense => [
-                'id' => $record->id,
-                'season_id' => $record->season_id,
-                'category' => $record->category->value,
-                'spent_on' => $record->spent_on->toDateString(),
-                'amount' => (float) $record->amount,
-                'notes' => $record->notes,
-            ],
-            $record instanceof Observation => [
-                'id' => $record->id,
-                'tree_id' => $record->tree_id,
-                'tree_code' => $record->tree->code,
-                'finding_id' => $record->finding_id,
-                'finding' => $record->finding->name,
-                'tree_issue_id' => $record->tree_issue_id,
-                'observed_on' => $record->observed_on->toDateString(),
-                'severity' => $record->severity?->value,
-                'outcome' => $record->outcome?->value,
-                'notes' => $record->notes,
-            ],
-            $record instanceof TreeIssue => [
-                'id' => $record->id,
-                'tree_id' => $record->tree_id,
-                'tree_code' => $record->tree->code,
-                'finding_id' => $record->finding_id,
-                'finding' => $record->finding->name,
-                'opened_on' => $record->opened_on->toDateString(),
-                'follow_up_on' => $record->follow_up_on->toDateString(),
-                'resolved_on' => $record->resolved_on?->toDateString(),
-            ],
-            default => ['id' => $record->getKey()],
-        };
-
-        $data['from_ai'] = method_exists($record, 'isFromAi') ? $record->isFromAi() : false;
-
-        if ($includeDeleted) {
-            $data['deleted_at'] = $record->getAttribute('deleted_at')?->toIso8601String();
-        }
-
-        return $data;
     }
 }
