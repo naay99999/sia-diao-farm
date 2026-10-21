@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreOrchardRequest;
 use App\Models\Harvest;
 use App\Models\Orchard;
+use App\Models\Tree;
+use App\Support\TreeQrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -94,6 +96,23 @@ class OrchardController extends Controller
                 ->whereNotNull('ended_on')
                 ->orderByDesc('started_on')
                 ->get(),
+        ]);
+    }
+
+    public function qr(Orchard $orchard): Response
+    {
+        return Inertia::render('farm/orchards/qr', [
+            'orchard' => $orchard,
+            'labels' => $orchard->trees()
+                ->active()
+                ->orderBy('code')
+                ->get()
+                ->map(fn (Tree $tree): array => [
+                    'code' => $tree->code,
+                    'orchardName' => $orchard->name,
+                    'svg' => TreeQrCode::svg($tree),
+                ])
+                ->all(),
         ]);
     }
 

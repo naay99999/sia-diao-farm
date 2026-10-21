@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('orchards', OrchardController::class)
         ->except(['create', 'edit']);
 
+    Route::get('orchards/{orchard}/qr', [OrchardController::class, 'qr'])->name('orchards.qr');
     Route::post('orchards/{orchard}/seasons', [SeasonController::class, 'store'])->name('orchards.seasons.store');
     Route::get('seasons/{season}', [SeasonController::class, 'show'])->name('seasons.show');
     Route::patch('seasons/{season}', [SeasonController::class, 'update'])->name('seasons.update');

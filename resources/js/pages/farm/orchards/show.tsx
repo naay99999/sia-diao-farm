@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatThaiDate } from '@/lib/thai-date';
-import { index, show } from '@/routes/orchards';
+import { index, qr, show } from '@/routes/orchards';
 import { create as createCareRecord } from '@/routes/orchards/care-records';
 import { create as createHarvest } from '@/routes/orchards/harvests';
 
@@ -116,6 +116,9 @@ export default function OrchardShow({
                             </Form>
                         </DialogContent>
                     </Dialog>
+                    <Button variant="outline" asChild>
+                        <Link href={qr(orchard.id)}>พิมพ์ QR</Link>
+                    </Button>
                     <Button
                         variant="destructive"
                         onClick={() => {
