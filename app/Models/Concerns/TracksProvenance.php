@@ -19,7 +19,7 @@ trait TracksProvenance
     {
         static::creating(function (self $model): void {
             $via = self::currentVia();
-            $userId = auth()->id();
+            $userId = auth()->user()?->id;
 
             $model->created_by = $userId;
             $model->updated_by = $userId;
@@ -28,7 +28,7 @@ trait TracksProvenance
         });
 
         static::updating(function (self $model): void {
-            $model->updated_by = auth()->id();
+            $model->updated_by = auth()->user()?->id;
             $model->updated_via = self::currentVia();
         });
     }
