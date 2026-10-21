@@ -12,11 +12,14 @@ beforeEach(function () {
 });
 
 test('expense stores without a season', function () {
+    $filtered = route('expenses.index', ['from' => '2026-01-01', 'to' => '2026-01-31']);
+
     $this->actingAs($this->user)
+        ->from($filtered)
         ->post(route('expenses.store'), [
             'category' => 'labor', 'spent_on' => '2026-01-10', 'amount' => '1500.5',
         ])
-        ->assertRedirect(route('expenses.index'));
+        ->assertRedirect($filtered);
 
     $this->assertDatabaseHas('expenses', ['season_id' => null, 'category' => 'labor', 'amount' => '1500.50']);
 });
@@ -49,16 +52,20 @@ test('expense validates category, amount and season', function (array $data, str
 test('expense updates and destroys', function () {
     $expense = Expense::factory()->create();
 
+    $filtered = route('expenses.index', ['from' => '2026-01-01', 'to' => '2026-02-28']);
+
     $this->actingAs($this->user)
+        ->from($filtered)
         ->patch(route('expenses.update', $expense), ['category' => 'equipment', 'spent_on' => '2026-02-02', 'amount' => 250])
-        ->assertRedirect(route('expenses.index'));
+        ->assertRedirect($filtered);
 
     expect($expense->refresh()->category)->toBe(ExpenseCategory::Equipment)
         ->and($expense->amount)->toBe('250.00');
 
     $this->actingAs($this->user)
+        ->from($filtered)
         ->delete(route('expenses.destroy', $expense))
-        ->assertRedirect(route('expenses.index'));
+        ->assertRedirect($filtered);
 
     $this->assertModelMissing($expense);
 });

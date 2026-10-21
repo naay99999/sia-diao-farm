@@ -10,6 +10,7 @@ use App\Models\Season;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use stdClass;
@@ -80,6 +81,10 @@ class SeasonController extends Controller
 
     public function close(Request $request, Season $season): RedirectResponse
     {
+        if ($season->ended_on !== null) {
+            throw ValidationException::withMessages(['ended_on' => 'รอบนี้ปิดแล้ว']);
+        }
+
         $validated = $request->validate([
             'ended_on' => ['nullable', 'date', 'after_or_equal:'.$season->started_on->toDateString()],
         ]);

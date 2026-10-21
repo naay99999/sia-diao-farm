@@ -64,16 +64,18 @@ Open [http://localhost:8000](http://localhost:8000) and log in as the owner. Set
 | Email    | `OWNER_EMAIL` (default `owner@example.com`)    |
 | Password | `OWNER_PASSWORD` (default `password`)          |
 
+`OWNER_PASSWORD` must be set to a non-default value for seeding outside `local`/`testing` environments; the seeder refuses to run otherwise. Re-running `db:seed` never overwrites an existing owner.
+
 ### Resetting the owner password
 
 There is no password reset flow. Reset it from the command line:
 
 ```bash
 php artisan tinker
->>> App\Models\User::where('email', 'owner@example.com')->first()->update(['password' => 'new-password']);
+>>> App\Models\User::where('email', config('farm.owner.email'))->first()->update(['password' => 'new-password']);
 ```
 
-The password is hashed automatically by the model.
+The password is hashed automatically by the model. The example looks the owner up by your `OWNER_EMAIL`.
 
 ## Dev Mode
 

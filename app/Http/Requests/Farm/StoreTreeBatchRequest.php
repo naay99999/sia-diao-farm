@@ -20,7 +20,7 @@ class StoreTreeBatchRequest extends FormRequest
     {
         return [
             'prefix' => [
-                'required', 'string', 'max:40',
+                'bail', 'required', 'string', 'max:40',
                 function (string $attribute, mixed $value, Closure $fail): void {
                     if ($this->integer('count') < 1 || $this->integer('start') < 1) {
                         return;
@@ -38,7 +38,7 @@ class StoreTreeBatchRequest extends FormRequest
                     }
                 },
             ],
-            'start' => ['required', 'integer', 'min:1'],
+            'start' => ['required', 'integer', 'min:1', 'max:99999'],
             'count' => ['required', 'integer', 'min:1', 'max:500'],
             'variety' => ['nullable', 'string', 'max:255'],
         ];

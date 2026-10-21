@@ -109,6 +109,15 @@ test('close accepts an explicit date and rejects one before the start', function
     expect($season->fresh()->ended_on->toDateString())->toBe('2026-03-31');
 });
 
+test('close rejects an already closed season', function () {
+    $season = Season::factory()->for($this->orchard)->create(['started_on' => '2026-01-01', 'ended_on' => '2026-03-31']);
+
+    $this->actingAs($this->user)->patch(route('seasons.close', $season), ['ended_on' => '2026-04-30'])
+        ->assertSessionHasErrors(['ended_on' => 'รอบนี้ปิดแล้ว']);
+
+    expect($season->fresh()->ended_on->toDateString())->toBe('2026-03-31');
+});
+
 test('destroy deletes the season', function () {
     $season = Season::factory()->for($this->orchard)->create();
 

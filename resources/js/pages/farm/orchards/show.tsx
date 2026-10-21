@@ -161,6 +161,24 @@ export default function OrchardShow({
                             >
                                 ปิดรอบ
                             </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    if (
+                                        confirm(
+                                            'ลบรอบนี้? ค่าใช้จ่ายที่ผูกกับรอบนี้จะไม่ผูกกับรอบใดอีก',
+                                        )
+                                    ) {
+                                        router.delete(
+                                            SeasonController.destroy.url(
+                                                currentSeason.id,
+                                            ),
+                                        );
+                                    }
+                                }}
+                            >
+                                ลบรอบ
+                            </Button>
                         </div>
                     ) : (
                         <Button onClick={() => setSeasonDialog('start')}>

@@ -67,7 +67,7 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกค่าใช้จ่ายแล้ว']);
 
-        return to_route('expenses.index');
+        return back();
     }
 
     public function update(StoreExpenseRequest $request, Expense $expense): RedirectResponse
@@ -76,7 +76,7 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกค่าใช้จ่ายแล้ว']);
 
-        return to_route('expenses.index');
+        return back();
     }
 
     public function destroy(Expense $expense): RedirectResponse
@@ -85,6 +85,6 @@ class ExpenseController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบค่าใช้จ่ายแล้ว']);
 
-        return to_route('expenses.index');
+        return back();
     }
 }

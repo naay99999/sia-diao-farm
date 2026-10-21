@@ -13,6 +13,7 @@ use App\Models\Season;
 use App\Models\Tree;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,11 +22,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
+        $ownerPassword = config('farm.owner.password');
+
+        if (! app()->environment(['local', 'testing']) && ($ownerPassword === null || $ownerPassword === '' || $ownerPassword === 'password')) {
+            throw new RuntimeException('Set OWNER_PASSWORD to a non-default value before seeding outside local/testing environments.');
+        }
+
+        User::firstOrCreate(
             ['email' => config('farm.owner.email')],
             [
                 'name' => 'เจ้าของสวน',
-                'password' => config('farm.owner.password'),
+                'password' => $ownerPassword,
             ],
         );
 

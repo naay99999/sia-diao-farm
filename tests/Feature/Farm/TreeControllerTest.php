@@ -28,6 +28,20 @@ test('batch creates zero padded codes', function () {
     expect($orchard->trees()->orderBy('code')->pluck('code')->all())->toBe(['A-001', 'A-002', 'A-003']);
 });
 
+test('batch rejects a non-string prefix and an oversized start', function () {
+    $orchard = Orchard::factory()->create();
+
+    $this->actingAs($this->user)
+        ->post(route('orchards.trees.batch', $orchard), ['prefix' => ['A-'], 'start' => 1, 'count' => 3])
+        ->assertSessionHasErrors('prefix');
+
+    $this->actingAs($this->user)
+        ->post(route('orchards.trees.batch', $orchard), ['prefix' => 'A-', 'start' => 100000, 'count' => 3])
+        ->assertSessionHasErrors('start');
+
+    expect($orchard->trees()->count())->toBe(0);
+});
+
 test('batch fails entirely when a code already exists', function () {
     $orchard = Orchard::factory()->create();
     Tree::factory()->for($orchard)->create(['code' => 'A-002']);
