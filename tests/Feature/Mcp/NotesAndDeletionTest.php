@@ -384,3 +384,15 @@ test('a farm note does not count as a tree record and survives the tree being re
 
     expect($note->fresh()->tree_id)->toBeNull();
 });
+
+test('restoring an issue is refused while another open issue exists for the same tree and finding', function () {
+    $deleted = TreeIssue::factory()->for($this->tree)->create(['finding_id' => $this->redMite->id]);
+    $deleted->delete();
+    TreeIssue::factory()->for($this->tree)->create(['finding_id' => $this->redMite->id]);
+
+    FarmServer::actingAs($this->user)
+        ->tool(RestoreRecord::class, ['type' => 'issue', 'id' => $deleted->id])
+        ->assertHasErrors(['already has another open issue for the same finding']);
+
+    expect($deleted->fresh()->trashed())->toBeTrue();
+});
