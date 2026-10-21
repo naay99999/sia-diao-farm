@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use stdClass;
 
 class SeasonController extends Controller
 {
@@ -37,6 +38,7 @@ class SeasonController extends Controller
             ->groupBy('trees.id', 'trees.code')
             ->orderByRaw('sum(harvests.weight_kg) desc')
             ->orderBy('trees.code')
+            ->toBase()
             ->get([
                 'trees.id as tree_id',
                 'trees.code',
@@ -44,7 +46,7 @@ class SeasonController extends Controller
                 DB::raw('coalesce(sum(harvests.fruit_count), 0) as fruit_count'),
             ]);
 
-        $treeYields = $yieldRows->map(fn ($row): array => [
+        $treeYields = $yieldRows->map(fn (stdClass $row): array => [
             'treeId' => (int) $row->tree_id,
             'code' => $row->code,
             'weightKg' => (float) $row->weight_kg,

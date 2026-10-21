@@ -53,7 +53,7 @@ class TreeController extends Controller
     }
 
     /**
-     * @return list<array{kind: string, id: int, date: string, title: string, detail: string|null, record: array<string, mixed>}>
+     * @return array<int, array{kind: string, id: int, date: string, title: string, detail: string|null, record: array<string, mixed>}>
      */
     private function timeline(Tree $tree): array
     {
@@ -100,7 +100,7 @@ class TreeController extends Controller
     }
 
     /**
-     * @return list<array{seasonId: int, seasonName: string, weightKg: float, fruitCount: int}>
+     * @return array<int, array{seasonId: int, seasonName: string, weightKg: float, fruitCount: int}>
      */
     private function seasonYields(Tree $tree): array
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Farm;
 
+use App\Models\Orchard;
 use App\Models\Season;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -43,16 +44,22 @@ class StoreSeasonRequest extends FormRequest
     private function validateAgainstOtherSeasons(Validator $validator): void
     {
         $season = $this->route('season');
-        $orchardId = $season instanceof Season
-            ? $season->orchard_id
-            : $this->route('orchard')->id;
+        $excludedSeasonId = null;
+        if ($season instanceof Season) {
+            $orchardId = $season->orchard_id;
+            $excludedSeasonId = $season->id;
+        } else {
+            $orchard = $this->route('orchard');
+            abort_unless($orchard instanceof Orchard, 404);
+            $orchardId = $orchard->id;
+        }
 
         $startedOn = $this->date('started_on')->toDateString();
         $endedOn = $this->filled('ended_on') ? $this->date('ended_on')->toDateString() : null;
 
         $others = Season::query()
             ->where('orchard_id', $orchardId)
-            ->when($season instanceof Season, fn ($query) => $query->whereKeyNot($season->getKey()))
+            ->when($excludedSeasonId !== null, fn ($query) => $query->whereKeyNot($excludedSeasonId))
             ->get();
 
         if ($endedOn === null && $others->contains(fn (Season $other) => $other->isOpen())) {

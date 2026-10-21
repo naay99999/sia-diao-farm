@@ -4,6 +4,7 @@ namespace App\Http\Requests\Farm;
 
 use App\Enums\CareType;
 use App\Models\CareRecord;
+use App\Models\Orchard;
 use App\Models\Tree;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -70,8 +71,13 @@ class StoreCareRecordRequest extends FormRequest
     {
         $careRecord = $this->route('care_record');
 
-        return $careRecord instanceof CareRecord
-            ? $careRecord->orchard_id
-            : $this->route('orchard')->id;
+        if ($careRecord instanceof CareRecord) {
+            return $careRecord->orchard_id;
+        }
+
+        $orchard = $this->route('orchard');
+        abort_unless($orchard instanceof Orchard, 404);
+
+        return $orchard->id;
     }
 }

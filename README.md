@@ -6,46 +6,30 @@ Feel free to fork it and adapt it for your own farm. No license restrictions.
 
 ## About
 
-Sia Diao Farm (เสี่ยเดียวฟาร์ม) is an internal ERP for a small fruit orchard. It replaces paper notebooks with a mobile-friendly web app for recording what happens on each plot — from bloom to harvest to sale.
+Sia Diao Farm (เสี่ยเดียวฟาร์ม) is a lean, single-owner durian tree tracker. It replaces paper notebooks with a mobile-friendly web app: scan a tree's QR label in the orchard to see its history and record what happened.
 
 **Core features:**
-- Fruit types, varieties, and quality grades
-- Plot management with crop cycle tracking
-- Activity logging (pruning, fertilizing, spraying, etc.)
-- Harvest recording with per-grade line items
-- Sale and expense tracking
-- Basic yield and revenue analytics per crop cycle
+- Orchards, each with its own trees
+- Trees with printable QR labels (one sheet per orchard) that open the tree page directly
+- Seasons per orchard (no overlapping dates, at most one open season)
+- Care records (fertilizer, pesticide, other) applied to one or many trees at once
+- Harvest recording per tree
+- Sales per orchard
+- Expenses with fixed categories, optionally tied to a season
+- Season summaries and an orchard overview
 
-The UI is Thai-only.
-
-## Screenshots
-
-| Dashboard | Orchard / Plot |
-|-----------|---------------|
-| ![Dashboard](docs/screenshots/Dashboard.jpeg) | ![Orchard](docs/screenshots/Orchard.jpeg) |
-
-| Fruit Types | Fruit Varieties |
-|-------------|-----------------|
-| ![Fruit Types](docs/screenshots/Types-of-fruit.jpeg) | ![Fruit Varieties](docs/screenshots/Fruit-varieties.jpeg) |
-
-| Grades | Activity Types |
-|--------|----------------|
-| ![Grades](docs/screenshots/Grade.jpeg) | ![Activity Types](docs/screenshots/Types-of-activities.jpeg) |
-
-| Expenses | Expense Categories |
-|----------|--------------------|
-| ![Expenses](docs/screenshots/Expenses.jpeg) | ![Expense Categories](docs/screenshots/Expense-category.jpeg) |
+The UI is Thai-only. There is a single owner account and no roles.
 
 ## Tech Stack
 
-- **Backend:** Laravel 13, PHP 8.3, SQLite
+- **Backend:** Laravel 13, PHP 8.5, SQLite
 - **Frontend:** React 19, Inertia.js v3, Tailwind CSS v4
 - **Auth:** Laravel Fortify
 - **Testing:** Pest v4
 
 ## Getting Started
 
-**Requirements:** PHP 8.3+, Composer, Node.js 20+
+**Requirements:** PHP 8.5+, Composer, Node.js 20+
 
 ```bash
 # 1. Clone
@@ -61,7 +45,8 @@ composer install
 # 4. Generate app key
 php artisan key:generate
 
-# 5. Database — creates SQLite file, runs migrations, seeds demo data
+# 5. Database — creates SQLite file, runs migrations, seeds the owner account
+#    (in the local environment also 2 demo orchards with 20 trees each)
 php artisan migrate --seed
 
 # 6. Frontend
@@ -72,12 +57,23 @@ npm run build
 php artisan serve
 ```
 
-Open [http://localhost:8000](http://localhost:8000) and log in with the seeded admin account:
+Open [http://localhost:8000](http://localhost:8000) and log in as the owner. Set the credentials in `.env` before seeding:
 
-| Field    | Value                          |
-|----------|--------------------------------|
-| Email    | value of `SEED_ADMIN_EMAIL` in `.env` |
-| Password | `password`                     |
+| Field    | Value                                          |
+|----------|------------------------------------------------|
+| Email    | `OWNER_EMAIL` (default `owner@example.com`)    |
+| Password | `OWNER_PASSWORD` (default `password`)          |
+
+### Resetting the owner password
+
+There is no password reset flow. Reset it from the command line:
+
+```bash
+php artisan tinker
+>>> App\Models\User::where('email', 'owner@example.com')->first()->update(['password' => 'new-password']);
+```
+
+The password is hashed automatically by the model.
 
 ## Dev Mode
 
