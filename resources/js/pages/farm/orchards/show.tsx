@@ -2,12 +2,14 @@ import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import { useState } from 'react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
 import OrchardController from '@/actions/App/Http/Controllers/Farm/OrchardController';
+import SaleController from '@/actions/App/Http/Controllers/Farm/SaleController';
 import SeasonController from '@/actions/App/Http/Controllers/Farm/SeasonController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import {
     CareRecordFields,
     TreePicker,
 } from '@/components/farm/care-record-form';
+import { formatPricePerKg, SaleFields } from '@/components/farm/sale-form';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import OrchardFormFields from '@/components/orchard-form-fields';
@@ -33,7 +35,7 @@ import { create as createHarvest } from '@/routes/orchards/harvests';
 import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
 import { careTypeLabels } from '@/types/farm';
-import type { CareRecord, Orchard, Season, Tree } from '@/types/farm';
+import type { CareRecord, Orchard, Sale, Season, Tree } from '@/types/farm';
 
 export default function OrchardShow({
     orchard,
@@ -43,6 +45,7 @@ export default function OrchardShow({
     seasons,
     recentCareRecords,
     activeTrees,
+    sales,
 }: {
     orchard: Orchard;
     trees: Tree[];
@@ -51,11 +54,13 @@ export default function OrchardShow({
     seasons: Season[];
     recentCareRecords: CareRecord[];
     activeTrees: Pick<Tree, 'id' | 'code'>[];
+    sales: Sale[];
 }) {
+    const [saleDialog, setSaleDialog] = useState<Sale | 'new' | null>(null);
     const [editingCare, setEditingCare] = useState<CareRecord | null>(null);
-    const [seasonDialog, setSeasonDialog] = useState<
-        'start' | 'edit' | null
-    >(null);
+    const [seasonDialog, setSeasonDialog] = useState<'start' | 'edit' | null>(
+        null,
+    );
     const [editing, setEditing] = useState(false);
     const [addingOne, setAddingOne] = useState(false);
     const [addingMany, setAddingMany] = useState(false);
@@ -495,6 +500,121 @@ export default function OrchardShow({
                                             initialSelected={(
                                                 editingCare.trees ?? []
                                             ).map((tree) => tree.id)}
+                                            errors={errors}
+                                        />
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            บันทึก
+                                        </Button>
+                                    </>
+                                )}
+                            </Form>
+                        )}
+                    </DialogContent>
+                </Dialog>
+            </section>
+
+            <section className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-medium">การขาย</h2>
+                    <Button onClick={() => setSaleDialog('new')}>
+                        บันทึกการขาย
+                    </Button>
+                </div>
+                {sales.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                        ยังไม่มีบันทึกการขาย
+                    </p>
+                )}
+                <div className="grid gap-2">
+                    {sales.map((sale) => (
+                        <div
+                            key={sale.id}
+                            className="flex items-start justify-between gap-2 rounded-lg border p-3"
+                        >
+                            <div className="min-w-0">
+                                <p className="font-medium">
+                                    {Number(sale.weight_kg).toLocaleString(
+                                        'th-TH',
+                                    )}{' '}
+                                    กก. ·{' '}
+                                    {Number(sale.amount).toLocaleString(
+                                        'th-TH',
+                                    )}{' '}
+                                    บาท
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {formatThaiDate(sale.sold_on)}
+                                    {sale.buyer_name &&
+                                        ` · ${sale.buyer_name}`}{' '}
+                                    · {formatPricePerKg(sale)} บาท/กก.
+                                </p>
+                            </div>
+                            <div className="flex shrink-0 gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSaleDialog(sale)}
+                                >
+                                    แก้ไข
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (confirm('ลบการขายนี้?')) {
+                                            router.delete(
+                                                SaleController.destroy.url(
+                                                    sale.id,
+                                                ),
+                                            );
+                                        }
+                                    }}
+                                >
+                                    ลบ
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <Dialog
+                    open={saleDialog !== null}
+                    onOpenChange={(open) => !open && setSaleDialog(null)}
+                >
+                    <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {saleDialog === 'new'
+                                    ? 'บันทึกการขาย'
+                                    : 'แก้ไขการขาย'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                ระบุน้ำหนักและจำนวนเงินที่ขายได้
+                            </DialogDescription>
+                        </DialogHeader>
+                        {saleDialog && (
+                            <Form
+                                key={
+                                    saleDialog === 'new' ? 'new' : saleDialog.id
+                                }
+                                {...(saleDialog === 'new'
+                                    ? SaleController.store.form(orchard.id)
+                                    : SaleController.update.form(
+                                          saleDialog.id,
+                                      ))}
+                                onSuccess={() => setSaleDialog(null)}
+                                className="space-y-4"
+                            >
+                                {({ processing, errors }) => (
+                                    <>
+                                        <SaleFields
+                                            sale={
+                                                saleDialog === 'new'
+                                                    ? undefined
+                                                    : saleDialog
+                                            }
                                             errors={errors}
                                         />
                                         <Button

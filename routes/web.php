@@ -3,6 +3,7 @@
 use App\Http\Controllers\Farm\CareRecordController;
 use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\OrchardController;
+use App\Http\Controllers\Farm\SaleController;
 use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('trees/{tree}/harvests', [HarvestController::class, 'store'])->name('trees.harvests.store');
     Route::patch('harvests/{harvest}', [HarvestController::class, 'update'])->name('harvests.update');
     Route::delete('harvests/{harvest}', [HarvestController::class, 'destroy'])->name('harvests.destroy');
+    Route::post('orchards/{orchard}/sales', [SaleController::class, 'store'])->name('orchards.sales.store');
+    Route::patch('sales/{sale}', [SaleController::class, 'update'])->name('sales.update');
+    Route::delete('sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 

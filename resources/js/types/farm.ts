@@ -76,3 +76,13 @@ export type SeasonYield = {
     weightKg: number;
     fruitCount: number;
 };
+
+export type Sale = {
+    id: number;
+    orchard_id: number;
+    sold_on: string;
+    buyer_name: string | null;
+    weight_kg: string;
+    amount: string;
+    notes: string | null;
+};

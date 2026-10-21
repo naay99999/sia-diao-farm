@@ -46,6 +46,7 @@ class OrchardController extends Controller
                 ->limit(10)
                 ->get(),
             'activeTrees' => $orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
+            'sales' => $orchard->sales()->latest('sold_on')->latest('id')->get(),
             'currentSeason' => $orchard->currentSeason,
             'seasons' => $orchard->seasons()
                 ->whereNotNull('ended_on')

@@ -49,6 +49,14 @@ class Orchard extends Model
     }
 
     /**
+     * @return HasMany<Sale, $this>
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
      * @return HasOne<Season, $this>
      */
     public function currentSeason(): HasOne
