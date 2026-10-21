@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Farm;
 
-use App\Enums\FindingKind;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreTreeBatchRequest;
 use App\Http\Requests\Farm\StoreTreeRequest;
 use App\Http\Requests\Farm\UpdateTreeRequest;
 use App\Models\Finding;
 use App\Models\Orchard;
-use App\Models\Season;
 use App\Models\Tree;
 use App\Support\IssueSummary;
+use App\Support\TreeStats;
 use App\Support\TreeTimeline;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,57 +51,11 @@ class TreeController extends Controller
             'openIssues' => IssueSummary::forIssues(
                 $tree->issues()->open()->with(['tree:id,code', 'finding:id,name'])->orderBy('follow_up_on')->orderBy('id')->get(),
             ),
-            'latestStage' => $this->latestStage($tree),
+            'latestStage' => TreeStats::latestStage($tree),
             'findings' => Finding::query()->orderBy('kind')->orderBy('id')->get(['id', 'name', 'kind']),
             'activeTrees' => $tree->orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
-            'seasonYields' => $this->seasonYields($tree),
+            'seasonYields' => TreeStats::seasonYields($tree),
         ]);
-    }
-
-    /**
-     * @return array{finding: string, observedOn: string, inCurrentSeason: bool}|null
-     */
-    private function latestStage(Tree $tree): ?array
-    {
-        $observation = $tree->observations()
-            ->whereRelation('finding', 'kind', FindingKind::Stage)
-            ->with('finding')
-            ->orderByDesc('observed_on')
-            ->orderByDesc('id')
-            ->first();
-
-        if ($observation === null) {
-            return null;
-        }
-
-        $currentSeason = $tree->orchard->currentSeason;
-
-        return [
-            'finding' => $observation->finding->name,
-            'observedOn' => $observation->observed_on->toDateString(),
-            'inCurrentSeason' => $currentSeason?->containsDate($observation->observed_on) ?? false,
-        ];
-    }
-
-    /**
-     * @return array<int, array{seasonId: int, seasonName: string, weightKg: float, fruitCount: int}>
-     */
-    private function seasonYields(Tree $tree): array
-    {
-        return $tree->orchard->seasons()
-            ->orderByDesc('started_on')
-            ->get()
-            ->map(function (Season $season) use ($tree): array {
-                $query = $season->applyDateWindow($tree->harvests()->getQuery(), 'harvested_on');
-
-                return [
-                    'seasonId' => $season->id,
-                    'seasonName' => $season->name,
-                    'weightKg' => (float) $query->sum('weight_kg'),
-                    'fruitCount' => (int) $query->sum('fruit_count'),
-                ];
-            })
-            ->all();
     }
 
     public function update(UpdateTreeRequest $request, Tree $tree): RedirectResponse

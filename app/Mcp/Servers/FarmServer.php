@@ -3,6 +3,9 @@
 namespace App\Mcp\Servers;
 
 use App\Mcp\Tools\GetFarmOverview;
+use App\Mcp\Tools\GetTreatmentOutcomes;
+use App\Mcp\Tools\GetTree;
+use App\Mcp\Tools\ListRecords;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -34,6 +37,9 @@ class FarmServer extends Server
 {
     protected array $tools = [
         GetFarmOverview::class,
+        GetTree::class,
+        ListRecords::class,
+        GetTreatmentOutcomes::class,
     ];
 
     protected array $resources = [
