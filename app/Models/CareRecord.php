@@ -65,4 +65,12 @@ class CareRecord extends Model
     {
         return $this->belongsToMany(Tree::class, 'care_record_tree');
     }
+
+    /**
+     * @return BelongsToMany<TreeIssue, $this>
+     */
+    public function issues(): BelongsToMany
+    {
+        return $this->belongsToMany(TreeIssue::class, 'care_record_tree_issue');
+    }
 }
