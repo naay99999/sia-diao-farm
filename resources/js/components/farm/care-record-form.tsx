@@ -30,21 +30,27 @@ export function CareRecordFields({
     return (
         <>
             <div className="grid gap-2">
-                <Label>ประเภทงาน</Label>
+                <Label id="care-type-label">ประเภทงาน</Label>
                 <input type="hidden" name="type" value={type} />
-                <div className="grid grid-cols-3 gap-2">
-                    {(Object.keys(careTypeLabels) as CareType[]).map((value) => (
-                        <Button
-                            key={value}
-                            type="button"
-                            variant={type === value ? 'default' : 'outline'}
-                            aria-pressed={type === value}
-                            className="h-12 text-base"
-                            onClick={() => setType(value)}
-                        >
-                            {careTypeLabels[value]}
-                        </Button>
-                    ))}
+                <div
+                    role="group"
+                    aria-labelledby="care-type-label"
+                    className="grid grid-cols-3 gap-2"
+                >
+                    {(Object.keys(careTypeLabels) as CareType[]).map(
+                        (value) => (
+                            <Button
+                                key={value}
+                                type="button"
+                                variant={type === value ? 'default' : 'outline'}
+                                aria-pressed={type === value}
+                                className="h-12 text-base md:h-10"
+                                onClick={() => setType(value)}
+                            >
+                                {careTypeLabels[value]}
+                            </Button>
+                        ),
+                    )}
                 </div>
                 <InputError message={errors.type} />
             </div>
@@ -84,13 +90,13 @@ export function CareRecordFields({
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="care-notes">บันทึก</Label>
+                <Label htmlFor="care-notes">หมายเหตุ</Label>
                 <textarea
                     id="care-notes"
                     name="notes"
                     rows={3}
                     defaultValue={record?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>
@@ -139,14 +145,18 @@ export function TreePicker({
 
     return (
         <div className="grid gap-2">
-            <div className="flex items-center justify-between gap-2">
-                <Label>เลือกต้นไม้ ({selected.size}/{trees.length})</Label>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <Label>
+                    เลือกต้นไม้ {selected.size} จาก {trees.length} ต้น
+                </Label>
                 <div className="flex gap-2">
                     <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelected(new Set(trees.map((tree) => tree.id)))}
+                        onClick={() =>
+                            setSelected(new Set(trees.map((tree) => tree.id)))
+                        }
                     >
                         เลือกทั้งหมด
                     </Button>
@@ -156,7 +166,7 @@ export function TreePicker({
                         size="sm"
                         onClick={() => setSelected(new Set())}
                     >
-                        ไม่เลือกเลย
+                        ล้างที่เลือก
                     </Button>
                 </div>
             </div>

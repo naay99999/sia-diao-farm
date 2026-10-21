@@ -1,7 +1,11 @@
 import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
 import { useState } from 'react';
 import ExpenseController from '@/actions/App/Http/Controllers/Farm/ExpenseController';
+import { useConfirm } from '@/components/confirm-dialog';
 import { todayIso } from '@/components/farm/care-record-form';
+import { EmptyState } from '@/components/farm/empty-state';
+import { RowActions } from '@/components/farm/row-actions';
+import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -14,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatBaht } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
 import { index } from '@/routes/expenses';
 import type { Expense, ExpenseCategory } from '@/types/farm';
@@ -23,13 +28,7 @@ type Errors = Record<string, string | undefined>;
 type CategoryOption = { value: ExpenseCategory; label: string };
 
 const controlClass =
-    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm';
-
-const formatBaht = (value: number | string): string =>
-    Number(value).toLocaleString('th-TH', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+    'flex h-11 w-full rounded-md border border-input bg-card px-3 py-1 md:h-9 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm';
 
 function ExpenseFields({
     expense,
@@ -88,14 +87,14 @@ function ExpenseFields({
                 </div>
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="expense-season">ฤดูกาล</Label>
+                <Label htmlFor="expense-season">รอบการผลิต</Label>
                 <select
                     id="expense-season"
                     name="season_id"
                     defaultValue={expense?.season_id ?? ''}
                     className={controlClass}
                 >
-                    <option value="">ไม่ระบุ</option>
+                    <option value="">ไม่ผูกกับรอบ</option>
                     {seasons.map((season) => (
                         <option key={season.id} value={season.id}>
                             {season.label}
@@ -105,13 +104,13 @@ function ExpenseFields({
                 <InputError message={errors.season_id} />
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="expense-notes">บันทึก</Label>
+                <Label htmlFor="expense-notes">หมายเหตุ</Label>
                 <textarea
                     id="expense-notes"
                     name="notes"
                     rows={3}
                     defaultValue={expense?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
+                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>
@@ -138,9 +137,15 @@ export default function ExpensesIndex({
     seasons: { id: number; label: string }[];
     categories: CategoryOption[];
 }) {
+    const confirm = useConfirm();
     const [dialog, setDialog] = useState<Expense | 'new' | null>(null);
     const categoryLabels = Object.fromEntries(
         categories.map((category) => [category.value, category.label]),
+    );
+    const isFiltered = Boolean(filters.from || filters.to);
+    const largestCategory = Math.max(
+        0,
+        ...totalsByCategory.map((row) => Number(row.total)),
     );
 
     setLayoutProps({
@@ -148,135 +153,169 @@ export default function ExpensesIndex({
     });
 
     return (
-        <div className="flex h-full flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
             <Head title="ค่าใช้จ่าย" />
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-start justify-between gap-3">
                 <Heading
                     title="ค่าใช้จ่าย"
-                    description="บันทึกรายจ่ายของฟาร์ม"
+                    description={
+                        isFiltered
+                            ? `${filters.from ? formatThaiDate(filters.from) : 'แรกสุด'} – ${filters.to ? formatThaiDate(filters.to) : 'วันนี้'}`
+                            : 'รายจ่ายทั้งหมดของฟาร์ม'
+                    }
                 />
                 <Button onClick={() => setDialog('new')}>
                     บันทึกค่าใช้จ่าย
                 </Button>
             </div>
 
-            <form
-                method="get"
-                action={index.url()}
-                className="flex flex-wrap items-end gap-3"
-            >
-                <div className="grid gap-2">
-                    <Label htmlFor="filter-from">ตั้งแต่วันที่</Label>
-                    <Input
-                        id="filter-from"
-                        name="from"
-                        type="date"
-                        defaultValue={filters.from ?? ''}
-                    />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="filter-to">ถึงวันที่</Label>
-                    <Input
-                        id="filter-to"
-                        name="to"
-                        type="date"
-                        defaultValue={filters.to ?? ''}
-                    />
-                </div>
-                <Button type="submit" variant="outline">
-                    กรอง
-                </Button>
-                {(filters.from || filters.to) && (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => router.get(index.url())}
-                    >
-                        ล้างตัวกรอง
-                    </Button>
-                )}
-            </form>
-
-            <section className="space-y-2 rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">รวมทั้งหมด</p>
-                <p className="text-2xl font-semibold">
-                    {formatBaht(total)} บาท
-                </p>
-                {totalsByCategory.length > 0 && (
-                    <ul className="grid gap-1 pt-2 text-sm">
-                        {totalsByCategory.map((row) => (
-                            <li
-                                key={row.category}
-                                className="flex justify-between gap-2"
-                            >
-                                <span>{row.label}</span>
-                                <span>{formatBaht(row.total)} บาท</span>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            {expenses.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                    ยังไม่มีค่าใช้จ่าย
-                </p>
-            )}
-            <div className="grid gap-2">
-                {expenses.map((expense) => (
-                    <div
-                        key={expense.id}
-                        className="flex items-start justify-between gap-2 rounded-lg border p-3"
-                    >
-                        <div className="min-w-0">
-                            <p className="font-medium">
-                                {categoryLabels[expense.category]} ·{' '}
-                                {formatBaht(expense.amount)} บาท
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {formatThaiDate(expense.spent_on)}
-                                {expense.season &&
-                                    ` · ${expense.season.orchard.name} · ${expense.season.name}`}
-                            </p>
-                            {expense.notes && (
-                                <p className="text-sm text-muted-foreground">
-                                    {expense.notes}
-                                </p>
-                            )}
-                        </div>
-                        <div className="flex shrink-0 gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setDialog(expense)}
-                            >
-                                แก้ไข
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                    if (confirm('ลบค่าใช้จ่ายนี้?')) {
-                                        router.delete(
-                                            ExpenseController.destroy.url(
-                                                expense.id,
-                                            ),
-                                        );
-                                    }
-                                }}
-                            >
-                                ลบ
-                            </Button>
-                        </div>
+            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <section
+                    aria-label="สรุปค่าใช้จ่าย"
+                    className="overflow-hidden rounded-lg border bg-card lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
+                >
+                    <div className="bg-brand-soft px-4 py-4">
+                        <p className="text-sm text-brand-ink">
+                            {isFiltered ? 'รวมในช่วงที่เลือก' : 'รวมทั้งหมด'}
+                        </p>
+                        <p className="text-[32px] leading-tight font-semibold">
+                            {formatBaht(total)}{' '}
+                            <span className="text-base font-normal text-muted-foreground">
+                                บาท
+                            </span>
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            {expenses.length} รายการ
+                        </p>
                     </div>
-                ))}
+                    {totalsByCategory.length > 0 && (
+                        <ul className="space-y-3 px-4 py-4">
+                            {totalsByCategory.map((row) => (
+                                <li key={row.category}>
+                                    <div className="flex items-baseline justify-between gap-2 text-base md:text-sm">
+                                        <span>{row.label}</span>
+                                        <span>{formatBaht(row.total)}</span>
+                                    </div>
+                                    <div
+                                        aria-hidden
+                                        className="mt-1 h-0.5 rounded-full bg-primary"
+                                        style={{
+                                            width: `${(Number(row.total) / largestCategory) * 100}%`,
+                                        }}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
+                    <form
+                        method="get"
+                        action={index.url()}
+                        className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:gap-3"
+                    >
+                        <div className="grid gap-2">
+                            <Label htmlFor="filter-from">ตั้งแต่วันที่</Label>
+                            <Input
+                                id="filter-from"
+                                name="from"
+                                type="date"
+                                defaultValue={filters.from ?? ''}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="filter-to">ถึงวันที่</Label>
+                            <Input
+                                id="filter-to"
+                                name="to"
+                                type="date"
+                                defaultValue={filters.to ?? ''}
+                            />
+                        </div>
+                        <Button type="submit" variant="outline">
+                            กรองตามวันที่
+                        </Button>
+                        {isFiltered && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => router.get(index.url())}
+                            >
+                                ล้างตัวกรอง
+                            </Button>
+                        )}
+                    </form>
+
+                    {expenses.length === 0 ? (
+                        <EmptyState>
+                            {isFiltered
+                                ? 'ไม่มีค่าใช้จ่ายในช่วงวันที่นี้'
+                                : 'ยังไม่มีค่าใช้จ่าย'}
+                        </EmptyState>
+                    ) : (
+                        <ul className="divide-y rounded-lg border bg-card">
+                            {expenses.map((expense) => (
+                                <li
+                                    key={expense.id}
+                                    className="flex items-center gap-3 py-3 pr-3 pl-4"
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-baseline justify-between gap-3">
+                                            <p className="truncate text-base font-medium">
+                                                {
+                                                    categoryLabels[
+                                                        expense.category
+                                                    ]
+                                                }
+                                            </p>
+                                            <p className="shrink-0 text-base font-medium">
+                                                {formatBaht(expense.amount)}{' '}
+                                                <span className="text-sm font-normal text-muted-foreground">
+                                                    บาท
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {formatThaiDate(expense.spent_on)}
+                                            {expense.season &&
+                                                ` · ${expense.season.orchard.name} · ${expense.season.name}`}
+                                            {expense.notes &&
+                                                ` · ${expense.notes}`}
+                                        </p>
+                                    </div>
+                                    <RowActions
+                                        label={`${categoryLabels[expense.category]} ${formatThaiDate(expense.spent_on)}`}
+                                        onEdit={() => setDialog(expense)}
+                                        onDelete={async () => {
+                                            if (
+                                                await confirm({
+                                                    title: 'ลบค่าใช้จ่ายนี้?',
+                                                    description: `${categoryLabels[expense.category]} ${formatBaht(expense.amount)} บาท วันที่ ${formatThaiDate(expense.spent_on)}`,
+                                                    confirmLabel: 'ลบ',
+                                                    destructive: true,
+                                                })
+                                            ) {
+                                                router.delete(
+                                                    ExpenseController.destroy.url(
+                                                        expense.id,
+                                                    ),
+                                                );
+                                            }
+                                        }}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
 
             <Dialog
                 open={dialog !== null}
                 onOpenChange={(open) => !open && setDialog(null)}
             >
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
                             {dialog === 'new'
@@ -308,9 +347,7 @@ export default function ExpensesIndex({
                                         seasons={seasons}
                                         errors={errors}
                                     />
-                                    <Button type="submit" disabled={processing}>
-                                        บันทึก
-                                    </Button>
+                                    <SubmitButton processing={processing} />
                                 </>
                             )}
                         </Form>

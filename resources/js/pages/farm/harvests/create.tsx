@@ -1,11 +1,13 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
+import { useState } from 'react';
 import HarvestController from '@/actions/App/Http/Controllers/Farm/HarvestController';
 import { todayIso } from '@/components/farm/care-record-form';
+import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatNumber } from '@/lib/format';
 import { index, show } from '@/routes/orchards';
 import type { Orchard, Tree } from '@/types/farm';
 
@@ -16,6 +18,21 @@ export default function HarvestCreate({
     orchard: Orchard;
     trees: Pick<Tree, 'id' | 'code' | 'variety'>[];
 }) {
+    const [entered, setEntered] = useState({ weightKg: 0, treeCount: 0 });
+
+    const recount = (form: HTMLElement) => {
+        const weights = Array.from(
+            form.querySelectorAll<HTMLInputElement>('input[data-weight]'),
+        )
+            .map((input) => Number(input.value.replace(',', '.')))
+            .filter((weight) => Number.isFinite(weight) && weight > 0);
+
+        setEntered({
+            weightKg: weights.reduce((sum, weight) => sum + weight, 0),
+            treeCount: weights.length,
+        });
+    };
+
     setLayoutProps({
         breadcrumbs: [
             { title: 'สวน', href: index() },
@@ -25,7 +42,7 @@ export default function HarvestCreate({
     });
 
     return (
-        <div className="flex h-full flex-1 flex-col gap-6 p-4">
+        <div className="flex flex-1 flex-col gap-6 px-4 pt-5 md:px-6 md:pt-6">
             <Head title="บันทึกผลผลิตทั้งสวน" />
             <Heading
                 title="บันทึกผลผลิตทั้งสวน"
@@ -39,6 +56,7 @@ export default function HarvestCreate({
                 <Form
                     {...HarvestController.storeBatch.form(orchard.id)}
                     className="max-w-2xl space-y-4"
+                    onInput={(event) => recount(event.currentTarget)}
                 >
                     {({ processing, errors }) => {
                         const rowsError = Object.entries(errors).find(
@@ -61,7 +79,7 @@ export default function HarvestCreate({
                                     />
                                     <InputError message={errors.harvested_on} />
                                 </div>
-                                <div className="grid grid-cols-[1fr_6rem_6rem] items-center gap-2 text-sm text-muted-foreground">
+                                <div className="sticky top-12 z-10 -mx-4 grid grid-cols-[1fr_6rem_6rem] items-center gap-2 border-b bg-background px-4 py-2 text-sm text-muted-foreground md:top-0 md:-mx-6 md:px-6">
                                     <span>ต้นไม้</span>
                                     <span>น้ำหนัก (กก.)</span>
                                     <span>จำนวนผล</span>
@@ -90,6 +108,7 @@ export default function HarvestCreate({
                                             <Input
                                                 name={`rows[${index}][weight_kg]`}
                                                 inputMode="decimal"
+                                                data-weight
                                                 aria-label={`น้ำหนัก (กก.) ${tree.code}`}
                                                 className="h-12 text-base"
                                             />
@@ -118,14 +137,17 @@ export default function HarvestCreate({
                                     ))}
                                 </div>
                                 <InputError message={rowsError} />
-                                <div className="sticky bottom-0 -mx-4 border-t bg-background p-4">
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="h-12 w-full text-base"
+                                <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] -mx-4 space-y-2 border-t bg-background px-4 py-3 md:bottom-0 md:-mx-6 md:px-6">
+                                    <p
+                                        className="text-sm text-muted-foreground"
+                                        aria-live="polite"
                                     >
-                                        บันทึก
-                                    </Button>
+                                        กรอกแล้ว {entered.treeCount} ต้น · รวม{' '}
+                                        <span className="font-medium text-foreground">
+                                            {formatNumber(entered.weightKg)} กก.
+                                        </span>
+                                    </p>
+                                    <SubmitButton processing={processing} />
                                 </div>
                             </>
                         );

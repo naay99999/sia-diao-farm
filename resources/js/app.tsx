@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { ConfirmProvider } from '@/components/confirm-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
@@ -23,12 +24,14 @@ createInertiaApp({
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
+                <ConfirmProvider>
+                    {app}
+                    <Toaster />
+                </ConfirmProvider>
             </TooltipProvider>
         );
     },
     progress: {
-        color: '#4B5563',
+        color: '#456e18',
     },
 });
