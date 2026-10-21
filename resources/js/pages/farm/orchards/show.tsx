@@ -46,6 +46,7 @@ export default function OrchardShow({
     recentCareRecords,
     activeTrees,
     sales,
+    currentSeasonYieldKg,
 }: {
     orchard: Orchard;
     trees: Tree[];
@@ -55,6 +56,7 @@ export default function OrchardShow({
     recentCareRecords: CareRecord[];
     activeTrees: Pick<Tree, 'id' | 'code'>[];
     sales: Sale[];
+    currentSeasonYieldKg: Record<number, number>;
 }) {
     const [saleDialog, setSaleDialog] = useState<Sale | 'new' | null>(null);
     const [editingCare, setEditingCare] = useState<CareRecord | null>(null);
@@ -410,9 +412,19 @@ export default function OrchardShow({
                                 </p>
                             )}
                         </div>
-                        {tree.removed_on && (
-                            <Badge variant="secondary">ไม่อยู่แล้ว</Badge>
-                        )}
+                        <div className="flex flex-col items-end gap-1">
+                            {currentSeason && (
+                                <p className="text-sm text-muted-foreground">
+                                    {(
+                                        currentSeasonYieldKg[tree.id] ?? 0
+                                    ).toLocaleString('th-TH')}{' '}
+                                    กก.
+                                </p>
+                            )}
+                            {tree.removed_on && (
+                                <Badge variant="secondary">ไม่อยู่แล้ว</Badge>
+                            )}
+                        </div>
                     </Link>
                 ))}
             </div>

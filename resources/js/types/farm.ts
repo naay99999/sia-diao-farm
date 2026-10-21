@@ -15,6 +15,19 @@ export type Tree = {
     notes: string | null;
 };
 
+export type OrchardSummary = Orchard & {
+    trees_count: number;
+    current_season: string | null;
+    current_yield_kg: number;
+};
+
+export type TreeSeasonYield = {
+    treeId: number;
+    code: string;
+    weightKg: number;
+    fruitCount: number;
+};
+
 export type Season = {
     id: number;
     orchard_id: number;

@@ -1,7 +1,12 @@
 <?php
 
+use App\Models\CareRecord;
+use App\Models\Expense;
+use App\Models\Harvest;
 use App\Models\Orchard;
+use App\Models\Sale;
 use App\Models\Season;
+use App\Models\Tree;
 use App\Models\User;
 
 beforeEach(function () {
@@ -131,4 +136,57 @@ test('orchard show passes the current season and past seasons newest first', fun
             ->where('seasons.0.id', $newer->id)
             ->where('seasons.1.id', $old->id)
             ->has('seasons', 2));
+});
+
+test('show summarises the season window including removed trees', function () {
+    $season = Season::factory()->for($this->orchard)->create(['started_on' => '2026-01-01', 'ended_on' => '2026-06-30']);
+    $active = Tree::factory()->for($this->orchard)->create(['code' => 'A-1']);
+    $removed = Tree::factory()->for($this->orchard)->removed()->create(['code' => 'R-1']);
+    $otherOrchardTree = Tree::factory()->create();
+
+    Harvest::factory()->for($active)->create(['harvested_on' => '2026-01-01', 'weight_kg' => 10, 'fruit_count' => 3]);
+    Harvest::factory()->for($active)->create(['harvested_on' => '2026-06-30', 'weight_kg' => 5, 'fruit_count' => null]);
+    Harvest::factory()->for($removed)->create(['harvested_on' => '2026-03-01', 'weight_kg' => 20, 'fruit_count' => 7]);
+    Harvest::factory()->for($active)->create(['harvested_on' => '2025-12-31', 'weight_kg' => 99]);
+    Harvest::factory()->for($active)->create(['harvested_on' => '2026-07-01', 'weight_kg' => 99]);
+    Harvest::factory()->for($otherOrchardTree)->create(['harvested_on' => '2026-03-01', 'weight_kg' => 99]);
+
+    Sale::factory()->for($this->orchard)->create(['sold_on' => '2026-02-01', 'weight_kg' => 30, 'amount' => 3000]);
+    Sale::factory()->for($this->orchard)->create(['sold_on' => '2026-07-01', 'weight_kg' => 50, 'amount' => 9000]);
+
+    Expense::factory()->create(['season_id' => $season->id, 'amount' => 400]);
+    Expense::factory()->create(['season_id' => null, 'spent_on' => '2026-02-01', 'amount' => 700]);
+
+    CareRecord::factory()->for($this->orchard)->create(['performed_on' => '2026-02-01']);
+    CareRecord::factory()->for($this->orchard)->create(['performed_on' => '2026-08-01']);
+
+    $this->actingAs($this->user)->get(route('seasons.show', $season))
+        ->assertInertia(fn ($page) => $page
+            ->component('farm/seasons/show')
+            ->where('totalYieldKg', 35)
+            ->where('totalFruitCount', 10)
+            ->has('treeYields', 2)
+            ->where('treeYields.0.code', 'R-1')
+            ->where('treeYields.0.weightKg', 20)
+            ->where('treeYields.0.fruitCount', 7)
+            ->where('treeYields.1.code', 'A-1')
+            ->where('treeYields.1.weightKg', 15)
+            ->where('salesTotal', 3000)
+            ->where('salesWeightKg', 30)
+            ->has('sales', 1)
+            ->where('expensesTotal', 400)
+            ->where('careRecordCount', 1));
+});
+
+test('show for an empty season returns zeros', function () {
+    $season = Season::factory()->for($this->orchard)->create();
+
+    $this->actingAs($this->user)->get(route('seasons.show', $season))
+        ->assertInertia(fn ($page) => $page
+            ->where('totalYieldKg', 0)
+            ->where('totalFruitCount', 0)
+            ->has('treeYields', 0)
+            ->where('salesTotal', 0)
+            ->where('expensesTotal', 0)
+            ->where('careRecordCount', 0));
 });

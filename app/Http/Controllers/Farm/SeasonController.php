@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Farm;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreSeasonRequest;
+use App\Models\Harvest;
 use App\Models\Orchard;
 use App\Models\Season;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,9 +28,42 @@ class SeasonController extends Controller
     {
         $season->load('orchard');
 
+        $yieldRows = $season->applyDateWindow(
+            Harvest::query()
+                ->join('trees', 'trees.id', '=', 'harvests.tree_id')
+                ->where('trees.orchard_id', $season->orchard_id),
+            'harvests.harvested_on',
+        )
+            ->groupBy('trees.id', 'trees.code')
+            ->orderByRaw('sum(harvests.weight_kg) desc')
+            ->orderBy('trees.code')
+            ->get([
+                'trees.id as tree_id',
+                'trees.code',
+                DB::raw('sum(harvests.weight_kg) as weight_kg'),
+                DB::raw('coalesce(sum(harvests.fruit_count), 0) as fruit_count'),
+            ]);
+
+        $treeYields = $yieldRows->map(fn ($row): array => [
+            'treeId' => (int) $row->tree_id,
+            'code' => $row->code,
+            'weightKg' => (float) $row->weight_kg,
+            'fruitCount' => (int) $row->fruit_count,
+        ])->values();
+
+        $sales = $season->applyDateWindow($season->orchard->sales()->getQuery(), 'sold_on');
+
         return Inertia::render('farm/seasons/show', [
             'season' => $season,
             'orchard' => $season->orchard,
+            'totalYieldKg' => $treeYields->sum('weightKg'),
+            'totalFruitCount' => $treeYields->sum('fruitCount'),
+            'treeYields' => $treeYields,
+            'salesTotal' => (float) (clone $sales)->sum('amount'),
+            'salesWeightKg' => (float) (clone $sales)->sum('weight_kg'),
+            'sales' => (clone $sales)->latest('sold_on')->latest('id')->get(),
+            'expensesTotal' => (float) $season->expenses()->sum('amount'),
+            'careRecordCount' => $season->applyDateWindow($season->orchard->careRecords()->getQuery(), 'performed_on')->count(),
         ]);
     }
 

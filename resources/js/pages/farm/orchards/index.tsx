@@ -14,9 +14,9 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { index, show } from '@/routes/orchards';
-import type { Orchard } from '@/types/farm';
+import type { OrchardSummary } from '@/types/farm';
 
-export default function OrchardsIndex({ orchards }: { orchards: Orchard[] }) {
+export default function OrchardsIndex({ orchards }: { orchards: OrchardSummary[] }) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -56,6 +56,17 @@ export default function OrchardsIndex({ orchards }: { orchards: Orchard[] }) {
                         <Card className="p-4 transition hover:border-foreground/20">
                             <p className="font-medium">{orchard.name}</p>
                             {orchard.location && <p className="text-muted-foreground text-sm">{orchard.location}</p>}
+                            <p className="mt-2 text-sm">
+                                {orchard.trees_count.toLocaleString('th-TH')} ต้น
+                                {' · '}
+                                {orchard.current_season ?? 'ยังไม่เปิดรอบ'}
+                            </p>
+                            {orchard.current_season && (
+                                <p className="text-muted-foreground text-sm">
+                                    ผลผลิตรอบนี้{' '}
+                                    {orchard.current_yield_kg.toLocaleString('th-TH')} กก.
+                                </p>
+                            )}
                         </Card>
                     </Link>
                 ))}
