@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Farm;
 
+use App\Enums\FindingKind;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreTreeBatchRequest;
 use App\Http\Requests\Farm\StoreTreeRequest;
 use App\Http\Requests\Farm\UpdateTreeRequest;
-use App\Models\CareRecord;
-use App\Models\Harvest;
+use App\Models\Finding;
 use App\Models\Orchard;
 use App\Models\Season;
 use App\Models\Tree;
+use App\Support\IssueSummary;
+use App\Support\TreeTimeline;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -46,57 +48,40 @@ class TreeController extends Controller
     {
         return Inertia::render('farm/trees/show', [
             'tree' => $tree->load('orchard'),
-            'timeline' => $this->timeline($tree),
+            'timeline' => TreeTimeline::for($tree),
+            'openIssues' => IssueSummary::forIssues(
+                $tree->issues()->open()->with(['tree:id,code', 'finding:id,name'])->orderBy('follow_up_on')->orderBy('id')->get(),
+            ),
+            'latestStage' => $this->latestStage($tree),
+            'findings' => Finding::query()->orderBy('kind')->orderBy('id')->get(['id', 'name', 'kind']),
             'activeTrees' => $tree->orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
             'seasonYields' => $this->seasonYields($tree),
         ]);
     }
 
     /**
-     * @return array<int, array{kind: string, id: int, date: string, title: string, detail: string|null, record: array<string, mixed>}>
+     * @return array{finding: string, observedOn: string, inCurrentSeason: bool}|null
      */
-    private function timeline(Tree $tree): array
+    private function latestStage(Tree $tree): ?array
     {
-        $care = $tree->careRecords()->with('trees:id,code,removed_on')->get()->map(fn (CareRecord $record): array => [
-            'kind' => 'care',
-            'id' => $record->id,
-            'date' => $record->performed_on->toDateString(),
-            'title' => trim($record->type->label().' '.$record->product),
-            'detail' => collect([$record->quantity, $record->notes])->filter()->join(' · ') ?: null,
-            'record' => [
-                'id' => $record->id,
-                'type' => $record->type->value,
-                'performed_on' => $record->performed_on->toDateString(),
-                'product' => $record->product,
-                'quantity' => $record->quantity,
-                'notes' => $record->notes,
-                'trees' => $record->trees->map->only(['id', 'code', 'removed_on'])->all(),
-            ],
-        ]);
+        $observation = $tree->observations()
+            ->whereRelation('finding', 'kind', FindingKind::Stage)
+            ->with('finding')
+            ->orderByDesc('observed_on')
+            ->orderByDesc('id')
+            ->first();
 
-        $harvests = $tree->harvests()->get()->map(fn (Harvest $harvest): array => [
-            'kind' => 'harvest',
-            'id' => $harvest->id,
-            'date' => $harvest->harvested_on->toDateString(),
-            'title' => 'ผลผลิต '.(float) $harvest->weight_kg.' กก.',
-            'detail' => collect([
-                $harvest->fruit_count ? $harvest->fruit_count.' ผล' : null,
-                $harvest->notes,
-            ])->filter()->join(' · ') ?: null,
-            'record' => [
-                'id' => $harvest->id,
-                'harvested_on' => $harvest->harvested_on->toDateString(),
-                'weight_kg' => $harvest->weight_kg,
-                'fruit_count' => $harvest->fruit_count,
-                'notes' => $harvest->notes,
-            ],
-        ]);
+        if ($observation === null) {
+            return null;
+        }
 
-        return $care->concat($harvests)
-            ->sortBy([['date', 'desc'], ['id', 'desc']])
-            ->take(50)
-            ->values()
-            ->all();
+        $currentSeason = $tree->orchard->currentSeason;
+
+        return [
+            'finding' => $observation->finding->name,
+            'observedOn' => $observation->observed_on->toDateString(),
+            'inCurrentSeason' => $currentSeason?->containsDate($observation->observed_on) ?? false,
+        ];
     }
 
     /**

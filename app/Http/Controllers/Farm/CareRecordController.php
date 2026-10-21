@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreCareRecordRequest;
 use App\Models\CareRecord;
 use App\Models\Orchard;
+use App\Support\IssueSummary;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,7 @@ class CareRecordController extends Controller
         return Inertia::render('farm/care-records/create', [
             'orchard' => $orchard,
             'trees' => $orchard->trees()->active()->orderBy('code')->get(),
+            'openIssues' => IssueSummary::openForOrchard($orchard),
             'types' => collect(CareType::cases())
                 ->map(fn (CareType $type) => ['value' => $type->value, 'label' => $type->label()])
                 ->all(),
