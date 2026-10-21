@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Farm\CareRecordController;
 use App\Http\Controllers\Farm\OrchardController;
 use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
@@ -28,6 +29,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('trees/{tree}/remove', [TreeController::class, 'remove'])->name('trees.remove');
     Route::patch('trees/{tree}/restore', [TreeController::class, 'restore'])->name('trees.restore');
     Route::delete('trees/{tree}', [TreeController::class, 'destroy'])->name('trees.destroy');
+    Route::get('orchards/{orchard}/care-records/create', [CareRecordController::class, 'create'])->name('orchards.care-records.create');
+    Route::post('orchards/{orchard}/care-records', [CareRecordController::class, 'store'])->name('orchards.care-records.store');
+    Route::patch('care-records/{care_record}', [CareRecordController::class, 'update'])->name('care-records.update');
+    Route::delete('care-records/{care_record}', [CareRecordController::class, 'destroy'])->name('care-records.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 

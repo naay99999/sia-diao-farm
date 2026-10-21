@@ -1,7 +1,9 @@
 import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
 import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
+import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
+import { CareRecordFields } from '@/components/farm/care-record-form';
 import Heading from '@/components/heading';
 import TreeFormFields from '@/components/tree-form-fields';
 import { Badge } from '@/components/ui/badge';
@@ -15,12 +17,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { index, show } from '@/routes/orchards';
 import { show as showTree } from '@/routes/trees';
-import type { Orchard, Tree } from '@/types/farm';
+import type { CareType, Orchard, Tree } from '@/types/farm';
 
 type TreeWithOrchard = Tree & { orchard: Orchard };
 
 export default function TreeShow({ tree }: { tree: TreeWithOrchard }) {
     const [editing, setEditing] = useState(false);
+    const [careType, setCareType] = useState<CareType | null>(null);
     const isRemoved = tree.removed_on !== null;
 
     setLayoutProps({
@@ -94,7 +97,68 @@ export default function TreeShow({ tree }: { tree: TreeWithOrchard }) {
 
             {tree.notes && <p className="text-sm">{tree.notes}</p>}
 
-            {/* ปุ่มบันทึกงานและประวัติ — เพิ่มในงานถัดไป */}
+            {!isRemoved && (
+                <div className="grid grid-cols-3 gap-2">
+                    <Button
+                        className="h-14 text-base"
+                        onClick={() => setCareType('fertilizer')}
+                    >
+                        ใส่ปุ๋ย
+                    </Button>
+                    <Button
+                        className="h-14 text-base"
+                        onClick={() => setCareType('pesticide')}
+                    >
+                        ฉีดยา
+                    </Button>
+                    <Button className="h-14 text-base" disabled>
+                        ผลผลิต
+                    </Button>
+                </div>
+            )}
+
+            <Dialog
+                open={careType !== null}
+                onOpenChange={(open) => !open && setCareType(null)}
+            >
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>บันทึกการดูแล</DialogTitle>
+                        <DialogDescription>{tree.code}</DialogDescription>
+                    </DialogHeader>
+                    {careType && (
+                        <Form
+                            key={careType}
+                            {...CareRecordController.store.form(tree.orchard_id)}
+                            transform={(data) => ({
+                                ...data,
+                                tree_ids: [tree.id],
+                                return_to: 'tree',
+                            })}
+                            onSuccess={() => setCareType(null)}
+                            className="space-y-4"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <CareRecordFields
+                                        defaultType={careType}
+                                        errors={errors}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="h-12 w-full text-base"
+                                    >
+                                        บันทึก
+                                    </Button>
+                                </>
+                            )}
+                        </Form>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* ประวัติ (timeline) และปุ่มผลผลิต — เพิ่มในงานถัดไป */}
         </div>
     );
 }

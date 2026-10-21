@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -45,6 +46,14 @@ class Tree extends Model
     public function orchard(): BelongsTo
     {
         return $this->belongsTo(Orchard::class);
+    }
+
+    /**
+     * @return BelongsToMany<CareRecord, $this>
+     */
+    public function careRecords(): BelongsToMany
+    {
+        return $this->belongsToMany(CareRecord::class, 'care_record_tree');
     }
 
     /**

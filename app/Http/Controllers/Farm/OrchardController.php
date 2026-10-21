@@ -39,6 +39,13 @@ class OrchardController extends Controller
                 ->orderBy('code')
                 ->get(),
             'showRemoved' => $showRemoved,
+            'recentCareRecords' => $orchard->careRecords()
+                ->with('trees:id,code')
+                ->latest('performed_on')
+                ->latest('id')
+                ->limit(10)
+                ->get(),
+            'activeTrees' => $orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
             'currentSeason' => $orchard->currentSeason,
             'seasons' => $orchard->seasons()
                 ->whereNotNull('ended_on')

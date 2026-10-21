@@ -1,8 +1,13 @@
 import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import { useState } from 'react';
+import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
 import OrchardController from '@/actions/App/Http/Controllers/Farm/OrchardController';
 import SeasonController from '@/actions/App/Http/Controllers/Farm/SeasonController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
+import {
+    CareRecordFields,
+    TreePicker,
+} from '@/components/farm/care-record-form';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import OrchardFormFields from '@/components/orchard-form-fields';
@@ -20,18 +25,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatThaiDate } from '@/lib/thai-date';
 import { index, show } from '@/routes/orchards';
+import { create as createCareRecord } from '@/routes/orchards/care-records';
+
 import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
-import type { Orchard, Season, Tree } from '@/types/farm';
-
-function formatThaiDate(date: string): string {
-    return new Date(date).toLocaleDateString('th-TH', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
-}
+import { careTypeLabels } from '@/types/farm';
+import type { CareRecord, Orchard, Season, Tree } from '@/types/farm';
 
 export default function OrchardShow({
     orchard,
@@ -39,13 +40,18 @@ export default function OrchardShow({
     showRemoved,
     currentSeason,
     seasons,
+    recentCareRecords,
+    activeTrees,
 }: {
     orchard: Orchard;
     trees: Tree[];
     showRemoved: boolean;
     currentSeason: Season | null;
     seasons: Season[];
+    recentCareRecords: CareRecord[];
+    activeTrees: Pick<Tree, 'id' | 'code'>[];
 }) {
+    const [editingCare, setEditingCare] = useState<CareRecord | null>(null);
     const [seasonDialog, setSeasonDialog] = useState<
         'start' | 'edit' | null
     >(null);
@@ -351,6 +357,11 @@ export default function OrchardShow({
                             </Form>
                         </DialogContent>
                     </Dialog>
+                    <Button variant="outline" asChild>
+                        <Link href={createCareRecord(orchard.id)}>
+                            บันทึกการดูแลหลายต้น
+                        </Link>
+                    </Button>
                     <Button
                         variant="ghost"
                         onClick={() =>
@@ -394,6 +405,104 @@ export default function OrchardShow({
                     </Link>
                 ))}
             </div>
+
+            <section className="space-y-3">
+                <h2 className="text-lg font-medium">การดูแลล่าสุด</h2>
+                {recentCareRecords.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                        ยังไม่มีบันทึกการดูแล
+                    </p>
+                )}
+                <div className="grid gap-2">
+                    {recentCareRecords.map((record) => (
+                        <div
+                            key={record.id}
+                            className="flex items-start justify-between gap-2 rounded-lg border p-3"
+                        >
+                            <div className="min-w-0">
+                                <p className="font-medium">
+                                    {careTypeLabels[record.type]}
+                                    {record.product && ` · ${record.product}`}
+                                    {record.quantity && ` · ${record.quantity}`}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {formatThaiDate(record.performed_on)} ·{' '}
+                                    {record.trees?.length ?? 0} ต้น
+                                </p>
+                            </div>
+                            <div className="flex shrink-0 gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setEditingCare(record)}
+                                >
+                                    แก้ไข
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (confirm('ลบบันทึกนี้?')) {
+                                            router.delete(
+                                                CareRecordController.destroy.url(
+                                                    record.id,
+                                                ),
+                                            );
+                                        }
+                                    }}
+                                >
+                                    ลบ
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <Dialog
+                    open={editingCare !== null}
+                    onOpenChange={(open) => !open && setEditingCare(null)}
+                >
+                    <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>แก้ไขบันทึกการดูแล</DialogTitle>
+                            <DialogDescription>
+                                แก้ไขรายละเอียดและต้นไม้ที่เกี่ยวข้อง
+                            </DialogDescription>
+                        </DialogHeader>
+                        {editingCare && (
+                            <Form
+                                key={editingCare.id}
+                                {...CareRecordController.update.form(
+                                    editingCare.id,
+                                )}
+                                onSuccess={() => setEditingCare(null)}
+                                className="space-y-4"
+                            >
+                                {({ processing, errors }) => (
+                                    <>
+                                        <CareRecordFields
+                                            record={editingCare}
+                                            errors={errors}
+                                        />
+                                        <TreePicker
+                                            trees={activeTrees}
+                                            initialSelected={(
+                                                editingCare.trees ?? []
+                                            ).map((tree) => tree.id)}
+                                            errors={errors}
+                                        />
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            บันทึก
+                                        </Button>
+                                    </>
+                                )}
+                            </Form>
+                        )}
+                    </DialogContent>
+                </Dialog>
+            </section>
         </div>
     );
 }

@@ -41,6 +41,14 @@ class Orchard extends Model
     }
 
     /**
+     * @return HasMany<CareRecord, $this>
+     */
+    public function careRecords(): HasMany
+    {
+        return $this->hasMany(CareRecord::class);
+    }
+
+    /**
      * @return HasOne<Season, $this>
      */
     public function currentSeason(): HasOne
