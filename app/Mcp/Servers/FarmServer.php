@@ -2,15 +2,19 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Tools\DeleteRecord;
 use App\Mcp\Tools\GetFarmOverview;
 use App\Mcp\Tools\GetTreatmentOutcomes;
 use App\Mcp\Tools\GetTree;
+use App\Mcp\Tools\ListNotes;
 use App\Mcp\Tools\ListRecords;
 use App\Mcp\Tools\RecordFollowUp;
 use App\Mcp\Tools\RecordObservation;
+use App\Mcp\Tools\RestoreRecord;
 use App\Mcp\Tools\SaveCareRecord;
 use App\Mcp\Tools\SaveExpense;
 use App\Mcp\Tools\SaveHarvest;
+use App\Mcp\Tools\SaveNote;
 use App\Mcp\Tools\SaveSale;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
@@ -27,13 +31,14 @@ Start every conversation by calling `get_farm_overview`. It lists the orchards (
 Knowledge sources, in this order of priority when you advise on a problem:
 1. The farm's built-in safety rules and guidance from this system.
 2. The farm's own recorded outcomes (what was applied to which tree, and whether the issue was resolved afterwards).
-3. The farm's saved notes.
+3. The farm's saved notes (`list_notes`, filtered by the finding and/or tree you are advising on; general notes are included).
 4. The web, only when the sources above do not answer the question.
 
 Never invent pesticide or fertiliser rates, dilution ratios or pre-harvest intervals. If the sources above do not state them, say so and tell the user to check the product label or ask a local agricultural officer.
 
 Writing data:
 - Before calling any tool that creates, edits or deletes a record, restate a short summary of exactly what will be saved (orchard, tree codes, dates, amounts) and wait for the user's explicit confirmation in chat. A vague reply or earlier general instruction is not confirmation.
+- Save a note with `save_note` only when the user asks to remember something. Deleting uses `delete_record` and is a soft delete; `restore_record` undoes it.
 - Do not repeat a write call after a failure without telling the user what failed.
 - Refer to trees by their tree code (for example A-001), never by database id. Pass `orchard_id` whenever the farm has more than one orchard.
 
@@ -52,6 +57,10 @@ class FarmServer extends Server
         SaveHarvest::class,
         SaveSale::class,
         SaveExpense::class,
+        SaveNote::class,
+        ListNotes::class,
+        DeleteRecord::class,
+        RestoreRecord::class,
     ];
 
     protected array $resources = [

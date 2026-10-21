@@ -83,10 +83,10 @@ abstract class FarmWriteTool extends Tool
      *
      * @throws ValidationException
      */
-    protected function existing(Builder $query, int $id, string $label): Model
+    protected function existing(Builder $query, int $id, string $label, string $listTool = 'list_records'): Model
     {
         return $query->find($id) ?? throw ValidationException::withMessages([
-            'id' => "No {$label} with id {$id} exists. Check the id with list_records; if it was deleted, bring it back with restore_record first.",
+            'id' => "No {$label} with id {$id} exists. Check the id with {$listTool}; if it was deleted, bring it back with restore_record first.",
         ]);
     }
 

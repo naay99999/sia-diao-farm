@@ -4,6 +4,7 @@ namespace App\Mcp\Support;
 
 use App\Models\CareRecord;
 use App\Models\Expense;
+use App\Models\FarmNote;
 use App\Models\Harvest;
 use App\Models\Observation;
 use App\Models\Sale;
@@ -82,6 +83,16 @@ class RecordSerializer
                 'follow_up_on' => $record->follow_up_on->toDateString(),
                 'resolved_on' => $record->resolved_on?->toDateString(),
             ],
+            $record instanceof FarmNote => [
+                'id' => $record->id,
+                'body' => $record->body,
+                'finding_id' => $record->finding_id,
+                'finding' => $record->finding?->name,
+                'tree_id' => $record->tree_id,
+                'tree_code' => $record->tree?->code,
+                'orchard_id' => $record->tree?->orchard_id,
+                'created_on' => $record->created_at?->toDateString(),
+            ],
             default => ['id' => $record->getKey()],
         };
 
@@ -100,6 +111,7 @@ class RecordSerializer
             $record instanceof CareRecord => $record->loadMissing(['trees:id,code', 'issues:id']),
             $record instanceof Harvest => $record->loadMissing('tree:id,code'),
             $record instanceof Observation, $record instanceof TreeIssue => $record->loadMissing(['tree:id,code', 'finding:id,name']),
+            $record instanceof FarmNote => $record->loadMissing(['finding:id,name', 'tree:id,code,orchard_id']),
             default => null,
         };
     }

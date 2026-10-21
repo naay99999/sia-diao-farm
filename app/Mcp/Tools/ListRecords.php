@@ -3,14 +3,9 @@
 namespace App\Mcp\Tools;
 
 use App\Mcp\Support\RecordSerializer;
+use App\Mcp\Support\RecordTypes;
 use App\Mcp\Support\TreeLookup;
-use App\Models\CareRecord;
-use App\Models\Expense;
-use App\Models\Harvest;
-use App\Models\Observation;
-use App\Models\Sale;
 use App\Models\Tree;
-use App\Models\TreeIssue;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,12 +20,10 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('list_records')]
-#[Description('List farm records of one type, newest first. type is one of care, harvest, sale, expense, observation, issue. Optional filters: orchard_id (required with tree_code when the farm has several orchards), tree_code (care, harvest, observation and issue only), from and to (YYYY-MM-DD, inclusive, applied to the record\'s own date). Every record carries its id, which the save, delete and restore tools take. Deleted records are hidden unless include_deleted is true, and then carry deleted_at. At most 200 records per call (default 50); has_more tells you when to narrow the dates.')]
+#[Description('List farm records of one type, newest first. type is one of care, harvest, sale, expense, observation, issue. Optional filters: orchard_id (required with tree_code when the farm has several orchards), tree_code (care, harvest, observation and issue only), from and to (YYYY-MM-DD, inclusive, applied to the record\'s own date). Every record carries its id, which the save, delete and restore tools take. Deleted records are hidden unless include_deleted is true, and then carry deleted_at. Notes are listed with list_notes instead. At most 200 records per call (default 50); has_more tells you when to narrow the dates.')]
 #[IsReadOnly]
 class ListRecords extends Tool
 {
-    private const TYPES = ['care', 'harvest', 'sale', 'expense', 'observation', 'issue'];
-
     private const DEFAULT_LIMIT = 50;
 
     private const MAX_LIMIT = 200;
@@ -41,7 +34,7 @@ class ListRecords extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'type' => $schema->string()->enum(self::TYPES)->description('Kind of record to list.')->required(),
+            'type' => $schema->string()->enum(RecordTypes::LISTABLE)->description('Kind of record to list.')->required(),
             'orchard_id' => $schema->integer()->description('Only records of this orchard. Needed with tree_code when the farm has several orchards.'),
             'tree_code' => $schema->string()->description('Only records of this tree (care, harvest, observation and issue only).'),
             'from' => $schema->string()->description('Earliest record date, YYYY-MM-DD, inclusive.'),
@@ -54,7 +47,7 @@ class ListRecords extends Tool
     public function handle(Request $request): Response
     {
         $validated = $request->validate([
-            'type' => ['required', 'string', 'in:'.implode(',', self::TYPES)],
+            'type' => ['required', 'string', 'in:'.implode(',', RecordTypes::LISTABLE)],
             'orchard_id' => ['nullable', 'integer'],
             'tree_code' => ['nullable', 'string'],
             'from' => ['nullable', 'date'],
@@ -62,8 +55,8 @@ class ListRecords extends Tool
             'include_deleted' => ['nullable', 'boolean'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:'.self::MAX_LIMIT],
         ], [
-            'type.required' => 'type is required; use one of: '.implode(', ', self::TYPES).'.',
-            'type.in' => 'type must be one of: '.implode(', ', self::TYPES).'.',
+            'type.required' => 'type is required; use one of: '.implode(', ', RecordTypes::LISTABLE).'.',
+            'type.in' => 'type must be one of: '.implode(', ', RecordTypes::LISTABLE).'.',
             'from.date' => 'from must be a date such as 2026-10-21.',
             'to.date' => 'to must be a date such as 2026-10-21.',
             'to.after_or_equal' => 'to must not be earlier than from.',
@@ -102,24 +95,6 @@ class ListRecords extends Tool
         ]);
     }
 
-    /**
-     * The one place that maps a record type to its model.
-     *
-     * @return class-string<Model>
-     */
-    private function modelClass(string $type): string
-    {
-        return match ($type) {
-            'care' => CareRecord::class,
-            'harvest' => Harvest::class,
-            'sale' => Sale::class,
-            'expense' => Expense::class,
-            'observation' => Observation::class,
-            'issue' => TreeIssue::class,
-            default => throw ValidationException::withMessages(['type' => 'type must be one of: '.implode(', ', self::TYPES).'.']),
-        };
-    }
-
     private function dateColumn(string $type): string
     {
         return match ($type) {
@@ -150,7 +125,7 @@ class ListRecords extends Tool
      */
     private function query(string $type, ?int $orchardId, ?string $treeCode): Builder
     {
-        $query = $this->modelClass($type)::query()->with($this->relations($type));
+        $query = RecordTypes::modelClass($type)::query()->with($this->relations($type));
 
         if ($treeCode !== null && $treeCode !== '') {
             if (in_array($type, ['sale', 'expense'], true)) {
