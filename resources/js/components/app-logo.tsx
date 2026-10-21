@@ -6,15 +6,13 @@ export default function AppLogo() {
 
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-brand-soft text-primary">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-muted text-foreground">
                 <AppLogoIcon className="size-5 fill-current" />
             </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    {name}
-                </span>
+            <div className="ml-1 grid flex-1 text-left text-base md:text-sm">
+                <span className="mb-0.5 truncate font-semibold">{name}</span>
                 {description && (
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate text-base text-muted-foreground md:text-sm">
                         {description}
                     </span>
                 )}

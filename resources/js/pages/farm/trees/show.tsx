@@ -165,7 +165,10 @@ export default function TreeShow({
             </div>
 
             {pageErrors.tree && (
-                <p role="alert" className="text-sm text-destructive">
+                <p
+                    role="alert"
+                    className="text-base text-destructive md:text-sm"
+                >
                     {pageErrors.tree}
                 </p>
             )}
@@ -184,28 +187,25 @@ export default function TreeShow({
                             className="grid grid-cols-3 gap-2"
                         >
                             <Button
-                                className="col-span-3 h-14 text-base"
+                                className="col-span-3"
                                 onClick={() => setHarvesting(true)}
                             >
                                 เก็บผลผลิต
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-14 text-base"
                                 onClick={() => setCareType('fertilizer')}
                             >
                                 ใส่ปุ๋ย
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-14 text-base"
                                 onClick={() => setCareType('pesticide')}
                             >
                                 ฉีดยา
                             </Button>
                             <Button
                                 variant="outline"
-                                className="h-14 text-base"
                                 onClick={() => setCareType('other')}
                             >
                                 งานอื่น
@@ -214,7 +214,7 @@ export default function TreeShow({
                     )}
 
                     <section className="space-y-3">
-                        <h2 className="text-base font-medium">
+                        <h2 className="text-xl font-semibold md:text-lg">
                             ผลผลิตแต่ละรอบ
                         </h2>
                         {seasonYields.length === 0 ? (
@@ -226,18 +226,18 @@ export default function TreeShow({
                                         key={item.seasonId}
                                         className="flex items-baseline justify-between gap-3 px-4 py-3"
                                     >
-                                        <span className="truncate text-base">
+                                        <span className="truncate text-lg md:text-base">
                                             {item.seasonName}
                                         </span>
                                         <span className="shrink-0 text-right">
-                                            <span className="text-base font-medium">
+                                            <span className="text-lg font-medium md:text-base">
                                                 {formatNumber(item.weightKg)}
                                             </span>{' '}
-                                            <span className="text-sm text-muted-foreground">
+                                            <span className="text-base text-muted-foreground md:text-sm">
                                                 กก.
                                             </span>
                                             {item.fruitCount > 0 && (
-                                                <span className="block text-sm text-muted-foreground">
+                                                <span className="block text-base text-muted-foreground md:text-sm">
                                                     {formatNumber(
                                                         item.fruitCount,
                                                         0,
@@ -254,7 +254,9 @@ export default function TreeShow({
                 </aside>
 
                 <section className="min-w-0 space-y-3 lg:col-start-1 lg:row-start-1">
-                    <h2 className="text-base font-medium">ประวัติ</h2>
+                    <h2 className="text-xl font-semibold md:text-lg">
+                        ประวัติ
+                    </h2>
                     {timeline.length === 0 ? (
                         <EmptyState>ยังไม่มีบันทึกของต้นนี้</EmptyState>
                     ) : (
@@ -265,10 +267,10 @@ export default function TreeShow({
                                     className="flex items-center gap-3 py-3 pr-3 pl-4"
                                 >
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-base font-medium">
+                                        <p className="truncate text-lg font-medium md:text-base">
                                             {entry.title}
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-base text-muted-foreground md:text-sm">
                                             {formatThaiDate(entry.date)}
                                             {entry.detail &&
                                                 ` · ${entry.detail}`}

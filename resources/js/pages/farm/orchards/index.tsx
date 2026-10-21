@@ -88,13 +88,13 @@ export default function OrchardsIndex({
                                                 {formatNumber(
                                                     orchard.current_yield_kg,
                                                 )}{' '}
-                                                <span className="text-sm font-normal text-muted-foreground">
+                                                <span className="text-base font-normal text-muted-foreground md:text-sm">
                                                     กก.
                                                 </span>
                                             </p>
                                         )}
                                     </div>
-                                    <div className="flex items-baseline justify-between gap-3 text-sm text-muted-foreground">
+                                    <div className="flex items-baseline justify-between gap-3 text-base text-muted-foreground md:text-sm">
                                         <p className="truncate">
                                             {[
                                                 orchard.location,

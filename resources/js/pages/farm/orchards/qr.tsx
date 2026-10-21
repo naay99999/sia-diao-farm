@@ -38,10 +38,10 @@ export default function OrchardQr({
                             className="w-full max-w-[32mm] [&>svg]:h-auto [&>svg]:w-full"
                             dangerouslySetInnerHTML={{ __html: label.svg }}
                         />
-                        <div className="text-xl leading-none font-bold">
+                        <div className="text-xl font-semibold">
                             {label.code}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-base text-muted-foreground md:text-sm">
                             {label.orchardName}
                         </div>
                     </div>

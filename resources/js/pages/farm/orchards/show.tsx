@@ -319,7 +319,7 @@ export default function OrchardShow({
                                                         className="block px-4 py-3 transition-colors hover:bg-accent/60 active:bg-accent"
                                                     >
                                                         <div className="flex items-baseline justify-between gap-3">
-                                                            <span className="truncate text-base font-medium">
+                                                            <span className="truncate text-lg font-medium md:text-base">
                                                                 {tree.code}
                                                             </span>
                                                             {tree.removed_on ? (
@@ -332,21 +332,21 @@ export default function OrchardShow({
                                                                         className={
                                                                             yieldKg >
                                                                             0
-                                                                                ? 'text-base font-medium'
-                                                                                : 'text-base text-muted-foreground'
+                                                                                ? 'text-lg font-medium md:text-base'
+                                                                                : 'text-lg text-muted-foreground md:text-base'
                                                                         }
                                                                     >
                                                                         {formatNumber(
                                                                             yieldKg,
                                                                         )}{' '}
-                                                                        <span className="text-sm font-normal text-muted-foreground">
+                                                                        <span className="text-base font-normal text-muted-foreground md:text-sm">
                                                                             กก.
                                                                         </span>
                                                                     </span>
                                                                 )
                                                             )}
                                                         </div>
-                                                        <div className="mt-0.5 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                                                        <div className="mt-0.5 flex items-center justify-between gap-3 text-base text-muted-foreground md:text-sm">
                                                             <span className="truncate">
                                                                 {tree.variety ??
                                                                     'ไม่ระบุพันธุ์'}
@@ -380,7 +380,7 @@ export default function OrchardShow({
                             className="space-y-3"
                         >
                             <div className="flex items-center justify-between gap-3">
-                                <h2 className="text-base font-medium">
+                                <h2 className="text-xl font-semibold md:text-lg">
                                     การดูแลล่าสุด
                                 </h2>
                                 <Button variant="outline" asChild>
@@ -399,7 +399,7 @@ export default function OrchardShow({
                                             className="flex items-center gap-3 py-3 pr-3 pl-4"
                                         >
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-base font-medium">
+                                                <p className="truncate text-lg font-medium md:text-base">
                                                     {
                                                         careTypeLabels[
                                                             record.type
@@ -408,7 +408,7 @@ export default function OrchardShow({
                                                     {record.product &&
                                                         ` · ${record.product}`}
                                                 </p>
-                                                <p className="text-sm text-muted-foreground">
+                                                <p className="text-base text-muted-foreground md:text-sm">
                                                     {formatThaiDate(
                                                         record.performed_on,
                                                     )}{' '}
@@ -463,7 +463,7 @@ export default function OrchardShow({
                             aria-labelledby="tab-seasons"
                             className="space-y-3"
                         >
-                            <h2 className="text-base font-medium">
+                            <h2 className="text-xl font-semibold md:text-lg">
                                 รอบที่ปิดแล้ว
                             </h2>
                             {seasons.length === 0 ? (
@@ -477,10 +477,10 @@ export default function OrchardShow({
                                                 className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/60 active:bg-accent"
                                             >
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="truncate text-base font-medium">
+                                                    <p className="truncate text-lg font-medium md:text-base">
                                                         {season.name}
                                                     </p>
-                                                    <p className="text-sm text-muted-foreground">
+                                                    <p className="text-base text-muted-foreground md:text-sm">
                                                         {formatThaiDate(
                                                             season.started_on,
                                                         )}{' '}
@@ -787,11 +787,7 @@ function SeasonPanel({
             <Button className="h-12 text-base md:h-10 md:text-sm" asChild>
                 <Link href={createHarvest(orchard.id)}>บันทึกผลผลิต</Link>
             </Button>
-            <Button
-                variant="outline"
-                className="h-12 text-base md:h-10 md:text-sm"
-                asChild
-            >
+            <Button variant="outline" asChild>
                 <Link href={createCareRecord(orchard.id)}>บันทึกการดูแล</Link>
             </Button>
         </div>
@@ -801,25 +797,16 @@ function SeasonPanel({
         return (
             <section className="space-y-4 rounded-lg border bg-card p-4 md:p-5 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1">
                 <div>
-                    <h2 className="text-base font-medium">
+                    <h2 className="text-xl font-semibold md:text-lg">
                         ยังไม่มีรอบที่เปิดอยู่
                     </h2>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground md:text-sm">
                         เริ่มรอบใหม่เพื่อนับผลผลิตและค่าใช้จ่ายของฤดูนี้
                     </p>
                 </div>
                 <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-                    <Button
-                        className="h-12 text-base md:h-10 md:text-sm"
-                        onClick={onStart}
-                    >
-                        เริ่มรอบใหม่
-                    </Button>
-                    <Button
-                        variant="outline"
-                        className="h-12 text-base md:h-10 md:text-sm"
-                        asChild
-                    >
+                    <Button onClick={onStart}>เริ่มรอบใหม่</Button>
+                    <Button variant="outline" asChild>
                         <Link href={createCareRecord(orchard.id)}>
                             บันทึกการดูแล
                         </Link>
@@ -833,10 +820,10 @@ function SeasonPanel({
         <section className="space-y-4 rounded-lg border bg-card p-4 md:p-5 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1">
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                    <h2 className="truncate text-base font-medium">
+                    <h2 className="truncate text-xl font-semibold md:text-lg">
                         {currentSeason.name}
                     </h2>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground md:text-sm">
                         เริ่ม {formatThaiDate(currentSeason.started_on)} ·
                         ยังไม่ปิดรอบ
                     </p>
@@ -910,16 +897,18 @@ function SeasonPanel({
 
             <Link
                 href={showSeason(currentSeason.id)}
-                className="block rounded-md bg-brand-soft px-4 py-3 transition-colors hover:bg-brand-track/60"
+                className="block rounded-md bg-muted px-4 py-3 transition-colors hover:bg-accent"
             >
-                <p className="text-sm text-brand-ink">ผลผลิตรอบนี้</p>
-                <p className="text-[32px] leading-tight font-semibold text-foreground">
+                <p className="text-base text-muted-foreground md:text-sm">
+                    ผลผลิตรอบนี้
+                </p>
+                <p className="text-3xl leading-[1.3] font-semibold text-foreground">
                     {formatNumber(seasonYieldKg)}{' '}
-                    <span className="text-base font-normal text-muted-foreground">
+                    <span className="text-lg font-normal text-muted-foreground md:text-base">
                         กก.
                     </span>
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground md:text-sm">
                     เก็บแล้ว {harvestedTreeCount} จาก {activeTreeCount} ต้น
                 </p>
             </Link>
@@ -957,9 +946,11 @@ function SalesPanel({
         >
             <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                    <h2 className="text-base font-medium">การขายทั้งหมด</h2>
+                    <h2 className="text-xl font-semibold md:text-lg">
+                        การขายทั้งหมด
+                    </h2>
                     {sales.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-base text-muted-foreground md:text-sm">
                             {sales.length} ครั้ง · {formatBaht(totalAmount)} บาท
                             · {formatNumber(totalWeight)} กก.
                         </p>
@@ -980,7 +971,7 @@ function SalesPanel({
                         >
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-baseline justify-between gap-3">
-                                    <p className="truncate text-base font-medium">
+                                    <p className="truncate text-lg font-medium md:text-base">
                                         {formatThaiDate(sale.sold_on)}
                                         {sale.buyer_name && (
                                             <span className="font-normal text-muted-foreground">
@@ -989,14 +980,14 @@ function SalesPanel({
                                             </span>
                                         )}
                                     </p>
-                                    <p className="shrink-0 text-base font-medium">
+                                    <p className="shrink-0 text-lg font-medium md:text-base">
                                         {formatBaht(sale.amount)}{' '}
-                                        <span className="text-sm font-normal text-muted-foreground">
+                                        <span className="text-base font-normal text-muted-foreground md:text-sm">
                                             บาท
                                         </span>
                                     </p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-base text-muted-foreground md:text-sm">
                                     {formatNumber(sale.weight_kg)} กก. ·{' '}
                                     {formatPricePerKg(sale)} บาท/กก.
                                 </p>

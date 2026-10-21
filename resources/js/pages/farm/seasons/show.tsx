@@ -25,15 +25,19 @@ function Figure({
 }) {
     return (
         <div className="bg-card px-4 py-3">
-            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-base text-muted-foreground md:text-sm">
+                {label}
+            </p>
             <p className="text-xl font-medium md:text-2xl">
                 {value}{' '}
-                <span className="text-sm font-normal text-muted-foreground">
+                <span className="text-base font-normal text-muted-foreground md:text-sm">
                     {unit}
                 </span>
             </p>
             {detail && (
-                <p className="text-sm text-muted-foreground">{detail}</p>
+                <p className="text-base text-muted-foreground md:text-sm">
+                    {detail}
+                </p>
             )}
         </div>
     );
@@ -93,23 +97,23 @@ export default function SeasonShow({
                 aria-label="สรุปรอบ"
                 className="overflow-hidden rounded-lg border bg-card"
             >
-                <div className="bg-brand-soft px-4 py-4">
-                    <p className="text-sm text-brand-ink">
+                <div className="bg-muted px-4 py-4">
+                    <p className="text-base text-muted-foreground md:text-sm">
                         {profit < 0 ? 'ขาดทุนรอบนี้' : 'กำไรรอบนี้'}
                     </p>
                     <p
                         className={cn(
-                            'text-[32px] leading-tight font-semibold',
+                            'text-3xl leading-[1.3] font-semibold',
                             profit < 0 && 'text-destructive',
                         )}
                     >
                         {profit < 0 ? '−' : ''}
                         {formatBaht(Math.abs(profit))}{' '}
-                        <span className="text-base font-normal text-muted-foreground">
+                        <span className="text-lg font-normal text-muted-foreground md:text-base">
                             บาท
                         </span>
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-base text-muted-foreground md:text-sm">
                         ยอดขาย {formatBaht(shownSales)} − ค่าใช้จ่าย{' '}
                         {formatBaht(shownExpenses)} บาท
                     </p>
@@ -150,7 +154,9 @@ export default function SeasonShow({
 
             <div className="grid items-start gap-6 lg:grid-cols-2">
                 <section className="space-y-3">
-                    <h2 className="text-base font-medium">ผลผลิตแต่ละต้น</h2>
+                    <h2 className="text-xl font-semibold md:text-lg">
+                        ผลผลิตแต่ละต้น
+                    </h2>
                     {treeYields.length === 0 ? (
                         <EmptyState>ยังไม่มีผลผลิตในรอบนี้</EmptyState>
                     ) : (
@@ -162,12 +168,12 @@ export default function SeasonShow({
                                         className="block px-4 py-3 transition-colors hover:bg-accent/60 active:bg-accent"
                                     >
                                         <div className="flex items-baseline justify-between gap-3">
-                                            <span className="text-base font-medium">
+                                            <span className="text-lg font-medium md:text-base">
                                                 {row.code}
                                             </span>
-                                            <span className="text-base">
+                                            <span className="text-lg md:text-base">
                                                 {formatNumber(row.weightKg)}{' '}
-                                                <span className="text-sm text-muted-foreground">
+                                                <span className="text-base text-muted-foreground md:text-sm">
                                                     กก.
                                                     {row.fruitCount > 0 &&
                                                         ` · ${formatNumber(row.fruitCount, 0)} ผล`}
@@ -191,7 +197,7 @@ export default function SeasonShow({
                 </section>
 
                 <section className="space-y-3">
-                    <h2 className="text-base font-medium">การขาย</h2>
+                    <h2 className="text-xl font-semibold md:text-lg">การขาย</h2>
                     {sales.length === 0 ? (
                         <EmptyState>ยังไม่มีการขายในรอบนี้</EmptyState>
                     ) : (
@@ -202,22 +208,22 @@ export default function SeasonShow({
                                     className="flex items-start justify-between gap-3 px-4 py-3"
                                 >
                                     <div className="min-w-0">
-                                        <p className="text-base font-medium">
+                                        <p className="text-lg font-medium md:text-base">
                                             {formatThaiDate(sale.sold_on)}
                                         </p>
-                                        <p className="truncate text-sm text-muted-foreground">
+                                        <p className="truncate text-base text-muted-foreground md:text-sm">
                                             {sale.buyer_name ??
                                                 'ไม่ระบุผู้ซื้อ'}
                                         </p>
                                     </div>
                                     <div className="shrink-0 text-right">
-                                        <p className="text-base font-medium">
+                                        <p className="text-lg font-medium md:text-base">
                                             {formatBaht(sale.amount)}{' '}
-                                            <span className="text-sm font-normal text-muted-foreground">
+                                            <span className="text-base font-normal text-muted-foreground md:text-sm">
                                                 บาท
                                             </span>
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-base text-muted-foreground md:text-sm">
                                             {formatNumber(sale.weight_kg)} กก.
                                         </p>
                                     </div>

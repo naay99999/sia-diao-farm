@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { formatBaht } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
 import { index } from '@/routes/expenses';
@@ -28,7 +29,7 @@ type Errors = Record<string, string | undefined>;
 type CategoryOption = { value: ExpenseCategory; label: string };
 
 const controlClass =
-    'flex h-11 w-full rounded-md border border-input bg-card px-3 py-1 md:h-9 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm';
+    'flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-lg shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:h-9 md:text-base';
 
 function ExpenseFields({
     expense,
@@ -105,12 +106,11 @@ function ExpenseFields({
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="expense-notes">หมายเหตุ</Label>
-                <textarea
+                <Textarea
                     id="expense-notes"
                     name="notes"
                     rows={3}
                     defaultValue={expense?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>
@@ -174,17 +174,17 @@ export default function ExpensesIndex({
                     aria-label="สรุปค่าใช้จ่าย"
                     className="overflow-hidden rounded-lg border bg-card lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1"
                 >
-                    <div className="bg-brand-soft px-4 py-4">
-                        <p className="text-sm text-brand-ink">
+                    <div className="bg-muted px-4 py-4">
+                        <p className="text-base text-muted-foreground md:text-sm">
                             {isFiltered ? 'รวมในช่วงที่เลือก' : 'รวมทั้งหมด'}
                         </p>
-                        <p className="text-[32px] leading-tight font-semibold">
+                        <p className="text-3xl leading-[1.3] font-semibold">
                             {formatBaht(total)}{' '}
-                            <span className="text-base font-normal text-muted-foreground">
+                            <span className="text-lg font-normal text-muted-foreground md:text-base">
                                 บาท
                             </span>
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-base text-muted-foreground md:text-sm">
                             {expenses.length} รายการ
                         </p>
                     </div>
@@ -262,21 +262,21 @@ export default function ExpensesIndex({
                                 >
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-baseline justify-between gap-3">
-                                            <p className="truncate text-base font-medium">
+                                            <p className="truncate text-lg font-medium md:text-base">
                                                 {
                                                     categoryLabels[
                                                         expense.category
                                                     ]
                                                 }
                                             </p>
-                                            <p className="shrink-0 text-base font-medium">
+                                            <p className="shrink-0 text-lg font-medium md:text-base">
                                                 {formatBaht(expense.amount)}{' '}
-                                                <span className="text-sm font-normal text-muted-foreground">
+                                                <span className="text-base font-normal text-muted-foreground md:text-sm">
                                                     บาท
                                                 </span>
                                             </p>
                                         </div>
-                                        <p className="truncate text-sm text-muted-foreground">
+                                        <p className="truncate text-base text-muted-foreground md:text-sm">
                                             {formatThaiDate(expense.spent_on)}
                                             {expense.season &&
                                                 ` · ${expense.season.orchard.name} · ${expense.season.name}`}

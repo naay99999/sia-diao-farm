@@ -29,7 +29,7 @@ export default function CareRecordCreate({
             <Head title="บันทึกการดูแลหลายต้น" />
             <Heading title="บันทึกการดูแลหลายต้น" description={orchard.name} />
             {trees.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground md:text-sm">
                     ยังไม่มีต้นไม้ในสวนนี้
                 </p>
             ) : (

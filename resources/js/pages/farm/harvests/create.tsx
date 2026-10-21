@@ -49,7 +49,7 @@ export default function HarvestCreate({
                 description={`${orchard.name} · กรอกเฉพาะต้นที่เก็บผลผลิต`}
             />
             {trees.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground md:text-sm">
                     ยังไม่มีต้นไม้ในสวนนี้
                 </p>
             ) : (
@@ -74,12 +74,11 @@ export default function HarvestCreate({
                                         name="harvested_on"
                                         type="date"
                                         required
-                                        className="h-12 text-base"
                                         defaultValue={todayIso()}
                                     />
                                     <InputError message={errors.harvested_on} />
                                 </div>
-                                <div className="sticky top-12 z-10 -mx-4 grid grid-cols-[1fr_6rem_6rem] items-center gap-2 border-b bg-background px-4 py-2 text-sm text-muted-foreground md:top-0 md:-mx-6 md:px-6">
+                                <div className="sticky top-12 z-10 -mx-4 grid grid-cols-[1fr_6rem_6rem] items-center gap-2 border-b bg-background px-4 py-2 text-base text-muted-foreground md:top-0 md:-mx-6 md:px-6 md:text-sm">
                                     <span>ต้นไม้</span>
                                     <span>น้ำหนัก (กก.)</span>
                                     <span>จำนวนผล</span>
@@ -100,7 +99,7 @@ export default function HarvestCreate({
                                                     {tree.code}
                                                 </p>
                                                 {tree.variety && (
-                                                    <p className="truncate text-xs text-muted-foreground">
+                                                    <p className="truncate text-base text-muted-foreground md:text-sm">
                                                         {tree.variety}
                                                     </p>
                                                 )}
@@ -110,13 +109,11 @@ export default function HarvestCreate({
                                                 inputMode="decimal"
                                                 data-weight
                                                 aria-label={`น้ำหนัก (กก.) ${tree.code}`}
-                                                className="h-12 text-base"
                                             />
                                             <Input
                                                 name={`rows[${index}][fruit_count]`}
                                                 inputMode="numeric"
                                                 aria-label={`จำนวนผล ${tree.code}`}
-                                                className="h-12 text-base"
                                             />
                                             <div className="col-span-3 empty:hidden">
                                                 <InputError
@@ -139,7 +136,7 @@ export default function HarvestCreate({
                                 <InputError message={rowsError} />
                                 <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] -mx-4 space-y-2 border-t bg-background px-4 py-3 md:bottom-0 md:-mx-6 md:px-6">
                                     <p
-                                        className="text-sm text-muted-foreground"
+                                        className="text-base text-muted-foreground md:text-sm"
                                         aria-live="polite"
                                     >
                                         กรอกแล้ว {entered.treeCount} ต้น · รวม{' '}
