@@ -67,7 +67,7 @@ class Tree extends Model
 
     public function hasRecords(): bool
     {
-        return $this->harvests()->exists() || $this->careRecords()->exists();
+        return $this->harvests()->withTrashed()->exists() || $this->careRecords()->withTrashed()->exists();
     }
 
     /**

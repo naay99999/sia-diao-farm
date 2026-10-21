@@ -67,7 +67,7 @@ test('expense updates and destroys', function () {
         ->delete(route('expenses.destroy', $expense))
         ->assertRedirect($filtered);
 
-    $this->assertModelMissing($expense);
+    $this->assertSoftDeleted($expense);
 });
 
 test('index filters by inclusive date range and totals the filtered set', function () {

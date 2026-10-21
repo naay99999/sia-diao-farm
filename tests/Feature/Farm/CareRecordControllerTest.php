@@ -127,7 +127,8 @@ test('destroy removes the record and pivot rows', function () {
         ->assertRedirect(route('trees.show', $tree));
 
     expect(CareRecord::count())->toBe(0);
-    $this->assertDatabaseCount('care_record_tree', 0);
+    $this->assertSoftDeleted($record);
+    $this->assertDatabaseCount('care_record_tree', 1);
 });
 
 test('update keeps an already attached removed tree but rejects newly added removed trees', function () {
