@@ -27,7 +27,7 @@ class OrchardController extends Controller
             ->join('seasons', function ($join): void {
                 $join->on('seasons.orchard_id', '=', 'trees.orchard_id')
                     ->whereNull('seasons.ended_on')
-                    ->whereColumn('harvests.harvested_on', '>=', 'seasons.started_on');
+                    ->whereRaw('date(harvests.harvested_on) >= date(seasons.started_on)');
             })
             ->whereDate('harvests.harvested_on', '<=', Date::today()->toDateString())
             ->groupBy('trees.orchard_id')

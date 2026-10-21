@@ -56,7 +56,7 @@ class SeasonController extends Controller
         return Inertia::render('farm/seasons/show', [
             'season' => $season,
             'orchard' => $season->orchard,
-            'totalYieldKg' => $treeYields->sum('weightKg'),
+            'totalYieldKg' => round($treeYields->sum('weightKg'), 2),
             'totalFruitCount' => $treeYields->sum('fruitCount'),
             'treeYields' => $treeYields,
             'salesTotal' => (float) (clone $sales)->sum('amount'),

@@ -87,6 +87,7 @@ test('orchards index shows active tree count and open-season yield only', functi
     Harvest::factory()->for($active)->create(['harvested_on' => '2025-06-01', 'weight_kg' => 100]);
     Harvest::factory()->for($active)->create(['harvested_on' => '2026-02-01', 'weight_kg' => 12.5]);
     Harvest::factory()->for($removed)->create(['harvested_on' => '2026-03-01', 'weight_kg' => 7.5]);
+    Harvest::factory()->for($removed)->create(['harvested_on' => '2026-01-01', 'weight_kg' => 5]);
     Harvest::factory()->create(['harvested_on' => '2026-03-01', 'weight_kg' => 50]);
 
     $this->actingAs(User::factory()->create())
@@ -95,7 +96,7 @@ test('orchards index shows active tree count and open-season yield only', functi
             ->where('orchards.0.id', $orchard->id)
             ->where('orchards.0.trees_count', 1)
             ->where('orchards.0.current_season', 'ปัจจุบัน')
-            ->where('orchards.0.current_yield_kg', 20)
+            ->where('orchards.0.current_yield_kg', 25)
             ->where('orchards.1.id', $bare->id)
             ->where('orchards.1.trees_count', 0)
             ->where('orchards.1.current_season', null)
