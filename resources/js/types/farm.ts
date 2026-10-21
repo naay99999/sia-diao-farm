@@ -48,6 +48,7 @@ export type CareRecord = {
     quantity: string | null;
     notes: string | null;
     trees?: Pick<Tree, 'id' | 'code' | 'removed_on'>[];
+    issue_ids?: number[];
 };
 
 export const careTypeLabels: Record<CareType, string> = {
@@ -65,23 +66,66 @@ export type Harvest = {
     notes: string | null;
 };
 
+export type FindingKind = 'problem' | 'stage';
+
+export type Finding = {
+    id: number;
+    name: string;
+    kind: FindingKind;
+};
+
+export type Severity = 'low' | 'medium' | 'high';
+
+export const severityLabels: Record<Severity, string> = {
+    low: 'น้อย',
+    medium: 'กลาง',
+    high: 'มาก',
+};
+
+export type FollowUpOutcome = 'resolved' | 'not_resolved';
+
+export type IssueSummary = {
+    id: number;
+    treeId: number;
+    treeCode: string;
+    finding: string;
+    openedOn: string;
+    followUpOn: string;
+    isDue: boolean;
+};
+
+export type LatestStage = {
+    finding: string;
+    observedOn: string;
+    inCurrentSeason: boolean;
+};
+
+export type Observation = {
+    id: number;
+    finding_id: number;
+    tree_issue_id: number | null;
+    observed_on: string;
+    severity: Severity | null;
+    outcome: FollowUpOutcome | null;
+    notes: string | null;
+};
+
+type TimelineEntryBase = {
+    id: number;
+    date: string;
+    title: string;
+    detail: string | null;
+    fromAi: boolean;
+};
+
 export type TimelineEntry =
-    | {
-          kind: 'care';
-          id: number;
-          date: string;
-          title: string;
-          detail: string | null;
-          record: CareRecord;
-      }
-    | {
-          kind: 'harvest';
-          id: number;
-          date: string;
-          title: string;
-          detail: string | null;
-          record: Harvest;
-      };
+    | (TimelineEntryBase & { kind: 'care'; record: CareRecord })
+    | (TimelineEntryBase & { kind: 'harvest'; record: Harvest })
+    | (TimelineEntryBase & {
+          kind: 'observation';
+          photos: string[];
+          record: Observation;
+      });
 
 export type SeasonYield = {
     seasonId: number;
