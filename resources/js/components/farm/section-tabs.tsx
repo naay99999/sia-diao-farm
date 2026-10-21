@@ -39,14 +39,14 @@ export function SectionTabs<T extends string>({
                         aria-controls={`panel-${tab.value}`}
                         onClick={() => onChange(tab.value)}
                         className={cn(
-                            '-mb-px flex h-12 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-3 text-base whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none md:h-11 md:text-sm',
+                            '-mb-px flex h-12 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-3 text-lg font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none md:h-10 md:text-base',
                             isSelected &&
                                 'border-foreground font-medium text-foreground',
                         )}
                     >
                         {tab.label}
                         {tab.count !== undefined && (
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-base text-muted-foreground md:text-sm">
                                 {tab.count.toLocaleString('th-TH')}
                             </span>
                         )}

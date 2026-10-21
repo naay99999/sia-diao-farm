@@ -2,6 +2,7 @@ import { todayIso } from '@/components/farm/care-record-form';
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import type { Harvest } from '@/types/farm';
 
 type Errors = Record<string, string | undefined>;
@@ -37,7 +38,6 @@ export function HarvestFields({
                         inputMode="decimal"
                         required
                         defaultValue={harvest?.weight_kg ?? ''}
-                        className="h-12 text-base"
                     />
                     <InputError message={errors.weight_kg} />
                 </div>
@@ -48,19 +48,17 @@ export function HarvestFields({
                         name="fruit_count"
                         inputMode="numeric"
                         defaultValue={harvest?.fruit_count ?? ''}
-                        className="h-12 text-base"
                     />
                     <InputError message={errors.fruit_count} />
                 </div>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="harvest-notes">หมายเหตุ</Label>
-                <textarea
+                <Textarea
                     id="harvest-notes"
                     name="notes"
                     rows={3}
                     defaultValue={harvest?.notes ?? ''}
-                    className="flex w-full rounded-md border border-input bg-card px-3 py-2 text-base shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
                 />
                 <InputError message={errors.notes} />
             </div>

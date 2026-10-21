@@ -29,7 +29,7 @@ export function AppBottomNav() {
                                 prefetch
                                 aria-current={isActive ? 'page' : undefined}
                                 className={cn(
-                                    'flex h-16 flex-col items-center justify-center gap-1 text-sm text-muted-foreground transition-colors active:bg-accent',
+                                    'flex h-16 flex-col items-center justify-center gap-1 text-base text-muted-foreground transition-colors active:bg-accent md:text-sm',
                                     isActive && 'font-medium text-foreground',
                                 )}
                             >

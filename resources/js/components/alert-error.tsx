@@ -13,7 +13,7 @@ export default function AlertError({
             <AlertCircleIcon />
             <AlertTitle>{title || 'เกิดข้อผิดพลาด'}</AlertTitle>
             <AlertDescription>
-                <ul className="list-inside list-disc text-sm">
+                <ul className="list-inside list-disc text-base md:text-sm">
                     {Array.from(new Set(errors)).map((error, index) => (
                         <li key={index}>{error}</li>
                     ))}

@@ -19,7 +19,7 @@ export function SubmitButton({
         <Button
             type="submit"
             disabled={processing}
-            className={cn('h-12 w-full text-base md:h-10', className)}
+            className={cn('w-full', className)}
         >
             {processing && <Spinner />}
             {children}

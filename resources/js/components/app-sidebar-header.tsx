@@ -19,13 +19,13 @@ export function AppSidebarHeader({
                 {parent ? (
                     <Link
                         href={parent.href}
-                        className="flex h-11 min-w-0 items-center gap-1 rounded-md pr-3 pl-1 text-base active:bg-accent"
+                        className="flex h-12 min-w-0 items-center gap-1 rounded-md pr-3 pl-1 text-lg active:bg-accent md:text-base"
                     >
                         <ChevronLeft className="size-5 shrink-0" />
                         <span className="truncate">{parent.title}</span>
                     </Link>
                 ) : (
-                    <span className="flex items-center gap-2 px-2 text-base font-semibold">
+                    <span className="flex items-center gap-2 px-2 text-lg font-semibold md:text-base">
                         <AppLogoIcon className="size-5 fill-current text-primary" />
                         {name}
                     </span>
