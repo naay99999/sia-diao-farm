@@ -42,3 +42,27 @@ export const careTypeLabels: Record<CareType, string> = {
     pesticide: 'ฉีดยา',
     other: 'อื่น ๆ',
 };
+
+export type Harvest = {
+    id: number;
+    tree_id: number;
+    harvested_on: string;
+    weight_kg: string;
+    fruit_count: number | null;
+    notes: string | null;
+};
+
+export type TimelineEntry = {
+    kind: 'care' | 'harvest';
+    id: number;
+    date: string;
+    title: string;
+    detail: string | null;
+};
+
+export type SeasonYield = {
+    seasonId: number;
+    seasonName: string;
+    weightKg: number;
+    fruitCount: number;
+};

@@ -122,8 +122,9 @@ test('destroy removes the record and pivot rows', function () {
     $record->trees()->sync([$tree->id]);
 
     $this->actingAs($this->user)
+        ->from(route('trees.show', $tree))
         ->delete(route('care-records.destroy', $record))
-        ->assertRedirect(route('orchards.show', $this->orchard));
+        ->assertRedirect(route('trees.show', $tree));
 
     expect(CareRecord::count())->toBe(0);
     $this->assertDatabaseCount('care_record_tree', 0);

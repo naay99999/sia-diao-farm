@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreTreeBatchRequest;
 use App\Http\Requests\Farm\StoreTreeRequest;
 use App\Http\Requests\Farm\UpdateTreeRequest;
+use App\Models\CareRecord;
+use App\Models\Harvest;
 use App\Models\Orchard;
+use App\Models\Season;
 use App\Models\Tree;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +46,61 @@ class TreeController extends Controller
     {
         return Inertia::render('farm/trees/show', [
             'tree' => $tree->load('orchard'),
+            'timeline' => $this->timeline($tree),
+            'seasonYields' => $this->seasonYields($tree),
         ]);
+    }
+
+    /**
+     * @return list<array{kind: string, id: int, date: string, title: string, detail: string|null}>
+     */
+    private function timeline(Tree $tree): array
+    {
+        $care = $tree->careRecords()->get()->map(fn (CareRecord $record): array => [
+            'kind' => 'care',
+            'id' => $record->id,
+            'date' => $record->performed_on->toDateString(),
+            'title' => trim($record->type->label().' '.$record->product),
+            'detail' => collect([$record->quantity, $record->notes])->filter()->join(' · ') ?: null,
+        ]);
+
+        $harvests = $tree->harvests()->get()->map(fn (Harvest $harvest): array => [
+            'kind' => 'harvest',
+            'id' => $harvest->id,
+            'date' => $harvest->harvested_on->toDateString(),
+            'title' => 'ผลผลิต '.(float) $harvest->weight_kg.' กก.',
+            'detail' => collect([
+                $harvest->fruit_count ? $harvest->fruit_count.' ผล' : null,
+                $harvest->notes,
+            ])->filter()->join(' · ') ?: null,
+        ]);
+
+        return $care->concat($harvests)
+            ->sortBy([['date', 'desc'], ['id', 'desc']])
+            ->take(50)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return list<array{seasonId: int, seasonName: string, weightKg: float, fruitCount: int}>
+     */
+    private function seasonYields(Tree $tree): array
+    {
+        return $tree->orchard->seasons()
+            ->orderByDesc('started_on')
+            ->get()
+            ->map(function (Season $season) use ($tree): array {
+                $query = $season->applyDateWindow($tree->harvests()->getQuery(), 'harvested_on');
+
+                return [
+                    'seasonId' => $season->id,
+                    'seasonName' => $season->name,
+                    'weightKg' => (float) $query->sum('weight_kg'),
+                    'fruitCount' => (int) $query->sum('fruit_count'),
+                ];
+            })
+            ->all();
     }
 
     public function update(UpdateTreeRequest $request, Tree $tree): RedirectResponse
@@ -77,6 +134,10 @@ class TreeController extends Controller
 
     public function destroy(Tree $tree): RedirectResponse
     {
+        if ($tree->hasRecords()) {
+            return back()->withErrors(['tree' => 'ลบไม่ได้เพราะต้นนี้มีบันทึกแล้ว']);
+        }
+
         $tree->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบต้นไม้แล้ว']);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Farm\CareRecordController;
+use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\OrchardController;
 use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
@@ -33,6 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('orchards/{orchard}/care-records', [CareRecordController::class, 'store'])->name('orchards.care-records.store');
     Route::patch('care-records/{care_record}', [CareRecordController::class, 'update'])->name('care-records.update');
     Route::delete('care-records/{care_record}', [CareRecordController::class, 'destroy'])->name('care-records.destroy');
+    Route::get('orchards/{orchard}/harvests/create', [HarvestController::class, 'create'])->name('orchards.harvests.create');
+    Route::post('orchards/{orchard}/harvests', [HarvestController::class, 'storeBatch'])->name('orchards.harvests.batch');
+    Route::post('trees/{tree}/harvests', [HarvestController::class, 'store'])->name('trees.harvests.store');
+    Route::patch('harvests/{harvest}', [HarvestController::class, 'update'])->name('harvests.update');
+    Route::delete('harvests/{harvest}', [HarvestController::class, 'destroy'])->name('harvests.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 

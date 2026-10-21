@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label';
 import { formatThaiDate } from '@/lib/thai-date';
 import { index, show } from '@/routes/orchards';
 import { create as createCareRecord } from '@/routes/orchards/care-records';
+import { create as createHarvest } from '@/routes/orchards/harvests';
 
 import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
@@ -360,6 +361,11 @@ export default function OrchardShow({
                     <Button variant="outline" asChild>
                         <Link href={createCareRecord(orchard.id)}>
                             บันทึกการดูแลหลายต้น
+                        </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                        <Link href={createHarvest(orchard.id)}>
+                            บันทึกผลผลิตทั้งสวน
                         </Link>
                     </Button>
                     <Button

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -54,6 +55,19 @@ class Tree extends Model
     public function careRecords(): BelongsToMany
     {
         return $this->belongsToMany(CareRecord::class, 'care_record_tree');
+    }
+
+    /**
+     * @return HasMany<Harvest, $this>
+     */
+    public function harvests(): HasMany
+    {
+        return $this->hasMany(Harvest::class);
+    }
+
+    public function hasRecords(): bool
+    {
+        return $this->harvests()->exists() || $this->careRecords()->exists();
     }
 
     /**

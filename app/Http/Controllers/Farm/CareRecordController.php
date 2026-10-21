@@ -58,7 +58,7 @@ class CareRecordController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบบันทึกแล้ว']);
 
-        return to_route('orchards.show', $careRecord->orchard_id);
+        return back();
     }
 
     /**

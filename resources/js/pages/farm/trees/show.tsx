@@ -2,8 +2,10 @@ import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
 import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
+import HarvestController from '@/actions/App/Http/Controllers/Farm/HarvestController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import { CareRecordFields } from '@/components/farm/care-record-form';
+import { HarvestFields } from '@/components/farm/harvest-form';
 import Heading from '@/components/heading';
 import TreeFormFields from '@/components/tree-form-fields';
 import { Badge } from '@/components/ui/badge';
@@ -15,13 +17,29 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { formatThaiDate } from '@/lib/thai-date';
 import { index, show } from '@/routes/orchards';
 import { show as showTree } from '@/routes/trees';
-import type { CareType, Orchard, Tree } from '@/types/farm';
+import type {
+    CareType,
+    Orchard,
+    SeasonYield,
+    TimelineEntry,
+    Tree,
+} from '@/types/farm';
 
 type TreeWithOrchard = Tree & { orchard: Orchard };
 
-export default function TreeShow({ tree }: { tree: TreeWithOrchard }) {
+export default function TreeShow({
+    tree,
+    timeline,
+    seasonYields,
+}: {
+    tree: TreeWithOrchard;
+    timeline: TimelineEntry[];
+    seasonYields: SeasonYield[];
+}) {
+    const [harvesting, setHarvesting] = useState(false);
     const [editing, setEditing] = useState(false);
     const [careType, setCareType] = useState<CareType | null>(null);
     const isRemoved = tree.removed_on !== null;
@@ -111,7 +129,10 @@ export default function TreeShow({ tree }: { tree: TreeWithOrchard }) {
                     >
                         ฉีดยา
                     </Button>
-                    <Button className="h-14 text-base" disabled>
+                    <Button
+                        className="h-14 text-base"
+                        onClick={() => setHarvesting(true)}
+                    >
                         ผลผลิต
                     </Button>
                 </div>
@@ -158,7 +179,95 @@ export default function TreeShow({ tree }: { tree: TreeWithOrchard }) {
                 </DialogContent>
             </Dialog>
 
-            {/* ประวัติ (timeline) และปุ่มผลผลิต — เพิ่มในงานถัดไป */}
+            <Dialog open={harvesting} onOpenChange={setHarvesting}>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>บันทึกผลผลิต</DialogTitle>
+                        <DialogDescription>{tree.code}</DialogDescription>
+                    </DialogHeader>
+                    <Form
+                        {...HarvestController.store.form(tree.id)}
+                        onSuccess={() => setHarvesting(false)}
+                        className="space-y-4"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <HarvestFields errors={errors} />
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="h-12 w-full text-base"
+                                >
+                                    บันทึก
+                                </Button>
+                            </>
+                        )}
+                    </Form>
+                </DialogContent>
+            </Dialog>
+
+            {seasonYields.length > 0 && (
+                <section className="space-y-3">
+                    <h2 className="text-lg font-medium">ผลผลิตแต่ละรอบ</h2>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        {seasonYields.map((item) => (
+                            <div
+                                key={item.seasonId}
+                                className="rounded-lg border p-3"
+                            >
+                                <p className="font-medium">{item.seasonName}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {item.weightKg.toLocaleString('th-TH')} กก.
+                                    {item.fruitCount > 0 &&
+                                        ` · ${item.fruitCount.toLocaleString('th-TH')} ผล`}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <section className="space-y-3">
+                <h2 className="text-lg font-medium">ประวัติ</h2>
+                {timeline.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                        ยังไม่มีบันทึก
+                    </p>
+                )}
+                <div className="grid gap-2">
+                    {timeline.map((entry) => (
+                        <div
+                            key={`${entry.kind}-${entry.id}`}
+                            className="flex items-start justify-between gap-2 rounded-lg border p-3"
+                        >
+                            <div className="min-w-0">
+                                <p className="font-medium">{entry.title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {formatThaiDate(entry.date)}
+                                    {entry.detail && ` · ${entry.detail}`}
+                                </p>
+                            </div>
+                            <div className="flex shrink-0 gap-2">
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (confirm('ลบบันทึกนี้?')) {
+                                            router.delete(
+                                                entry.kind === 'harvest'
+                                                    ? HarvestController.destroy.url(entry.id)
+                                                    : CareRecordController.destroy.url(entry.id),
+                                            );
+                                        }
+                                    }}
+                                >
+                                    ลบ
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }
