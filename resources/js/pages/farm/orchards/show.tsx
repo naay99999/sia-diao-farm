@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/farm/empty-state';
 import { RowActions } from '@/components/farm/row-actions';
 import { formatPricePerKg, SaleFields } from '@/components/farm/sale-form';
 import { SectionTabs } from '@/components/farm/section-tabs';
+import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -212,7 +213,7 @@ export default function OrchardShow({
                             { value: 'sales', label: 'การขาย' },
                             {
                                 value: 'seasons',
-                                label: 'รอบที่ผ่านมา',
+                                label: 'รอบก่อน',
                                 count: seasons.length,
                             },
                         ]}
@@ -234,7 +235,7 @@ export default function OrchardShow({
                                         onChange={(event) =>
                                             setTreeQuery(event.target.value)
                                         }
-                                        placeholder="ค้นหารหัสต้นหรือพันธุ์"
+                                        placeholder="ค้นหาต้น"
                                         aria-label="ค้นหาต้นไม้"
                                         className="pl-9"
                                     />
@@ -353,13 +354,15 @@ export default function OrchardShow({
                                                             </span>
                                                         </div>
                                                         {currentSeason &&
-                                                            yieldKg > 0 && (
-                                                                <div
-                                                                    aria-hidden
-                                                                    className="mt-2 h-1 rounded-full bg-primary"
-                                                                    style={{
-                                                                        width: `${(yieldKg / maxTreeYield) * 100}%`,
-                                                                    }}
+                                                            !tree.removed_on && (
+                                                                <ShareBar
+                                                                    value={
+                                                                        yieldKg
+                                                                    }
+                                                                    max={
+                                                                        maxTreeYield
+                                                                    }
+                                                                    className="mt-2"
                                                                 />
                                                             )}
                                                     </Link>
@@ -784,7 +787,7 @@ function SeasonPanel({
 
     const actions = (
         <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-            <Button className="h-12 text-base md:h-10 md:text-sm" asChild>
+            <Button asChild>
                 <Link href={createHarvest(orchard.id)}>บันทึกผลผลิต</Link>
             </Button>
             <Button variant="outline" asChild>
@@ -897,20 +900,23 @@ function SeasonPanel({
 
             <Link
                 href={showSeason(currentSeason.id)}
-                className="block rounded-md bg-muted px-4 py-3 transition-colors hover:bg-accent"
+                className="block rounded-md bg-brand-soft px-4 py-3 text-brand-ink transition-colors hover:bg-brand-track"
             >
-                <p className="text-base text-muted-foreground md:text-sm">
-                    ผลผลิตรอบนี้
-                </p>
+                <p className="text-base font-medium md:text-sm">ผลผลิตรอบนี้</p>
                 <p className="text-3xl leading-[1.3] font-semibold text-foreground">
                     {formatNumber(seasonYieldKg)}{' '}
                     <span className="text-lg font-normal text-muted-foreground md:text-base">
                         กก.
                     </span>
                 </p>
-                <p className="text-base text-muted-foreground md:text-sm">
+                <p className="text-base md:text-sm">
                     เก็บแล้ว {harvestedTreeCount} จาก {activeTreeCount} ต้น
                 </p>
+                <ShareBar
+                    value={harvestedTreeCount}
+                    max={activeTreeCount}
+                    className="mt-2 bg-background"
+                />
             </Link>
 
             {actions}

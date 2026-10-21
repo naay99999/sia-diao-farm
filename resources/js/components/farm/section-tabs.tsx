@@ -39,9 +39,9 @@ export function SectionTabs<T extends string>({
                         aria-controls={`panel-${tab.value}`}
                         onClick={() => onChange(tab.value)}
                         className={cn(
-                            '-mb-px flex h-12 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-3 text-lg font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none md:h-10 md:text-base',
+                            '-mb-px flex h-12 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-2.5 text-lg font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none md:h-10 md:px-3 md:text-base',
                             isSelected &&
-                                'border-foreground font-medium text-foreground',
+                                'border-primary font-medium text-foreground',
                         )}
                     >
                         {tab.label}

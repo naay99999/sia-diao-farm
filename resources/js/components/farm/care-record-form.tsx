@@ -173,7 +173,7 @@ export function TreePicker({
                 {trees.map((tree) => (
                     <label
                         key={tree.id}
-                        className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                        className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 has-[:checked]:border-primary has-[:checked]:bg-brand-soft"
                     >
                         <input
                             type="checkbox"
@@ -181,7 +181,7 @@ export function TreePicker({
                             value={tree.id}
                             checked={selected.has(tree.id)}
                             onChange={() => toggle(tree.id)}
-                            className="size-5"
+                            className="size-5 accent-primary"
                         />
                         <span className="font-medium">
                             {tree.code}

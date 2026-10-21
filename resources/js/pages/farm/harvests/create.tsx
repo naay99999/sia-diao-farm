@@ -83,11 +83,11 @@ export default function HarvestCreate({
                                     <span>น้ำหนัก (กก.)</span>
                                     <span>จำนวนผล</span>
                                 </div>
-                                <div className="grid gap-2">
+                                <div className="-mx-2 grid gap-1">
                                     {trees.map((tree, index) => (
                                         <div
                                             key={tree.id}
-                                            className="grid grid-cols-[1fr_6rem_6rem] items-center gap-2"
+                                            className="grid grid-cols-[1fr_6rem_6rem] items-center gap-2 rounded-md px-2 py-1 transition-colors has-[[data-weight]:not(:placeholder-shown)]:bg-brand-soft"
                                         >
                                             <input
                                                 type="hidden"
@@ -107,12 +107,16 @@ export default function HarvestCreate({
                                             <Input
                                                 name={`rows[${index}][weight_kg]`}
                                                 inputMode="decimal"
+                                                placeholder="กก."
+                                                className="bg-background"
                                                 data-weight
                                                 aria-label={`น้ำหนัก (กก.) ${tree.code}`}
                                             />
                                             <Input
                                                 name={`rows[${index}][fruit_count]`}
                                                 inputMode="numeric"
+                                                placeholder="ผล"
+                                                className="bg-background"
                                                 aria-label={`จำนวนผล ${tree.code}`}
                                             />
                                             <div className="col-span-3 empty:hidden">
