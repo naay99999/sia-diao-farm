@@ -47,21 +47,31 @@ class TreeController extends Controller
         return Inertia::render('farm/trees/show', [
             'tree' => $tree->load('orchard'),
             'timeline' => $this->timeline($tree),
+            'activeTrees' => $tree->orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
             'seasonYields' => $this->seasonYields($tree),
         ]);
     }
 
     /**
-     * @return list<array{kind: string, id: int, date: string, title: string, detail: string|null}>
+     * @return list<array{kind: string, id: int, date: string, title: string, detail: string|null, record: array<string, mixed>}>
      */
     private function timeline(Tree $tree): array
     {
-        $care = $tree->careRecords()->get()->map(fn (CareRecord $record): array => [
+        $care = $tree->careRecords()->with('trees:id,code,removed_on')->get()->map(fn (CareRecord $record): array => [
             'kind' => 'care',
             'id' => $record->id,
             'date' => $record->performed_on->toDateString(),
             'title' => trim($record->type->label().' '.$record->product),
             'detail' => collect([$record->quantity, $record->notes])->filter()->join(' · ') ?: null,
+            'record' => [
+                'id' => $record->id,
+                'type' => $record->type->value,
+                'performed_on' => $record->performed_on->toDateString(),
+                'product' => $record->product,
+                'quantity' => $record->quantity,
+                'notes' => $record->notes,
+                'trees' => $record->trees->map->only(['id', 'code', 'removed_on'])->all(),
+            ],
         ]);
 
         $harvests = $tree->harvests()->get()->map(fn (Harvest $harvest): array => [
@@ -73,6 +83,13 @@ class TreeController extends Controller
                 $harvest->fruit_count ? $harvest->fruit_count.' ผล' : null,
                 $harvest->notes,
             ])->filter()->join(' · ') ?: null,
+            'record' => [
+                'id' => $harvest->id,
+                'harvested_on' => $harvest->harvested_on->toDateString(),
+                'weight_kg' => $harvest->weight_kg,
+                'fruit_count' => $harvest->fruit_count,
+                'notes' => $harvest->notes,
+            ],
         ]);
 
         return $care->concat($harvests)

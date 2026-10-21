@@ -66,8 +66,14 @@ class CareRecordController extends Controller
      */
     private function redirectAfterSave(StoreCareRecordRequest $request, int $orchardId, array $treeIds): RedirectResponse
     {
-        if ($request->validated('return_to') === 'tree' && count($treeIds) === 1) {
-            return to_route('trees.show', $treeIds[0]);
+        if ($request->validated('return_to') === 'tree') {
+            if (count($treeIds) === 1) {
+                return to_route('trees.show', $treeIds[0]);
+            }
+
+            if ($request->isMethod('PATCH')) {
+                return back();
+            }
         }
 
         return to_route('orchards.show', $orchardId);

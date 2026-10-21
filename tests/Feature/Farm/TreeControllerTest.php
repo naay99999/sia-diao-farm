@@ -143,6 +143,15 @@ test('restore clears removed_on', function () {
     expect($tree->fresh()->removed_on)->toBeNull();
 });
 
+test('destroy from the tree page redirects to the orchard', function () {
+    $tree = Tree::factory()->create();
+
+    $this->actingAs($this->user)
+        ->from(route('trees.show', $tree))
+        ->delete(route('trees.destroy', $tree))
+        ->assertRedirect(route('orchards.show', $tree->orchard_id));
+});
+
 test('destroy deletes a tree without records', function () {
     $tree = Tree::factory()->create();
 

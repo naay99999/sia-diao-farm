@@ -34,7 +34,7 @@ export type CareRecord = {
     product: string | null;
     quantity: string | null;
     notes: string | null;
-    trees?: Pick<Tree, 'id' | 'code'>[];
+    trees?: Pick<Tree, 'id' | 'code' | 'removed_on'>[];
 };
 
 export const careTypeLabels: Record<CareType, string> = {
@@ -52,13 +52,23 @@ export type Harvest = {
     notes: string | null;
 };
 
-export type TimelineEntry = {
-    kind: 'care' | 'harvest';
-    id: number;
-    date: string;
-    title: string;
-    detail: string | null;
-};
+export type TimelineEntry =
+    | {
+          kind: 'care';
+          id: number;
+          date: string;
+          title: string;
+          detail: string | null;
+          record: CareRecord;
+      }
+    | {
+          kind: 'harvest';
+          id: number;
+          date: string;
+          title: string;
+          detail: string | null;
+          record: Harvest;
+      };
 
 export type SeasonYield = {
     seasonId: number;

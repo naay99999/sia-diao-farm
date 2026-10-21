@@ -99,14 +99,24 @@ export function CareRecordFields({
 }
 
 export function TreePicker({
-    trees,
+    trees: activeTrees,
+    attachedTrees = [],
     initialSelected,
     errors,
 }: {
     trees: Pick<Tree, 'id' | 'code'>[];
+    attachedTrees?: Pick<Tree, 'id' | 'code' | 'removed_on'>[];
     initialSelected: number[];
     errors: Errors;
 }) {
+    const activeIds = new Set(activeTrees.map((tree) => tree.id));
+    const removedAttached = attachedTrees.filter(
+        (tree) => tree.removed_on && !activeIds.has(tree.id),
+    );
+    const trees: (Pick<Tree, 'id' | 'code'> & { removed?: boolean })[] = [
+        ...activeTrees,
+        ...removedAttached.map((tree) => ({ ...tree, removed: true })),
+    ];
     const [selected, setSelected] = useState<Set<number>>(
         () => new Set(initialSelected),
     );
@@ -164,7 +174,15 @@ export function TreePicker({
                             onChange={() => toggle(tree.id)}
                             className="size-5"
                         />
-                        <span className="font-medium">{tree.code}</span>
+                        <span className="font-medium">
+                            {tree.code}
+                            {tree.removed && (
+                                <span className="font-normal text-muted-foreground">
+                                    {' '}
+                                    (ไม่อยู่แล้ว)
+                                </span>
+                            )}
+                        </span>
                     </label>
                 ))}
             </div>

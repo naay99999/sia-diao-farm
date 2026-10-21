@@ -129,3 +129,34 @@ test('destroy removes the record and pivot rows', function () {
     expect(CareRecord::count())->toBe(0);
     $this->assertDatabaseCount('care_record_tree', 0);
 });
+
+test('update keeps an already attached removed tree but rejects newly added removed trees', function () {
+    $active = Tree::factory()->for($this->orchard)->create();
+    $attachedRemoved = Tree::factory()->for($this->orchard)->removed()->create();
+    $otherRemoved = Tree::factory()->for($this->orchard)->removed()->create();
+    $record = CareRecord::factory()->for($this->orchard)->create();
+    $record->trees()->sync([$active->id, $attachedRemoved->id]);
+
+    $this->actingAs($this->user)
+        ->patch(route('care-records.update', $record), careRecordPayload([$active->id, $attachedRemoved->id], ['product' => 'ใหม่', 'return_to' => 'tree']))
+        ->assertSessionDoesntHaveErrors()
+        ->assertRedirect();
+
+    expect($record->trees()->pluck('trees.id')->sort()->values()->all())
+        ->toBe(collect([$active->id, $attachedRemoved->id])->sort()->values()->all());
+
+    $this->actingAs($this->user)
+        ->patch(route('care-records.update', $record), careRecordPayload([$active->id, $otherRemoved->id]))
+        ->assertSessionHasErrors('tree_ids.1');
+});
+
+test('multi tree update from the tree page returns back', function () {
+    $trees = Tree::factory()->count(2)->for($this->orchard)->create();
+    $record = CareRecord::factory()->for($this->orchard)->create();
+    $record->trees()->sync($trees->pluck('id'));
+
+    $this->actingAs($this->user)
+        ->from(route('trees.show', $trees[0]))
+        ->patch(route('care-records.update', $record), careRecordPayload($trees->pluck('id')->all(), ['return_to' => 'tree']))
+        ->assertRedirect(route('trees.show', $trees[0]));
+});

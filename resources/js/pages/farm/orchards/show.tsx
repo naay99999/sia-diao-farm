@@ -491,6 +491,7 @@ export default function OrchardShow({
                                         />
                                         <TreePicker
                                             trees={activeTrees}
+                                            attachedTrees={editingCare.trees}
                                             initialSelected={(
                                                 editingCare.trees ?? []
                                             ).map((tree) => tree.id)}

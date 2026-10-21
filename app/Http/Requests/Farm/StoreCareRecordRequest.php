@@ -46,9 +46,14 @@ class StoreCareRecordRequest extends FormRequest
             $orchardId = $this->orchardId();
             $ids = array_values($this->validated('tree_ids'));
 
+            $careRecord = $this->route('care_record');
+            $attachedIds = $careRecord instanceof CareRecord
+                ? $careRecord->trees()->pluck('trees.id')->all()
+                : [];
+
             $validIds = Tree::query()
                 ->where('orchard_id', $orchardId)
-                ->active()
+                ->where(fn ($query) => $query->whereNull('removed_on')->orWhereIn('id', $attachedIds))
                 ->whereIn('id', $ids)
                 ->pluck('id')
                 ->all();

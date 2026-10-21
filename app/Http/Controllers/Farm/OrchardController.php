@@ -40,7 +40,7 @@ class OrchardController extends Controller
                 ->get(),
             'showRemoved' => $showRemoved,
             'recentCareRecords' => $orchard->careRecords()
-                ->with('trees:id,code')
+                ->with('trees:id,code,removed_on')
                 ->latest('performed_on')
                 ->latest('id')
                 ->limit(10)
