@@ -124,6 +124,21 @@ test('removing a tree from a record unlinks its issues', function () {
         ->and($this->issue->fresh()->isOpen())->toBeTrue();
 });
 
+test('removing a tree while still sending its linked issue id unlinks it without error', function () {
+    $otherTree = Tree::factory()->for($this->orchard)->create();
+    $otherIssue = TreeIssue::factory()->for($otherTree)->create(['follow_up_on' => '2026-10-28']);
+
+    $this->actingAs($this->user)
+        ->post(route('orchards.care-records.store', $this->orchard), pesticidePayload([$this->tree->id, $otherTree->id], [$this->issue->id, $otherIssue->id]));
+    $record = CareRecord::firstOrFail();
+
+    $this->actingAs($this->user)
+        ->patch(route('care-records.update', $record), pesticidePayload([$otherTree->id], [$this->issue->id, $otherIssue->id]))
+        ->assertSessionDoesntHaveErrors();
+
+    expect($record->issues()->pluck('tree_issues.id')->all())->toBe([$otherIssue->id]);
+});
+
 test('unlinking an issue from a record keeps its follow up date', function () {
     $this->actingAs($this->user)
         ->post(route('orchards.care-records.store', $this->orchard), pesticidePayload([$this->tree->id], [$this->issue->id]));

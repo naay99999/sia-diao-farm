@@ -145,11 +145,17 @@ class SaveCareRecord
             ->get()
             ->keyBy('id');
 
-        foreach ($requestedIssueIds as $issueId) {
+        foreach ($requestedIssueIds as $index => $issueId) {
             $issue = $issues->get($issueId);
             $alreadyLinked = in_array($issueId, $linkedIds, true);
 
             if ($issue === null && $alreadyLinked) {
+                continue;
+            }
+
+            if ($issue !== null && $alreadyLinked && ! in_array($issue->tree_id, $treeIds, true)) {
+                unset($requestedIssueIds[$index]);
+
                 continue;
             }
 
