@@ -73,7 +73,7 @@ test('sale destroys', function () {
         ->delete(route('sales.destroy', $sale))
         ->assertRedirect(route('orchards.show', $this->orchard));
 
-    $this->assertModelMissing($sale);
+    $this->assertSoftDeleted($sale);
 });
 
 test('orchard page lists sales newest first', function () {

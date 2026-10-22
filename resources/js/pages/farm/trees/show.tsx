@@ -3,14 +3,20 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
 import HarvestController from '@/actions/App/Http/Controllers/Farm/HarvestController';
+import ObservationController from '@/actions/App/Http/Controllers/Farm/ObservationController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import { useConfirm } from '@/components/confirm-dialog';
 import {
-    CareRecordFields,
-    TreePicker,
+    CareRecordFormBody,
+    todayIso,
 } from '@/components/farm/care-record-form';
 import { EmptyState } from '@/components/farm/empty-state';
+import { FollowUpForm } from '@/components/farm/follow-up-form';
 import { HarvestFields } from '@/components/farm/harvest-form';
+import {
+    ObservationEditForm,
+    ObservationForm,
+} from '@/components/farm/observation-form';
 import { RowActions } from '@/components/farm/row-actions';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
@@ -37,6 +43,9 @@ import { index, show } from '@/routes/orchards';
 import { show as showTree } from '@/routes/trees';
 import type {
     CareType,
+    Finding,
+    IssueSummary,
+    LatestStage,
     Orchard,
     SeasonYield,
     TimelineEntry,
@@ -45,16 +54,33 @@ import type {
 
 type TreeWithOrchard = Tree & { orchard: Orchard };
 
+function destroyUrl(entry: TimelineEntry): string {
+    switch (entry.kind) {
+        case 'harvest':
+            return HarvestController.destroy.url(entry.id);
+        case 'observation':
+            return ObservationController.destroy.url(entry.id);
+        case 'care':
+            return CareRecordController.destroy.url(entry.id);
+    }
+}
+
 export default function TreeShow({
     tree,
     timeline,
     seasonYields,
     activeTrees,
+    openIssues,
+    latestStage,
+    findings,
 }: {
     tree: TreeWithOrchard;
     timeline: TimelineEntry[];
     seasonYields: SeasonYield[];
     activeTrees: Pick<Tree, 'id' | 'code'>[];
+    openIssues: IssueSummary[];
+    latestStage: LatestStage | null;
+    findings: Finding[];
 }) {
     const confirm = useConfirm();
     const [editingEntry, setEditingEntry] = useState<TimelineEntry | null>(
@@ -65,6 +91,8 @@ export default function TreeShow({
     const [harvesting, setHarvesting] = useState(false);
     const [editing, setEditing] = useState(false);
     const [careType, setCareType] = useState<CareType | null>(null);
+    const [observing, setObserving] = useState(false);
+    const [followingUp, setFollowingUp] = useState<IssueSummary | null>(null);
     const isRemoved = tree.removed_on !== null;
 
     setLayoutProps({
@@ -179,6 +207,66 @@ export default function TreeShow({
                 </p>
             )}
 
+            {latestStage && (
+                <p
+                    className={
+                        latestStage.inCurrentSeason
+                            ? '-mt-3 text-lg md:text-base'
+                            : '-mt-3 text-lg text-muted-foreground md:text-base'
+                    }
+                >
+                    ระยะล่าสุด: {latestStage.finding} ·{' '}
+                    {formatThaiDate(latestStage.observedOn)}
+                </p>
+            )}
+
+            {openIssues.length > 0 && (
+                <section aria-label="ปัญหาที่ยังไม่จบ" className="space-y-3">
+                    <h2 className="text-xl font-semibold md:text-lg">
+                        ปัญหาที่ยังไม่จบ
+                    </h2>
+                    <ul className="divide-y overflow-hidden rounded-lg border bg-card">
+                        {openIssues.map((issue) => (
+                            <li
+                                key={issue.id}
+                                className={
+                                    issue.isDue
+                                        ? 'flex items-center gap-3 bg-brand-soft py-3 pr-3 pl-4'
+                                        : 'flex items-center gap-3 py-3 pr-3 pl-4'
+                                }
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <p className="flex flex-wrap items-center gap-x-2 text-lg font-medium md:text-base">
+                                        {issue.finding}
+                                        {issue.isDue && (
+                                            <Badge>
+                                                {issue.followUpOn < todayIso()
+                                                    ? 'เลยกำหนด'
+                                                    : 'ถึงกำหนดวันนี้'}
+                                            </Badge>
+                                        )}
+                                    </p>
+                                    <p className="text-base text-muted-foreground md:text-sm">
+                                        พบเมื่อ {formatThaiDate(issue.openedOn)}{' '}
+                                        · ดูซ้ำ{' '}
+                                        {formatThaiDate(issue.followUpOn)}
+                                    </p>
+                                </div>
+                                {!isRemoved && (
+                                    <Button
+                                        variant="outline"
+                                        className="shrink-0"
+                                        onClick={() => setFollowingUp(issue)}
+                                    >
+                                        ดูซ้ำ
+                                    </Button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <aside className="space-y-6 lg:sticky lg:top-6 lg:col-start-2 lg:row-start-1">
                     {!isRemoved && (
@@ -191,6 +279,13 @@ export default function TreeShow({
                                 onClick={() => setHarvesting(true)}
                             >
                                 เก็บผลผลิต
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="col-span-3"
+                                onClick={() => setObserving(true)}
+                            >
+                                บันทึกสภาพต้น
                             </Button>
                             <Button
                                 variant="outline"
@@ -267,14 +362,50 @@ export default function TreeShow({
                                     className="flex items-center gap-3 py-3 pr-3 pl-4"
                                 >
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-lg font-medium md:text-base">
-                                            {entry.title}
-                                        </p>
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            <p className="truncate text-lg font-medium md:text-base">
+                                                {entry.title}
+                                            </p>
+                                            {entry.fromAi && (
+                                                <Badge variant="outline">
+                                                    <span className="sr-only">
+                                                        บันทึกโดย{' '}
+                                                    </span>
+                                                    AI
+                                                </Badge>
+                                            )}
+                                        </div>
                                         <p className="text-base text-muted-foreground md:text-sm">
                                             {formatThaiDate(entry.date)}
                                             {entry.detail &&
                                                 ` · ${entry.detail}`}
                                         </p>
+                                        {entry.kind === 'observation' &&
+                                            entry.photos.length > 0 && (
+                                                <ul className="mt-2 flex flex-wrap gap-2">
+                                                    {entry.photos.map(
+                                                        (url, index) => (
+                                                            <li key={url}>
+                                                                <a
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    aria-label={`เปิดรูปที่ ${index + 1} ของ ${entry.title}`}
+                                                                >
+                                                                    <img
+                                                                        src={
+                                                                            url
+                                                                        }
+                                                                        alt=""
+                                                                        loading="lazy"
+                                                                        className="size-16 rounded-md border object-cover"
+                                                                    />
+                                                                </a>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            )}
                                     </div>
                                     <RowActions
                                         label={`${entry.title} ${formatThaiDate(entry.date)}`}
@@ -292,13 +423,7 @@ export default function TreeShow({
                                                 })
                                             ) {
                                                 router.delete(
-                                                    entry.kind === 'harvest'
-                                                        ? HarvestController.destroy.url(
-                                                              entry.id,
-                                                          )
-                                                        : CareRecordController.destroy.url(
-                                                              entry.id,
-                                                          ),
+                                                    destroyUrl(entry),
                                                 );
                                             }
                                         }}
@@ -356,9 +481,11 @@ export default function TreeShow({
                         >
                             {({ processing, errors }) => (
                                 <>
-                                    <CareRecordFields
+                                    <CareRecordFormBody
                                         defaultType={careType}
                                         errors={errors}
+                                        initialSelected={[tree.id]}
+                                        openIssues={openIssues}
                                     />
                                     <SubmitButton processing={processing} />
                                 </>
@@ -389,6 +516,42 @@ export default function TreeShow({
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={observing} onOpenChange={setObserving}>
+                <DialogContent className="max-h-[90dvh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>บันทึกสภาพต้น</DialogTitle>
+                        <DialogDescription>{tree.code}</DialogDescription>
+                    </DialogHeader>
+                    <ObservationForm
+                        tree={tree}
+                        findings={findings}
+                        openIssues={openIssues}
+                        onSuccess={() => setObserving(false)}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={followingUp !== null}
+                onOpenChange={(open) => !open && setFollowingUp(null)}
+            >
+                <DialogContent className="max-h-[90dvh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>ดูซ้ำ</DialogTitle>
+                        <DialogDescription>
+                            {tree.code} · {followingUp?.finding}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {followingUp && (
+                        <FollowUpForm
+                            key={followingUp.id}
+                            issue={followingUp}
+                            onSuccess={() => setFollowingUp(null)}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+
             <Dialog
                 open={editingEntry !== null}
                 onOpenChange={(open) => !open && setEditingEntry(null)}
@@ -396,9 +559,11 @@ export default function TreeShow({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            {editingEntry?.kind === 'harvest'
-                                ? 'แก้ไขผลผลิต'
-                                : 'แก้ไขบันทึกการดูแล'}
+                            {editingEntry?.kind === 'harvest' && 'แก้ไขผลผลิต'}
+                            {editingEntry?.kind === 'observation' &&
+                                'แก้ไขบันทึกสภาพต้น'}
+                            {editingEntry?.kind === 'care' &&
+                                'แก้ไขบันทึกการดูแล'}
                         </DialogTitle>
                         <DialogDescription>{tree.code}</DialogDescription>
                     </DialogHeader>
@@ -420,6 +585,20 @@ export default function TreeShow({
                             )}
                         </Form>
                     )}
+                    {editingEntry?.kind === 'observation' && (
+                        <ObservationEditForm
+                            key={`observation-${editingEntry.id}`}
+                            observation={editingEntry.record}
+                            hasSeverity={
+                                findings.find(
+                                    (finding) =>
+                                        finding.id ===
+                                        editingEntry.record.finding_id,
+                                )?.kind === 'problem'
+                            }
+                            onSuccess={() => setEditingEntry(null)}
+                        />
+                    )}
                     {editingEntry?.kind === 'care' && (
                         <Form
                             key={`care-${editingEntry.id}`}
@@ -435,11 +614,9 @@ export default function TreeShow({
                         >
                             {({ processing, errors }) => (
                                 <>
-                                    <CareRecordFields
+                                    <CareRecordFormBody
                                         record={editingEntry.record}
                                         errors={errors}
-                                    />
-                                    <TreePicker
                                         trees={activeTrees}
                                         attachedTrees={
                                             editingEntry.record.trees
@@ -447,7 +624,7 @@ export default function TreeShow({
                                         initialSelected={(
                                             editingEntry.record.trees ?? []
                                         ).map((item) => item.id)}
-                                        errors={errors}
+                                        openIssues={openIssues}
                                     />
                                     <SubmitButton processing={processing} />
                                 </>

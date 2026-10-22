@@ -1,20 +1,19 @@
 import { Form, Head, setLayoutProps } from '@inertiajs/react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
-import {
-    CareRecordFields,
-    TreePicker,
-} from '@/components/farm/care-record-form';
+import { CareRecordFormBody } from '@/components/farm/care-record-form';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import { index, show } from '@/routes/orchards';
-import type { Orchard, Tree } from '@/types/farm';
+import type { IssueSummary, Orchard, Tree } from '@/types/farm';
 
 export default function CareRecordCreate({
     orchard,
     trees,
+    openIssues,
 }: {
     orchard: Orchard;
     trees: Tree[];
+    openIssues: IssueSummary[];
 }) {
     setLayoutProps({
         breadcrumbs: [
@@ -39,11 +38,11 @@ export default function CareRecordCreate({
                 >
                     {({ processing, errors }) => (
                         <>
-                            <CareRecordFields errors={errors} />
-                            <TreePicker
+                            <CareRecordFormBody
+                                errors={errors}
                                 trees={trees}
                                 initialSelected={trees.map((tree) => tree.id)}
-                                errors={errors}
+                                openIssues={openIssues}
                             />
                             <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] -mx-4 border-t bg-background px-4 py-3 md:bottom-0 md:-mx-6 md:px-6">
                                 <SubmitButton processing={processing} />

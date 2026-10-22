@@ -65,9 +65,28 @@ class Tree extends Model
         return $this->hasMany(Harvest::class);
     }
 
+    /**
+     * @return HasMany<TreeIssue, $this>
+     */
+    public function issues(): HasMany
+    {
+        return $this->hasMany(TreeIssue::class);
+    }
+
+    /**
+     * @return HasMany<Observation, $this>
+     */
+    public function observations(): HasMany
+    {
+        return $this->hasMany(Observation::class);
+    }
+
     public function hasRecords(): bool
     {
-        return $this->harvests()->exists() || $this->careRecords()->exists();
+        return $this->harvests()->withTrashed()->exists()
+            || $this->careRecords()->withTrashed()->exists()
+            || $this->observations()->withTrashed()->exists()
+            || $this->issues()->withTrashed()->exists();
     }
 
     /**

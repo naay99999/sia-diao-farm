@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Mcp\Server\Testing\TestResponse as McpTestResponse;
 use Tests\TestCase;
 
 /*
@@ -48,3 +49,12 @@ function something()
 {
     // ..
 }
+
+/*
+| Decodes the JSON body an MCP tool returned through Response::json(), so tests can assert on the payload.
+| Usage: FarmServer::actingAs($user)->tool(SomeTool::class)->assertOk()->payload()
+*/
+McpTestResponse::macro('payload', function (): array {
+    /** @var McpTestResponse $this */
+    return json_decode($this->content()[0] ?? '[]', true, flags: JSON_THROW_ON_ERROR);
+});

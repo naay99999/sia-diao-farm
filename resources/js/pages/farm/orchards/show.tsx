@@ -7,11 +7,9 @@ import SaleController from '@/actions/App/Http/Controllers/Farm/SaleController';
 import SeasonController from '@/actions/App/Http/Controllers/Farm/SeasonController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import { useConfirm } from '@/components/confirm-dialog';
-import {
-    CareRecordFields,
-    TreePicker,
-} from '@/components/farm/care-record-form';
+import { CareRecordFormBody } from '@/components/farm/care-record-form';
 import { EmptyState } from '@/components/farm/empty-state';
+import { IssueList } from '@/components/farm/issue-list';
 import { RowActions } from '@/components/farm/row-actions';
 import { formatPricePerKg, SaleFields } from '@/components/farm/sale-form';
 import { SectionTabs } from '@/components/farm/section-tabs';
@@ -48,7 +46,14 @@ import { create as createHarvest } from '@/routes/orchards/harvests';
 import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
 import { careTypeLabels } from '@/types/farm';
-import type { CareRecord, Orchard, Sale, Season, Tree } from '@/types/farm';
+import type {
+    CareRecord,
+    IssueSummary,
+    Orchard,
+    Sale,
+    Season,
+    Tree,
+} from '@/types/farm';
 
 type OrchardTab = 'trees' | 'care' | 'sales' | 'seasons';
 
@@ -86,6 +91,8 @@ export default function OrchardShow({
     activeTrees,
     sales,
     currentSeasonYieldKg,
+    dueIssues,
+    openIssues,
 }: {
     orchard: Orchard;
     trees: Tree[];
@@ -96,6 +103,8 @@ export default function OrchardShow({
     activeTrees: Pick<Tree, 'id' | 'code'>[];
     sales: Sale[];
     currentSeasonYieldKg: Record<number, number>;
+    dueIssues: IssueSummary[];
+    openIssues: IssueSummary[];
 }) {
     const confirm = useConfirm();
     const [tab, setTab] = useState<OrchardTab>(() => rememberedTab(orchard.id));
@@ -226,6 +235,10 @@ export default function OrchardShow({
                             aria-labelledby="tab-trees"
                             className="space-y-3"
                         >
+                            <IssueList
+                                dueIssues={dueIssues}
+                                openIssues={openIssues}
+                            />
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -693,17 +706,15 @@ export default function OrchardShow({
                         >
                             {({ processing, errors }) => (
                                 <>
-                                    <CareRecordFields
+                                    <CareRecordFormBody
                                         record={editingCare}
                                         errors={errors}
-                                    />
-                                    <TreePicker
                                         trees={activeTrees}
                                         attachedTrees={editingCare.trees}
                                         initialSelected={(
                                             editingCare.trees ?? []
                                         ).map((tree) => tree.id)}
-                                        errors={errors}
+                                        openIssues={openIssues}
                                     />
                                     <SubmitButton processing={processing} />
                                 </>

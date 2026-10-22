@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { formatThaiDate } from '@/lib/thai-date';
 import { careTypeLabels } from '@/types/farm';
-import type { CareRecord, CareType, Tree } from '@/types/farm';
+import type { CareRecord, CareType, IssueSummary, Tree } from '@/types/farm';
 
 type Errors = Record<string, string | undefined>;
 
@@ -21,12 +22,18 @@ export function CareRecordFields({
     record,
     defaultType = 'fertilizer',
     errors,
+    onTypeChange,
 }: {
     record?: CareRecord;
     defaultType?: CareType;
     errors: Errors;
+    onTypeChange?: (type: CareType) => void;
 }) {
     const [type, setType] = useState<CareType>(record?.type ?? defaultType);
+    const selectType = (value: CareType) => {
+        setType(value);
+        onTypeChange?.(value);
+    };
 
     return (
         <>
@@ -45,7 +52,7 @@ export function CareRecordFields({
                                 type="button"
                                 variant={type === value ? 'default' : 'outline'}
                                 aria-pressed={type === value}
-                                onClick={() => setType(value)}
+                                onClick={() => selectType(value)}
                             >
                                 {careTypeLabels[value]}
                             </Button>
@@ -108,11 +115,13 @@ export function TreePicker({
     attachedTrees = [],
     initialSelected,
     errors,
+    onSelectionChange,
 }: {
     trees: Pick<Tree, 'id' | 'code'>[];
     attachedTrees?: Pick<Tree, 'id' | 'code' | 'removed_on'>[];
     initialSelected: number[];
     errors: Errors;
+    onSelectionChange?: (selected: Set<number>) => void;
 }) {
     const activeIds = new Set(activeTrees.map((tree) => tree.id));
     const removedAttached = attachedTrees.filter(
@@ -129,18 +138,22 @@ export function TreePicker({
         key.startsWith('tree_ids'),
     )?.[1];
 
-    const toggle = (id: number) =>
-        setSelected((current) => {
-            const next = new Set(current);
+    const select = (next: Set<number>) => {
+        setSelected(next);
+        onSelectionChange?.(next);
+    };
 
-            if (next.has(id)) {
-                next.delete(id);
-            } else {
-                next.add(id);
-            }
+    const toggle = (id: number) => {
+        const next = new Set(selected);
 
-            return next;
-        });
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+
+        select(next);
+    };
 
     return (
         <div className="grid gap-2">
@@ -154,7 +167,7 @@ export function TreePicker({
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                            setSelected(new Set(trees.map((tree) => tree.id)))
+                            select(new Set(trees.map((tree) => tree.id)))
                         }
                     >
                         เลือกทั้งหมด
@@ -163,7 +176,7 @@ export function TreePicker({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelected(new Set())}
+                        onClick={() => select(new Set())}
                     >
                         ล้างที่เลือก
                     </Button>
@@ -197,5 +210,174 @@ export function TreePicker({
             </div>
             <InputError message={treeError} />
         </div>
+    );
+}
+
+/**
+ * Checkboxes for the open problems of the selected trees. A pesticide record is the treatment, so it ticks them by default.
+ */
+function IssueLinks({
+    issues,
+    ticked,
+    onToggle,
+}: {
+    issues: IssueSummary[];
+    ticked: Set<number>;
+    onToggle: (id: number) => void;
+}) {
+    if (issues.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="grid gap-2">
+            <Label>ผูกกับปัญหา</Label>
+            <p className="-mt-1 text-base text-muted-foreground md:text-sm">
+                ปัญหาที่ผูกใหม่จะเลื่อนวันดูซ้ำเป็น 7 วันหลังวันที่ทำ
+            </p>
+            <div className="grid gap-2">
+                {issues.map((issue) => (
+                    <label
+                        key={issue.id}
+                        className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 has-[:checked]:border-primary has-[:checked]:bg-brand-soft"
+                    >
+                        <input
+                            type="checkbox"
+                            name="issue_ids[]"
+                            value={issue.id}
+                            checked={ticked.has(issue.id)}
+                            onChange={() => onToggle(issue.id)}
+                            className="size-5 accent-primary"
+                        />
+                        <span className="min-w-0 flex-1">
+                            <span className="font-medium">
+                                {issue.treeCode} · {issue.finding}
+                            </span>
+                            <span className="block text-base text-muted-foreground md:text-sm">
+                                ดูซ้ำ {formatThaiDate(issue.followUpOn)}
+                            </span>
+                        </span>
+                    </label>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+/**
+ * Everything a care record form holds: the fields, the trees it covers and the problems it treats.
+ * It owns the type and the tree selection so the problem ticks can follow both.
+ *
+ * Pass `trees` for a picker, or leave it out when the page decides the trees (`initialSelected` is then fixed).
+ * `openIssues` are the issues the page knows; links on the record that are not among them are sent
+ * back untouched, because the form always submits the full set of links.
+ */
+export function CareRecordFormBody({
+    record,
+    defaultType = 'fertilizer',
+    errors,
+    trees,
+    attachedTrees,
+    initialSelected,
+    openIssues,
+}: {
+    record?: CareRecord;
+    defaultType?: CareType;
+    errors: Errors;
+    trees?: Pick<Tree, 'id' | 'code'>[];
+    attachedTrees?: Pick<Tree, 'id' | 'code' | 'removed_on'>[];
+    initialSelected: number[];
+    openIssues: IssueSummary[];
+}) {
+    const isEditing = record !== undefined;
+    const openIssueIds = new Set(openIssues.map((issue) => issue.id));
+    const defaultTicks = (
+        careType: CareType,
+        treeIds: Set<number>,
+    ): Set<number> =>
+        careType === 'pesticide'
+            ? new Set(
+                  openIssues
+                      .filter((issue) => treeIds.has(issue.treeId))
+                      .map((issue) => issue.id),
+              )
+            : new Set();
+
+    const [type, setType] = useState<CareType>(record?.type ?? defaultType);
+    const [selected, setSelected] = useState<Set<number>>(
+        () => new Set(initialSelected),
+    );
+    const [ticked, setTicked] = useState<Set<number>>(() =>
+        record
+            ? new Set(
+                  (record.issue_ids ?? []).filter((id) => openIssueIds.has(id)),
+              )
+            : defaultTicks(defaultType, new Set(initialSelected)),
+    );
+    const issueError = Object.entries(errors).find(([key]) =>
+        key.startsWith('issue_ids'),
+    )?.[1];
+    const keptIssueIds = (record?.issue_ids ?? []).filter(
+        (id) => !openIssueIds.has(id),
+    );
+
+    const changeType = (next: CareType) => {
+        setType(next);
+
+        if (!isEditing) {
+            setTicked(defaultTicks(next, selected));
+        }
+    };
+
+    const changeSelection = (next: Set<number>) => {
+        setSelected(next);
+
+        if (!isEditing) {
+            setTicked(defaultTicks(type, next));
+        }
+    };
+
+    const toggleIssue = (id: number) =>
+        setTicked((current) => {
+            const next = new Set(current);
+
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+
+            return next;
+        });
+
+    return (
+        <>
+            <CareRecordFields
+                record={record}
+                defaultType={defaultType}
+                errors={errors}
+                onTypeChange={changeType}
+            />
+            {trees && (
+                <TreePicker
+                    trees={trees}
+                    attachedTrees={attachedTrees}
+                    initialSelected={initialSelected}
+                    errors={errors}
+                    onSelectionChange={changeSelection}
+                />
+            )}
+            <IssueLinks
+                issues={openIssues.filter((issue) =>
+                    selected.has(issue.treeId),
+                )}
+                ticked={ticked}
+                onToggle={toggleIssue}
+            />
+            {keptIssueIds.map((id) => (
+                <input key={id} type="hidden" name="issue_ids[]" value={id} />
+            ))}
+            <InputError message={issueError} />
+        </>
     );
 }

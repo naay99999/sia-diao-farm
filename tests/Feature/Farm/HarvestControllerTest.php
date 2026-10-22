@@ -111,7 +111,7 @@ test('update and destroy change a harvest', function () {
     expect($harvest->fresh()->weight_kg)->toBe('9.00');
 
     $this->actingAs($this->user)->delete(route('harvests.destroy', $harvest))->assertRedirect();
-    $this->assertModelMissing($harvest);
+    $this->assertSoftDeleted($harvest);
 });
 
 test('a tree with a harvest or care record cannot be deleted', function () {

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Farm;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreOrchardRequest;
+use App\Models\CareRecord;
 use App\Models\Harvest;
 use App\Models\Orchard;
 use App\Models\Tree;
+use App\Support\IssueSummary;
 use App\Support\TreeQrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,11 +85,17 @@ class OrchardController extends Controller
                 ->get(),
             'showRemoved' => $showRemoved,
             'recentCareRecords' => $orchard->careRecords()
-                ->with('trees:id,code,removed_on')
+                ->with(['trees:id,code,removed_on', 'issues:id'])
                 ->latest('performed_on')
                 ->latest('id')
                 ->limit(10)
-                ->get(),
+                ->get()
+                ->each(function (CareRecord $record): void {
+                    $record->setAttribute('issue_ids', $record->issues->pluck('id')->all());
+                    $record->unsetRelation('issues');
+                }),
+            'dueIssues' => IssueSummary::dueForOrchard($orchard),
+            'openIssues' => IssueSummary::openForOrchard($orchard),
             'activeTrees' => $orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
             'sales' => $orchard->sales()->latest('sold_on')->latest('id')->get(),
             'currentSeason' => $currentSeason,
