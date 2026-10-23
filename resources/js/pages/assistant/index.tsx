@@ -144,45 +144,51 @@ export default function Assistant({
                                 สถานะการเชื่อมต่อ
                             </h2>
                             {isConnected ? (
-                                <ul className="divide-y">
-                                    {myConnections.map((connection) => (
-                                        <li
-                                            key={connection.clientId}
-                                            className="flex min-h-12 items-center gap-3 px-4 py-3"
-                                        >
-                                            <Check
-                                                className="size-5 shrink-0 text-primary"
-                                                aria-hidden
-                                            />
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-lg font-medium md:text-base">
-                                                    Claude ของคุณเชื่อมอยู่
-                                                </p>
-                                                <p className="text-base text-muted-foreground md:text-sm">
-                                                    {connection.name} ·
-                                                    เชื่อมเมื่อ{' '}
-                                                    {formatThaiDate(
-                                                        connection.connectedOn,
-                                                    )}
-                                                </p>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                className="shrink-0 text-destructive hover:text-destructive"
-                                                onClick={() =>
-                                                    disconnect(
-                                                        auth.user.id,
-                                                        null,
-                                                        connection,
-                                                    )
-                                                }
+                                <div>
+                                    <div className="flex min-h-12 items-center gap-3 px-4 py-3">
+                                        <Check
+                                            className="size-5 shrink-0 text-primary"
+                                            aria-hidden
+                                        />
+                                        <p className="text-lg font-medium md:text-base">
+                                            Claude ของคุณเชื่อมอยู่
+                                        </p>
+                                    </div>
+                                    <ul className="divide-y border-t">
+                                        {myConnections.map((connection) => (
+                                            <li
+                                                key={connection.clientId}
+                                                className="flex min-h-12 items-center gap-3 px-4 py-3"
                                             >
-                                                ยกเลิกการเชื่อม
-                                            </Button>
-                                        </li>
-                                    ))}
-                                </ul>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate text-lg font-medium md:text-base">
+                                                        {connection.name}
+                                                    </p>
+                                                    <p className="text-base text-muted-foreground md:text-sm">
+                                                        เชื่อมเมื่อ{' '}
+                                                        {formatThaiDate(
+                                                            connection.connectedOn,
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    className="shrink-0 text-destructive hover:text-destructive"
+                                                    onClick={() =>
+                                                        disconnect(
+                                                            auth.user.id,
+                                                            null,
+                                                            connection,
+                                                        )
+                                                    }
+                                                >
+                                                    ยกเลิกการเชื่อม
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             ) : (
                                 <p className="px-4 py-3 text-lg md:text-base">
                                     {auth.user.is_owner

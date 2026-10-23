@@ -191,4 +191,4 @@ Use `.backup` rather than `cp` so the copy stays consistent while the app is wri
 
 ### Connect Claude
 
-After logging in, open **ตั้งค่า → เชื่อมต่อ Claude** and add the MCP URL it shows (`https://farm.example.com/mcp/farm`) as a custom connector in Claude. Claude asks you to log in and approve access once.
+The owner adds each family member's account at **ตั้งค่า → สมาชิก**. Then each person logs in and opens **ผู้ช่วย AI** (`/assistant`). The owner sees a setup section there with the MCP URL (`https://farm.example.com/mcp/farm`) to add as a custom connector in Claude. Claude asks that person to log in and approve access once.
