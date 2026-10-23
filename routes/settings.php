@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AiConnectionController;
+use App\Http\Controllers\Settings\MemberController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,17 @@ Route::middleware(['auth'])->group(function () {
     Route::put('settings/password', [ProfileController::class, 'updatePassword'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
+
+    Route::middleware('can:manage-members')->group(function () {
+        Route::get('settings/members', [MemberController::class, 'index'])->name('members.index');
+        Route::post('settings/members', [MemberController::class, 'store'])->name('members.store');
+        Route::patch('settings/members/{user}', [MemberController::class, 'update'])->name('members.update');
+        Route::put('settings/members/{user}/password', [MemberController::class, 'resetPassword'])
+            ->middleware('throttle:6,1')
+            ->name('members.password');
+        Route::patch('settings/members/{user}/deactivate', [MemberController::class, 'deactivate'])->name('members.deactivate');
+        Route::patch('settings/members/{user}/activate', [MemberController::class, 'activate'])->name('members.activate');
+    });
 
     Route::get('settings/ai', [AiConnectionController::class, 'edit'])->name('ai-connection.edit');
     Route::delete('settings/ai/{client}', [AiConnectionController::class, 'destroy'])->name('ai-connection.destroy');

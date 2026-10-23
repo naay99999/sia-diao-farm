@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configurePassport();
+        $this->configureAuthorization();
     }
 
     /**
@@ -56,5 +59,13 @@ class AppServiceProvider extends ServiceProvider
     protected function configurePassport(): void
     {
         Passport::authorizationView('mcp.authorize');
+    }
+
+    /**
+     * Only the owner may manage family member accounts.
+     */
+    protected function configureAuthorization(): void
+    {
+        Gate::define('manage-members', fn (User $user): bool => $user->is_owner);
     }
 }

@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -6,21 +6,29 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { edit as aiConnectionEdit } from '@/routes/ai-connection';
+import { index as membersIndex } from '@/routes/members';
 import { edit as profileEdit } from '@/routes/profile';
-
-const settingsNavItems = [
-    { title: 'โปรไฟล์', href: profileEdit() },
-    { title: 'เชื่อมต่อ Claude', href: aiConnectionEdit() },
-];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { auth } = usePage().props;
+    const isOwner = auth.user.is_owner;
+
+    const settingsNavItems = [
+        { title: 'โปรไฟล์', href: profileEdit() },
+        { title: 'เชื่อมต่อ Claude', href: aiConnectionEdit() },
+        ...(isOwner ? [{ title: 'สมาชิก', href: membersIndex() }] : []),
+    ];
 
     return (
         <div className="space-y-6 px-4 py-6 md:px-6">
             <Heading
                 title="ตั้งค่า"
-                description="บัญชีของคุณและการเชื่อมต่อกับ Claude"
+                description={
+                    isOwner
+                        ? 'บัญชีของคุณและสมาชิกในครอบครัว'
+                        : 'บัญชีของคุณและการเชื่อมต่อกับ Claude'
+                }
             />
 
             <nav
