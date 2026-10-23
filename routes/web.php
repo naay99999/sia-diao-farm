@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\Farm\CareRecordController;
 use App\Http\Controllers\Farm\ExpenseController;
 use App\Http\Controllers\Farm\HarvestController;
@@ -54,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::patch('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+    Route::get('assistant', [AssistantController::class, 'index'])->name('assistant.index');
+    Route::delete('assistant/connections/{user}/{client}', [AssistantController::class, 'destroy'])->name('assistant.connections.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 

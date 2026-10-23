@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
-import { edit as aiConnectionEdit } from '@/routes/ai-connection';
 import { index as membersIndex } from '@/routes/members';
 import { edit as profileEdit } from '@/routes/profile';
 
@@ -16,7 +15,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     const settingsNavItems = [
         { title: 'โปรไฟล์', href: profileEdit() },
-        { title: 'เชื่อมต่อ Claude', href: aiConnectionEdit() },
         ...(isOwner ? [{ title: 'สมาชิก', href: membersIndex() }] : []),
     ];
 
@@ -25,9 +23,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             <Heading
                 title="ตั้งค่า"
                 description={
-                    isOwner
-                        ? 'บัญชีของคุณและสมาชิกในครอบครัว'
-                        : 'บัญชีของคุณและการเชื่อมต่อกับ Claude'
+                    isOwner ? 'บัญชีของคุณและสมาชิกในครอบครัว' : 'บัญชีของคุณ'
                 }
             />
 
