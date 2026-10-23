@@ -372,3 +372,10 @@ test('guests cannot record observations', function () {
         'finding_id' => $this->redMite->id, 'observed_on' => '2026-10-21',
     ])->assertRedirect(route('login'));
 });
+
+test('observation photos are kept in laravel storage on the server', function () {
+    expect(config('filesystems.disks.photos'))
+        ->driver->toBe('local')
+        ->root->toBe(storage_path('app/private/photos'))
+        ->serve->toBeTrue();
+});

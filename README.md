@@ -128,15 +128,7 @@ On later deploys, run everything except the `first deploy only` lines. Keep `sto
 
 ### 3. Observation photos
 
-Photos are stored in `storage/app/private/photos` by default and served through short-lived signed URLs. To keep them in Cloudflare R2 instead:
-
-```dotenv
-PHOTOS_DISK_DRIVER=s3
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_BUCKET=...
-R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-```
+Photos are stored on the server in `storage/app/private/photos` and served through short-lived signed URLs. Make sure that folder survives deploys (it does unless you replace `storage/` wholesale).
 
 Each observation takes up to 3 photos of 8 MB each, so raise PHP's upload limits (and the web server's body size, e.g. nginx `client_max_body_size 30M`):
 
@@ -147,13 +139,17 @@ post_max_size = 30M
 
 ### 4. Backups
 
-All farm data lives in `database/database.sqlite`, plus the photos. Copy them off the server regularly, for example with a daily cron:
+Everything lives on the server: the farm data in `database/database.sqlite`, the photos in `storage/app/private/photos` and the OAuth keys in `storage/oauth-*.key`. If the server's disk is lost, so is the farm, so copy all three off the server every day. A daily cron that snapshots the database and syncs to any off-site storage with [rclone](https://rclone.org) (an S3-compatible bucket, Google Drive, another machine):
 
 ```bash
-sqlite3 database/database.sqlite ".backup '/backups/farm-$(date +%F).sqlite'"
+cd /path/to/sia-diao-farm
+mkdir -p ~/farm-db && sqlite3 database/database.sqlite ".backup '$HOME/farm-db/farm.sqlite'"
+rclone sync ~/farm-db remote:farm-backup/database --backup-dir remote:farm-backup/database-old/$(date +%F)
+rclone sync storage/app/private/photos remote:farm-backup/photos
+rclone copy storage --include "oauth-*.key" remote:farm-backup/keys
 ```
 
-Use `.backup` rather than `cp` so the copy stays consistent while the app is writing. Back up the photos folder (or rely on R2) and the two `storage/oauth-*.key` files as well.
+Use `.backup` rather than `cp` so the copy stays consistent while the app is writing. `--backup-dir` keeps each day's previous database copy, so a bad day can be rolled back.
 
 ### 5. Connect Claude
 
