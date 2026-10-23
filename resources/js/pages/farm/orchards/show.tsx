@@ -1,4 +1,11 @@
-import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
+import {
+    Form,
+    Head,
+    Link,
+    router,
+    setLayoutProps,
+    usePage,
+} from '@inertiajs/react';
 import { ChevronRight, MoreVertical, Search } from 'lucide-react';
 import { useState } from 'react';
 import CareRecordController from '@/actions/App/Http/Controllers/Farm/CareRecordController';
@@ -107,6 +114,8 @@ export default function OrchardShow({
     openIssues: IssueSummary[];
 }) {
     const confirm = useConfirm();
+    const pageErrors =
+        usePage<{ errors?: Record<string, string> }>().props.errors ?? {};
     const [tab, setTab] = useState<OrchardTab>(() => rememberedTab(orchard.id));
     const [saleDialog, setSaleDialog] = useState<Sale | 'new' | null>(null);
     const [editingCare, setEditingCare] = useState<CareRecord | null>(null);
@@ -135,7 +144,7 @@ export default function OrchardShow({
             await confirm({
                 title: `ลบ${orchard.name}?`,
                 description:
-                    'ต้นไม้ รอบการผลิต บันทึกการดูแล ผลผลิต และการขายทั้งหมดในสวนนี้จะถูกลบไปด้วย',
+                    'ต้นไม้และรอบการผลิตในสวนนี้จะถูกลบไปด้วย ลบได้เฉพาะสวนที่ยังไม่มีบันทึก',
                 confirmLabel: 'ลบสวน',
                 destructive: true,
             })
@@ -190,6 +199,15 @@ export default function OrchardShow({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {pageErrors.orchard && (
+                <p
+                    role="alert"
+                    className="text-base text-destructive md:text-sm"
+                >
+                    {pageErrors.orchard}
+                </p>
+            )}
 
             {orchard.notes && (
                 <p className="-mt-3 text-base text-muted-foreground md:text-sm">
