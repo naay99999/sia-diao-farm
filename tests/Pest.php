@@ -1,7 +1,12 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Mcp\Server\Testing\TestResponse as McpTestResponse;
+use Laravel\Passport\Client;
+use Laravel\Passport\RefreshToken;
+use Laravel\Passport\Token;
 use Tests\TestCase;
 
 /*
@@ -45,9 +50,33 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Issue an access token (and its refresh token) for the user, the way the OAuth flow would.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function issueToken(User $user, Client $client, array $attributes = [], ?string $refreshExpiresAt = '+30 days'): Token
 {
-    // ..
+    $token = Token::forceCreate([
+        'id' => Str::random(80),
+        'user_id' => $user->id,
+        'client_id' => $client->id,
+        'scopes' => [],
+        'revoked' => false,
+        'expires_at' => now()->addHour(),
+        ...$attributes,
+    ]);
+
+    if ($refreshExpiresAt !== null) {
+        RefreshToken::forceCreate([
+            'id' => Str::random(80),
+            'access_token_id' => $token->id,
+            'revoked' => false,
+            'expires_at' => now()->modify($refreshExpiresAt),
+        ]);
+    }
+
+    return $token;
 }
 
 /*

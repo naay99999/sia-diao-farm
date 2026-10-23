@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\AiConnections;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -50,5 +51,17 @@ class User extends Authenticatable implements OAuthenticatable
     public function isActive(): bool
     {
         return $this->deactivated_at === null;
+    }
+
+    public function deactivate(): void
+    {
+        $this->forceFill(['deactivated_at' => now()])->save();
+
+        AiConnections::revokeAll($this->id);
+    }
+
+    public function activate(): void
+    {
+        $this->forceFill(['deactivated_at' => null])->save();
     }
 }

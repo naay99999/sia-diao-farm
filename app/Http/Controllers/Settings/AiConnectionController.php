@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Support\AiConnections;
 use App\Support\RecentAiRecords;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Passport\RefreshToken;
-use Laravel\Passport\Token;
 
 class AiConnectionController extends Controller
 {
@@ -24,24 +22,10 @@ class AiConnectionController extends Controller
     {
         $appUrl = rtrim((string) config('app.url'), '/');
 
-        $connections = $this->liveTokens($request->user()->id)
-            ->with('client')
-            ->get()
-            ->filter(fn (Token $token): bool => $token->client !== null && ! $token->client->revoked)
-            ->groupBy('client_id')
-            ->map(fn ($tokens): array => [
-                'clientId' => $tokens->first()->client_id,
-                'name' => $tokens->first()->client->name,
-                'connectedOn' => $tokens->min('created_at')->toDateString(),
-            ])
-            ->sortBy('connectedOn')
-            ->values()
-            ->all();
-
         return Inertia::render('settings/ai-connection', [
             'mcpUrl' => $appUrl.self::MCP_PATH,
             'isPubliclyReachable' => $this->isPubliclyReachable($appUrl),
-            'connections' => $connections,
+            'connections' => AiConnections::forUser($request->user()->id),
             'recentAiRecords' => RecentAiRecords::latest(),
         ]);
     }
@@ -51,35 +35,11 @@ class AiConnectionController extends Controller
      */
     public function destroy(Request $request, string $client): RedirectResponse
     {
-        $tokenIds = Token::query()
-            ->where('user_id', $request->user()->id)
-            ->where('client_id', $client)
-            ->pluck('id');
-
-        Token::query()->whereKey($tokenIds)->update(['revoked' => true]);
-        RefreshToken::query()->whereIn('access_token_id', $tokenIds)->update(['revoked' => true]);
+        AiConnections::revoke($request->user()->id, $client);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ยกเลิกการเชื่อมต่อแล้ว']);
 
         return to_route('ai-connection.edit');
-    }
-
-    /**
-     * Tokens the app can still use, directly or by refreshing them.
-     *
-     * @return Builder<Token>
-     */
-    private function liveTokens(int $userId): Builder
-    {
-        return Token::query()
-            ->where('user_id', $userId)
-            ->where('revoked', false)
-            ->where(fn (Builder $query) => $query
-                ->whereNull('expires_at')
-                ->orWhere('expires_at', '>', now())
-                ->orWhereHas('refreshToken', fn (Builder $refresh) => $refresh
-                    ->where('revoked', false)
-                    ->where('expires_at', '>', now())));
     }
 
     /**

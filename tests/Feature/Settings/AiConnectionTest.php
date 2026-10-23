@@ -5,44 +5,13 @@ use App\Models\Tree;
 use App\Models\User;
 use App\Support\Provenance;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Passport\Client;
 use Laravel\Passport\RefreshToken;
-use Laravel\Passport\Token;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
 });
-
-/**
- * Issue an access token (and its refresh token) for the user, the way the OAuth flow would.
- *
- * @param  array<string, mixed>  $attributes
- */
-function issueToken(User $user, Client $client, array $attributes = [], ?string $refreshExpiresAt = '+30 days'): Token
-{
-    $token = Token::forceCreate([
-        'id' => Str::random(80),
-        'user_id' => $user->id,
-        'client_id' => $client->id,
-        'scopes' => [],
-        'revoked' => false,
-        'expires_at' => now()->addHour(),
-        ...$attributes,
-    ]);
-
-    if ($refreshExpiresAt !== null) {
-        RefreshToken::forceCreate([
-            'id' => Str::random(80),
-            'access_token_id' => $token->id,
-            'revoked' => false,
-            'expires_at' => now()->modify($refreshExpiresAt),
-        ]);
-    }
-
-    return $token;
-}
 
 test('guests are redirected to login', function () {
     $this->get(route('ai-connection.edit'))->assertRedirect(route('login'));
