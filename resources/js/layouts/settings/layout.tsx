@@ -2,19 +2,53 @@ import { Link, router } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import { useCurrentUrl } from '@/hooks/use-current-url';
+import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
+import { edit as aiConnectionEdit } from '@/routes/ai-connection';
+import { edit as profileEdit } from '@/routes/profile';
+
+const settingsNavItems = [
+    { title: 'โปรไฟล์', href: profileEdit() },
+    { title: 'เชื่อมต่อ Claude', href: aiConnectionEdit() },
+];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const { isCurrentUrl } = useCurrentUrl();
+
     return (
-        <div className="space-y-8 px-4 py-6 md:px-6">
+        <div className="space-y-6 px-4 py-6 md:px-6">
             <Heading
                 title="ตั้งค่า"
-                description="จัดการโปรไฟล์และการตั้งค่าบัญชีของคุณ"
+                description="บัญชีของคุณและการเชื่อมต่อกับ Claude"
             />
 
-            <div className="flex-1 md:max-w-2xl">
-                <section className="max-w-xl space-y-12">{children}</section>
-            </div>
+            <nav
+                aria-label="หมวดการตั้งค่า"
+                className="-mx-4 flex [scrollbar-width:none] overflow-x-auto border-b px-4 md:mx-0 md:px-0"
+            >
+                {settingsNavItems.map((item) => {
+                    const isActive = isCurrentUrl(item.href);
+
+                    return (
+                        <Link
+                            key={item.title}
+                            href={item.href}
+                            prefetch
+                            aria-current={isActive ? 'page' : undefined}
+                            className={cn(
+                                '-mb-px flex h-12 shrink-0 items-center border-b-2 border-transparent px-2.5 text-lg font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none md:h-10 md:px-3 md:text-base',
+                                isActive && 'border-primary text-foreground',
+                            )}
+                        >
+                            {item.title}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Each settings page sets its own width: forms stay narrow, overviews use the canvas. */}
+            {children}
 
             <div className="max-w-xl border-t pt-6 md:hidden">
                 <Button variant="outline" className="w-full" asChild>

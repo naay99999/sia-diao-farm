@@ -1,9 +1,13 @@
 <?php
 
+use App\Models\FarmNote;
+use App\Models\Observation;
 use App\Models\Orchard;
 use App\Models\Season;
 use App\Models\Tree;
+use App\Models\TreeIssue;
 use App\Models\User;
+use App\Support\RecentAiRecords;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -26,6 +30,22 @@ it('seeds demo orchards with one open season each in the local environment', fun
     expect(Orchard::count())->toBe(2)
         ->and(Tree::count())->toBe(40)
         ->and(Season::whereNull('ended_on')->count())->toBe(2);
+});
+
+it('seeds demo issues, observations, and notes in the local environment', function () {
+    app()->detectEnvironment(fn () => 'local');
+
+    $this->seed(DatabaseSeeder::class);
+
+    expect(Season::whereNotNull('ended_on')->count())->toBe(2)
+        ->and(Tree::whereNotNull('removed_on')->count())->toBe(2)
+        ->and(TreeIssue::open()->count())->toBe(6)
+        ->and(TreeIssue::due(now())->count())->toBe(4)
+        ->and(TreeIssue::whereNotNull('resolved_on')->count())->toBe(2)
+        ->and(TreeIssue::has('careRecords')->count())->toBe(4)
+        ->and(Observation::whereNotNull('outcome')->count())->toBe(4)
+        ->and(FarmNote::count())->toBe(9)
+        ->and(RecentAiRecords::latest())->toHaveCount(3);
 });
 
 it('does not overwrite an existing owner when re-seeding', function () {
