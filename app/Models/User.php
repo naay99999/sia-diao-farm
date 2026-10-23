@@ -19,6 +19,8 @@ use Laravel\Passport\HasApiTokens;
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
+ * @property bool $is_owner
+ * @property Carbon|null $deactivated_at
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -40,6 +42,13 @@ class User extends Authenticatable implements OAuthenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_owner' => 'bool',
+            'deactivated_at' => 'datetime',
         ];
+    }
+
+    public function isActive(): bool
+    {
+        return $this->deactivated_at === null;
     }
 }

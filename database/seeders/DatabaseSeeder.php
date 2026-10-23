@@ -32,13 +32,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->seedOwner();
+
+        if (app()->environment('local')) {
+            $this->seedDemoOrchards();
+            $this->seedGeneralNotes();
+            $this->seedAiRecords();
+        }
+    }
+
+    /**
+     * Create the owner only when none exists, so repeated deploys never add another or reclaim one.
+     */
+    private function seedOwner(): void
+    {
+        if (User::query()->where('is_owner', true)->exists()) {
+            return;
+        }
+
         $ownerPassword = config('farm.owner.password');
 
         if (! app()->environment(['local', 'testing']) && ($ownerPassword === null || $ownerPassword === '' || $ownerPassword === 'password')) {
             throw new RuntimeException('Set OWNER_PASSWORD to a non-default value before seeding outside local/testing environments.');
         }
 
-        User::firstOrCreate(
+        $owner = User::firstOrCreate(
             ['email' => config('farm.owner.email')],
             [
                 'name' => 'เจ้าของสวน',
@@ -46,11 +64,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        if (app()->environment('local')) {
-            $this->seedDemoOrchards();
-            $this->seedGeneralNotes();
-            $this->seedAiRecords();
-        }
+        $owner->forceFill(['is_owner' => true])->save();
     }
 
     /**

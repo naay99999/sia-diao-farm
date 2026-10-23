@@ -22,6 +22,34 @@ it('seeds only the owner outside the local environment', function () {
         ->and(Orchard::count())->toBe(0);
 });
 
+it('marks the seeded account as the owner', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    expect(User::sole()->is_owner)->toBeTrue();
+});
+
+it('does not create another owner when the owner changed their email', function () {
+    $this->seed(DatabaseSeeder::class);
+    User::sole()->update(['email' => 'changed@example.com']);
+
+    $this->seed(DatabaseSeeder::class);
+
+    expect(User::count())->toBe(1)
+        ->and(User::sole()->email)->toBe('changed@example.com')
+        ->and(User::sole()->is_owner)->toBeTrue();
+});
+
+it('does not hand ownership to a member who holds the owner email', function () {
+    $owner = User::factory()->owner()->create(['email' => 'real-owner@example.com']);
+    $member = User::factory()->create(['email' => config('farm.owner.email')]);
+
+    $this->seed(DatabaseSeeder::class);
+
+    expect($member->fresh()->is_owner)->toBeFalse()
+        ->and($owner->fresh()->is_owner)->toBeTrue()
+        ->and(User::count())->toBe(2);
+});
+
 it('seeds demo orchards with one open season each in the local environment', function () {
     app()->detectEnvironment(fn () => 'local');
 
