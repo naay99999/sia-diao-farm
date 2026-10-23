@@ -14,6 +14,7 @@
         "fortify-development",
         "laravel-best-practices",
         "mcp-development",
+        "passport-development",
         "wayfinder-development",
         "pest-testing",
         "inertia-react-development",
