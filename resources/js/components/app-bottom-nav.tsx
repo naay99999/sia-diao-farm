@@ -18,7 +18,7 @@ export function AppBottomNav() {
             aria-label="เมนูหลัก"
             className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
         >
-            <ul className="grid grid-cols-3">
+            <ul className="grid grid-cols-4">
                 {[...mainNavItems, accountNavItem].map((item) => {
                     const isActive = isNavItemActive(item, currentUrl);
 

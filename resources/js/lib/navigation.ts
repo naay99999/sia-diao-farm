@@ -1,4 +1,5 @@
-import { Trees, UserRound, Wallet } from 'lucide-react';
+import { Sparkles, Trees, UserRound, Wallet } from 'lucide-react';
+import { index as assistantIndex } from '@/routes/assistant';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as orchardsIndex } from '@/routes/orchards';
 import { edit as profileEdit } from '@/routes/profile';
@@ -19,6 +20,12 @@ export const mainNavItems: NavItem[] = [
         href: expensesIndex(),
         icon: Wallet,
         matches: ['/expenses'],
+    },
+    {
+        title: 'ผู้ช่วย AI',
+        href: assistantIndex(),
+        icon: Sparkles,
+        matches: ['/assistant'],
     },
 ];
 
