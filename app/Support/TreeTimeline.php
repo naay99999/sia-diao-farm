@@ -16,19 +16,20 @@ class TreeTimeline
     public const PHOTO_URL_MINUTES = 30;
 
     /**
-     * Newest first. Every entry carries `fromAi`; observation entries also carry short-lived photo URLs.
+     * Newest first. Every entry carries `fromAi` and `aiBy`; observation entries also carry short-lived photo URLs.
      *
      * @return array<int, array<string, mixed>>
      */
     public static function for(Tree $tree, int $limit = 50): array
     {
-        $care = $tree->careRecords()->with(['trees:id,code,removed_on', 'issues:id'])->get()->map(fn (CareRecord $record): array => [
+        $care = $tree->careRecords()->with(['trees:id,code,removed_on', 'issues:id', 'creator:id,name', 'updater:id,name'])->get()->map(fn (CareRecord $record): array => [
             'kind' => 'care',
             'id' => $record->id,
             'date' => $record->performed_on->toDateString(),
             'title' => trim($record->type->label().' '.$record->product),
             'detail' => collect([$record->quantity, $record->notes])->filter()->join(' · ') ?: null,
             'fromAi' => $record->isFromAi(),
+            'aiBy' => $record->aiActorName(),
             'record' => [
                 'id' => $record->id,
                 'type' => $record->type->value,
@@ -41,7 +42,7 @@ class TreeTimeline
             ],
         ]);
 
-        $harvests = $tree->harvests()->get()->map(fn (Harvest $harvest): array => [
+        $harvests = $tree->harvests()->with(['creator:id,name', 'updater:id,name'])->get()->map(fn (Harvest $harvest): array => [
             'kind' => 'harvest',
             'id' => $harvest->id,
             'date' => $harvest->harvested_on->toDateString(),
@@ -51,6 +52,7 @@ class TreeTimeline
                 $harvest->notes,
             ])->filter()->join(' · ') ?: null,
             'fromAi' => $harvest->isFromAi(),
+            'aiBy' => $harvest->aiActorName(),
             'record' => [
                 'id' => $harvest->id,
                 'harvested_on' => $harvest->harvested_on->toDateString(),
@@ -60,13 +62,14 @@ class TreeTimeline
             ],
         ]);
 
-        $observations = $tree->observations()->with(['finding', 'photos' => fn ($query) => $query->orderBy('id')])->get()->map(fn (Observation $observation): array => [
+        $observations = $tree->observations()->with(['finding', 'creator:id,name', 'updater:id,name', 'photos' => fn ($query) => $query->orderBy('id')])->get()->map(fn (Observation $observation): array => [
             'kind' => 'observation',
             'id' => $observation->id,
             'date' => $observation->observed_on->toDateString(),
             'title' => self::observationTitle($observation),
             'detail' => collect([$observation->severity?->label(), $observation->notes])->filter()->join(' · ') ?: null,
             'fromAi' => $observation->isFromAi(),
+            'aiBy' => $observation->aiActorName(),
             'photos' => self::photoUrls($observation),
             'record' => [
                 'id' => $observation->id,

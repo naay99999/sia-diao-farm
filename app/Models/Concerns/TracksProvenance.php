@@ -2,8 +2,10 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\User;
 use App\Support\Provenance;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Context;
 
 /**
@@ -47,6 +49,34 @@ trait TracksProvenance
     public function isFromAi(): bool
     {
         return $this->created_via === Provenance::VIA_MCP || $this->updated_via === Provenance::VIA_MCP;
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * The name of whoever used AI to write or change this row, if anyone did.
+     */
+    public function aiActorName(): ?string
+    {
+        return match (true) {
+            $this->created_via === Provenance::VIA_MCP => $this->creator?->name,
+            $this->updated_via === Provenance::VIA_MCP => $this->updater?->name,
+            default => null,
+        };
     }
 
     private static function currentVia(): string

@@ -157,6 +157,7 @@ test('timeline marks care records and harvests as ai when written through mcp', 
     $this->tree->careRecords()->attach($care);
     $care->issues()->attach(TreeIssue::factory()->for($this->tree)->create());
 
+    $this->actingAs($this->user);
     Context::add('record_via', 'mcp');
     $harvest = $this->tree->harvests()->create(['harvested_on' => '2026-10-19', 'weight_kg' => 12]);
     Context::forget('record_via');
@@ -167,8 +168,10 @@ test('timeline marks care records and harvests as ai when written through mcp', 
             ->where('timeline.0.kind', 'harvest')
             ->where('timeline.0.id', $harvest->id)
             ->where('timeline.0.fromAi', true)
+            ->where('timeline.0.aiBy', $this->user->name)
             ->where('timeline.1.kind', 'care')
             ->where('timeline.1.fromAi', false)
+            ->where('timeline.1.aiBy', null)
             ->where('timeline.1.record.issue_ids', $care->issues->pluck('id')->all()));
 });
 

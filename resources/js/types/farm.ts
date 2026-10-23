@@ -116,6 +116,7 @@ type TimelineEntryBase = {
     title: string;
     detail: string | null;
     fromAi: boolean;
+    aiBy: string | null;
 };
 
 export type TimelineEntry =

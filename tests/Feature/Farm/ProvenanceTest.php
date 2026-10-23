@@ -98,3 +98,24 @@ test('a tree whose records were soft deleted still counts as having records', fu
 
     expect($tree->hasRecords())->toBeTrue();
 });
+
+test('the ai badge names whoever used ai', function () {
+    $mae = User::factory()->create(['name' => 'แม่']);
+    $owner = User::factory()->create(['name' => 'นราธิป']);
+    $tree = Tree::factory()->create();
+
+    $this->actingAs($owner);
+    $harvest = Harvest::factory()->create(['tree_id' => $tree->id]);
+    expect($harvest->aiActorName())->toBeNull();
+
+    $this->actingAs($mae);
+    Context::add(Provenance::VIA_KEY, Provenance::VIA_MCP);
+    $harvest->update(['weight_kg' => 30]);
+    expect($harvest->fresh()->aiActorName())->toBe('แม่');
+
+    $created = Harvest::factory()->create(['tree_id' => $tree->id]);
+    Context::forget(Provenance::VIA_KEY);
+    $this->actingAs($owner);
+    $created->update(['weight_kg' => 31]);
+    expect($created->fresh()->aiActorName())->toBe('แม่');
+});

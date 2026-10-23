@@ -71,6 +71,7 @@ test('page lists the latest records written through mcp', function () {
     $tree = Tree::factory()->create(['code' => 'A-03']);
     Harvest::factory()->create(['tree_id' => $tree->id, 'weight_kg' => 12.5, 'harvested_on' => now()->subDay()]);
 
+    $this->actingAs($this->user);
     Context::add(Provenance::VIA_KEY, Provenance::VIA_MCP);
     Harvest::factory()->create(['tree_id' => $tree->id, 'weight_kg' => 20, 'harvested_on' => now()->toDateString()]);
     Context::forget(Provenance::VIA_KEY);
@@ -81,6 +82,7 @@ test('page lists the latest records written through mcp', function () {
             ->has('recentAiRecords', 1)
             ->where('recentAiRecords.0.title', 'ผลผลิต 20 กก.')
             ->where('recentAiRecords.0.subject', 'ต้น A-03')
+            ->where('recentAiRecords.0.by', $this->user->name)
             ->where('recentAiRecords.0.href', route('trees.show', $tree, false)));
 });
 

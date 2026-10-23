@@ -372,6 +372,8 @@ export default function TreeShow({
                                                         บันทึกโดย{' '}
                                                     </span>
                                                     AI
+                                                    {entry.aiBy &&
+                                                        ` · ${entry.aiBy}`}
                                                 </Badge>
                                             )}
                                         </div>
