@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\AiConnectionController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,4 +13,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('settings/password', [ProfileController::class, 'updatePassword'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
+
+    Route::get('settings/ai', [AiConnectionController::class, 'edit'])->name('ai-connection.edit');
+    Route::delete('settings/ai/{client}', [AiConnectionController::class, 'destroy'])->name('ai-connection.destroy');
 });

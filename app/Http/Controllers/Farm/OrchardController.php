@@ -135,6 +135,10 @@ class OrchardController extends Controller
 
     public function destroy(Orchard $orchard): RedirectResponse
     {
+        if ($orchard->hasRecords()) {
+            return back()->withErrors(['orchard' => 'ลบไม่ได้เพราะสวนนี้มีบันทึกแล้ว']);
+        }
+
         $orchard->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบสวนแล้ว']);

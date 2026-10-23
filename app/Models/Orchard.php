@@ -63,4 +63,20 @@ class Orchard extends Model
     {
         return $this->hasOne(Season::class)->whereNull('ended_on');
     }
+
+    /**
+     * Whether deleting the orchard would wipe farm history, counting soft deleted records too.
+     * Trees and seasons that hold nothing yet do not count.
+     */
+    public function hasRecords(): bool
+    {
+        $treeIds = $this->trees()->select('id');
+
+        return $this->careRecords()->withTrashed()->exists()
+            || $this->sales()->withTrashed()->exists()
+            || Expense::withTrashed()->whereIn('season_id', $this->seasons()->select('id'))->exists()
+            || Harvest::withTrashed()->whereIn('tree_id', $treeIds)->exists()
+            || Observation::withTrashed()->whereIn('tree_id', $treeIds)->exists()
+            || TreeIssue::withTrashed()->whereIn('tree_id', $treeIds)->exists();
+    }
 }

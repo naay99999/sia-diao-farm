@@ -90,3 +90,71 @@ Starts the Laravel server, Vite dev server, and Pail log viewer together.
 ```bash
 php artisan test --compact
 ```
+
+## Deployment
+
+The app is a single Laravel server with an SQLite file. No queue worker or scheduler is needed. Any host that runs PHP 8.5 works (Laravel Cloud, Forge, a VPS).
+
+### 1. Environment
+
+Set these in the server's `.env`:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://farm.example.com   # must be https and publicly reachable for the AI connection
+APP_LOCALE=th
+APP_FALLBACK_LOCALE=th
+
+OWNER_EMAIL=you@example.com
+OWNER_PASSWORD=a-long-unique-password
+```
+
+In production, passwords changed from the settings page must be at least 12 characters with mixed case, numbers and symbols.
+
+### 2. Install and build
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan key:generate          # first deploy only
+php artisan passport:keys         # first deploy only; the MCP OAuth flow fails without these keys
+php artisan migrate --force
+php artisan db:seed --force       # first deploy only; creates the owner account
+npm ci && npm run build
+php artisan optimize
+```
+
+On later deploys, run everything except the `first deploy only` lines. Keep `storage/oauth-private.key` and `storage/oauth-public.key` across deploys, or every connected AI app has to reconnect.
+
+### 3. Observation photos
+
+Photos are stored in `storage/app/private/photos` by default and served through short-lived signed URLs. To keep them in Cloudflare R2 instead:
+
+```dotenv
+PHOTOS_DISK_DRIVER=s3
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=...
+R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+```
+
+Each observation takes up to 3 photos of 8 MB each, so raise PHP's upload limits (and the web server's body size, e.g. nginx `client_max_body_size 30M`):
+
+```ini
+upload_max_filesize = 8M
+post_max_size = 30M
+```
+
+### 4. Backups
+
+All farm data lives in `database/database.sqlite`, plus the photos. Copy them off the server regularly, for example with a daily cron:
+
+```bash
+sqlite3 database/database.sqlite ".backup '/backups/farm-$(date +%F).sqlite'"
+```
+
+Use `.backup` rather than `cp` so the copy stays consistent while the app is writing. Back up the photos folder (or rely on R2) and the two `storage/oauth-*.key` files as well.
+
+### 5. Connect Claude
+
+After logging in, open **ตั้งค่า → เชื่อมต่อ Claude** and add the MCP URL it shows (`https://farm.example.com/mcp/farm`) as a custom connector in Claude. Claude asks you to log in and approve access once.

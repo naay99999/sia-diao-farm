@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Support\Provenance;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Context;
 
 /**
@@ -31,6 +32,16 @@ trait TracksProvenance
             $model->updated_by = auth()->user()?->id;
             $model->updated_via = self::currentVia();
         });
+    }
+
+    /**
+     * The newest rows an AI client created through MCP.
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeLatestFromMcp(Builder $query, int $limit): void
+    {
+        $query->where('created_via', Provenance::VIA_MCP)->latest()->latest('id')->limit($limit);
     }
 
     public function isFromAi(): bool

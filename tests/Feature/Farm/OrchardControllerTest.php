@@ -1,9 +1,14 @@
 <?php
 
+use App\Models\CareRecord;
+use App\Models\Expense;
 use App\Models\Harvest;
+use App\Models\Observation;
 use App\Models\Orchard;
+use App\Models\Sale;
 use App\Models\Season;
 use App\Models\Tree;
+use App\Models\TreeIssue;
 use App\Models\User;
 
 test('guests are redirected to login from orchards index', function () {
@@ -75,6 +80,38 @@ test('destroy removes an orchard', function () {
 
     $this->assertModelMissing($orchard);
 });
+
+test('destroy removes an orchard whose trees and seasons have no records', function () {
+    $orchard = Orchard::factory()->create();
+    Tree::factory()->for($orchard)->create();
+    Season::factory()->for($orchard)->create();
+
+    $this->actingAs(User::factory()->create())
+        ->delete(route('orchards.destroy', $orchard))
+        ->assertRedirect(route('orchards.index'));
+
+    $this->assertModelMissing($orchard);
+});
+
+test('destroy refuses an orchard that has records', function (Closure $recordFor) {
+    $orchard = Orchard::factory()->create();
+    $recordFor($orchard)->delete();
+
+    $this->actingAs(User::factory()->create())
+        ->from(route('orchards.show', $orchard))
+        ->delete(route('orchards.destroy', $orchard))
+        ->assertRedirect(route('orchards.show', $orchard))
+        ->assertSessionHasErrors(['orchard' => 'ลบไม่ได้เพราะสวนนี้มีบันทึกแล้ว']);
+
+    $this->assertModelExists($orchard);
+})->with([
+    'harvest' => fn (Orchard $orchard) => Harvest::factory()->for(Tree::factory()->for($orchard))->create(),
+    'observation' => fn (Orchard $orchard) => Observation::factory()->for(Tree::factory()->for($orchard))->create(),
+    'tree issue' => fn (Orchard $orchard) => TreeIssue::factory()->for(Tree::factory()->for($orchard))->create(),
+    'care record' => fn (Orchard $orchard) => CareRecord::factory()->for($orchard)->create(),
+    'sale' => fn (Orchard $orchard) => Sale::factory()->for($orchard)->create(),
+    'season expense' => fn (Orchard $orchard) => Expense::factory()->for(Season::factory()->for($orchard))->create(),
+]);
 
 test('orchards index shows active tree count and open-season yield only', function () {
     $orchard = Orchard::factory()->create(['name' => 'ก']);
