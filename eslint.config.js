@@ -106,6 +106,8 @@ export default [
         ignores: [
             'vendor',
             'node_modules',
+            '.agents',
+            '.cmux',
             'public',
             'bootstrap/ssr',
             'tailwind.config.js',
