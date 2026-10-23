@@ -277,12 +277,12 @@ export default function AiConnection({
                                                     className="flex min-h-12 items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/60 active:bg-accent"
                                                 >
                                                     {content}
-                                                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                                                    <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
                                                 </Link>
                                             ) : (
                                                 <div className="flex min-h-12 items-center gap-3 px-4 py-3">
                                                     {content}
-                                                    <span className="size-4 shrink-0" />
+                                                    <span className="size-5 shrink-0" />
                                                 </div>
                                             )}
                                         </li>

@@ -59,7 +59,7 @@ function IssueGroup({
                                     ดูซ้ำ {formatThaiDate(issue.followUpOn)}
                                 </p>
                             </div>
-                            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                            <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
                         </Link>
                     </li>
                 ))}
