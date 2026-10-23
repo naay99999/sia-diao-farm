@@ -95,7 +95,45 @@ php artisan test --compact
 
 The app is a single Laravel server with an SQLite file. No queue worker or scheduler is needed. Any host that runs PHP 8.5 works (Laravel Cloud, Forge, a VPS).
 
-### 1. Environment
+### Docker on Dokploy
+
+The repo ships a `Dockerfile` (FrankenPHP) and a `compose.yaml` for [Dokploy](https://dokploy.com). Dokploy's Traefik handles the domain, HTTPS and networking; the container only serves plain HTTP on port 80 and trusts the proxy's forwarded headers.
+
+1. In Dokploy, create a **Docker Compose** service from this repository (compose path `./compose.yaml`).
+2. Under **Environment**, set:
+
+   ```dotenv
+   APP_KEY=base64:...                 # generate once with: php artisan key:generate --show
+   APP_URL=https://farm.example.com
+   OWNER_EMAIL=you@example.com
+   OWNER_PASSWORD=a-long-unique-password
+   ```
+
+   Keep `APP_KEY` unchanged across deploys; changing it logs everyone out and breaks encrypted values.
+3. Under **Domains**, add `farm.example.com` for service `app`, container port `80`, with HTTPS on.
+4. Deploy.
+
+On every start the container creates the SQLite file and OAuth keys if they are missing, runs migrations, makes sure the owner account exists and caches the config. PHP upload limits for photos are already set in `docker/php.ini`.
+
+Everything that must survive a redeploy lives in the `farm-storage` volume, mounted at `/app/storage`:
+
+| Path in the volume         | Contents                      |
+|----------------------------|-------------------------------|
+| `database/database.sqlite` | All farm data                 |
+| `app/private/photos`       | Observation photos            |
+| `oauth-*.key`              | Keys for the Claude connection |
+
+Back up that volume daily. A consistent database snapshot from the VPS:
+
+```bash
+docker exec $(docker ps -qf "label=com.docker.compose.service=app" | head -n1) \
+  sqlite3 storage/database/database.sqlite ".backup 'storage/backup.sqlite'"
+```
+
+Then copy the volume's folder (`docker volume inspect` shows its path) off the server with `rclone`, as described under [Backups](#4-backups). Dokploy's own volume backups work too.
+### Without Docker
+
+#### 1. Environment
 
 Set these in the server's `.env`:
 
@@ -112,7 +150,7 @@ OWNER_PASSWORD=a-long-unique-password
 
 In production, passwords changed from the settings page must be at least 12 characters with mixed case, numbers and symbols.
 
-### 2. Install and build
+#### 2. Install and build
 
 ```bash
 composer install --no-dev --optimize-autoloader
@@ -126,7 +164,7 @@ php artisan optimize
 
 On later deploys, run everything except the `first deploy only` lines. Keep `storage/oauth-private.key` and `storage/oauth-public.key` across deploys, or every connected AI app has to reconnect.
 
-### 3. Observation photos
+#### 3. Observation photos
 
 Photos are stored on the server in `storage/app/private/photos` and served through short-lived signed URLs. Make sure that folder survives deploys (it does unless you replace `storage/` wholesale).
 
@@ -137,7 +175,7 @@ upload_max_filesize = 8M
 post_max_size = 30M
 ```
 
-### 4. Backups
+#### 4. Backups
 
 Everything lives on the server: the farm data in `database/database.sqlite`, the photos in `storage/app/private/photos` and the OAuth keys in `storage/oauth-*.key`. If the server's disk is lost, so is the farm, so copy all three off the server every day. A daily cron that snapshots the database and syncs to any off-site storage with [rclone](https://rclone.org) (an S3-compatible bucket, Google Drive, another machine):
 
@@ -151,6 +189,6 @@ rclone copy storage --include "oauth-*.key" remote:farm-backup/keys
 
 Use `.backup` rather than `cp` so the copy stays consistent while the app is writing. `--backup-dir` keeps each day's previous database copy, so a bad day can be rolled back.
 
-### 5. Connect Claude
+### Connect Claude
 
 After logging in, open **ตั้งค่า → เชื่อมต่อ Claude** and add the MCP URL it shows (`https://farm.example.com/mcp/farm`) as a custom connector in Claude. Claude asks you to log in and approve access once.

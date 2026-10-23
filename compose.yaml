@@ -1,0 +1,27 @@
+# Production stack for Dokploy. Dokploy attaches its Traefik network and
+# routes the domain set in its UI to port 80 of this service.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      APP_NAME: "Sia Diao Farm"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:?Set APP_KEY}
+      APP_URL: ${APP_URL:?Set APP_URL to the https address of the farm}
+      APP_LOCALE: th
+      APP_FALLBACK_LOCALE: th
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /app/storage/database/database.sqlite
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: warning
+      OWNER_EMAIL: ${OWNER_EMAIL:?Set OWNER_EMAIL}
+      OWNER_PASSWORD: ${OWNER_PASSWORD:?Set OWNER_PASSWORD}
+    volumes:
+      - farm-storage:/app/storage
+
+volumes:
+  farm-storage:
