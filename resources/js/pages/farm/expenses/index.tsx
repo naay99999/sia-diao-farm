@@ -9,6 +9,7 @@ import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { PageContainer } from '@/components/page-container';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -154,7 +155,7 @@ export default function ExpensesIndex({
     });
 
     return (
-        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
+        <PageContainer>
             <Head title="ค่าใช้จ่าย" />
             <div className="flex items-start justify-between gap-3">
                 <Heading
@@ -358,6 +359,6 @@ export default function ExpensesIndex({
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </PageContainer>
     );
 }

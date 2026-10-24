@@ -20,6 +20,7 @@ import {
 import { RowActions } from '@/components/farm/row-actions';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
+import { PageContainer } from '@/components/page-container';
 import TreeFormFields from '@/components/tree-form-fields';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,7 +105,7 @@ export default function TreeShow({
     });
 
     return (
-        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
+        <PageContainer>
             <Head title={tree.code} />
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 space-y-2">
@@ -635,6 +636,6 @@ export default function TreeShow({
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </PageContainer>
     );
 }

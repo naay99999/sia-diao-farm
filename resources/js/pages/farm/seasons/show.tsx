@@ -2,6 +2,7 @@ import { Head, Link, setLayoutProps } from '@inertiajs/react';
 import { EmptyState } from '@/components/farm/empty-state';
 import { ShareBar } from '@/components/farm/share-bar';
 import Heading from '@/components/heading';
+import { PageContainer } from '@/components/page-container';
 import { formatBaht, formatNumber } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
 import { cn } from '@/lib/utils';
@@ -83,7 +84,7 @@ export default function SeasonShow({
         salesWeightKg > 0 ? formatBaht(salesTotal / salesWeightKg) : null;
 
     return (
-        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
+        <PageContainer>
             <Head title={season.name} />
             <Heading
                 title={season.name}
@@ -237,6 +238,6 @@ export default function SeasonShow({
                     )}
                 </section>
             </div>
-        </div>
+        </PageContainer>
     );
 }

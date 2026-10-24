@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/farm/empty-state';
 import { SubmitButton } from '@/components/farm/submit-button';
 import Heading from '@/components/heading';
 import OrchardFormFields from '@/components/orchard-form-fields';
+import { PageContainer } from '@/components/page-container';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -27,7 +28,7 @@ export default function OrchardsIndex({
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-6 md:py-6">
+        <PageContainer>
             <Head title="สวน" />
             <div className="flex items-start justify-between gap-3">
                 <Heading title="สวน" description={`${orchards.length} สวน`} />
@@ -116,7 +117,7 @@ export default function OrchardsIndex({
                     ))}
                 </ul>
             )}
-        </div>
+        </PageContainer>
     );
 }
 
