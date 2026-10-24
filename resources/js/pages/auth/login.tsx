@@ -46,7 +46,6 @@ export default function Login({ status }: Props) {
                 <div className="mb-6 grid gap-3">
                     <Button
                         type="button"
-                        variant="outline"
                         className="w-full"
                         disabled={isLoading}
                         onClick={() => verify()}
@@ -113,6 +112,7 @@ export default function Login({ status }: Props) {
 
                             <Button
                                 type="submit"
+                                variant="outline"
                                 className="mt-4 w-full"
                                 tabIndex={4}
                                 disabled={processing}

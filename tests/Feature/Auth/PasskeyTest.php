@@ -69,3 +69,29 @@ test('failed login does not suggest a passkey', function () {
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'wrong'])
         ->assertSessionMissing('inertia.flash_data.suggestPasskey');
 });
+
+test('passkey login routes are rate limited', function () {
+    foreach (['passkey.login', 'passkey.login-options'] as $name) {
+        expect(Route::getRoutes()->getByName($name)->gatherMiddleware())->toContain('throttle:passkeys');
+    }
+});
+
+test('deactivated passkey login fails with the validation shape the frontend reads', function () {
+    $passkey = createPasskey(User::factory()->deactivated()->create());
+
+    try {
+        Passkeys::allowsLogin(request(), $passkey);
+        $this->fail('Expected a ValidationException.');
+    } catch (ValidationException $e) {
+        expect($e->status)->toBe(422)
+            ->and($e->getMessage())->toBe('บัญชีนี้ถูกปิดใช้งานแล้ว')
+            ->and($e->errors()['passkey'][0])->toBe('บัญชีนี้ถูกปิดใช้งานแล้ว');
+    }
+});
+
+test('deactivated user with the correct password gets no passkey suggestion', function () {
+    $user = User::factory()->deactivated()->create();
+
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+        ->assertSessionMissing('inertia.flash_data.suggestPasskey');
+});
