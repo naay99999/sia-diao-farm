@@ -2,9 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\Orchard;
 use App\Models\Season;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection as SupportCollection;
 
 class RecordFilters
 {
@@ -55,5 +59,27 @@ class RecordFilters
         } elseif ($orchardRelation !== null) {
             $query->whereHas($orchardRelation, fn (Builder $q) => $q->where('orchard_id', $orchardId));
         }
+    }
+
+    /**
+     * The choices every records filter bar offers.
+     *
+     * @return array{orchards: Collection<int, Orchard>, seasons: SupportCollection<int, array{id: int, label: string}>, members: Collection<int, User>}
+     */
+    public static function options(): array
+    {
+        return [
+            'orchards' => Orchard::query()->orderBy('name')->get(['id', 'name']),
+            'seasons' => Season::query()
+                ->with('orchard')
+                ->orderByDesc('started_on')
+                ->get()
+                ->map(fn (Season $season) => [
+                    'id' => $season->id,
+                    'label' => "{$season->orchard->name} · {$season->name}",
+                ])
+                ->values(),
+            'members' => User::query()->orderBy('name')->get(['id', 'name']),
+        ];
     }
 }

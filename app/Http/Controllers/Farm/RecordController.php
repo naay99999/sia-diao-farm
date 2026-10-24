@@ -7,10 +7,7 @@ use App\Http\Requests\Farm\RecordFilterRequest;
 use App\Models\CareRecord;
 use App\Models\Harvest;
 use App\Models\Observation;
-use App\Models\Orchard;
 use App\Models\Sale;
-use App\Models\Season;
-use App\Models\User;
 use App\Support\RecordFilters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -44,17 +41,7 @@ class RecordController extends Controller
             'type' => $type,
             'records' => $records->withQueryString(),
             'filters' => $filters,
-            'orchards' => Orchard::query()->orderBy('name')->get(['id', 'name']),
-            'seasons' => Season::query()
-                ->with('orchard')
-                ->orderByDesc('started_on')
-                ->get()
-                ->map(fn (Season $season) => [
-                    'id' => $season->id,
-                    'label' => "{$season->orchard->name} · {$season->name}",
-                ])
-                ->values(),
-            'members' => User::query()->orderBy('name')->get(['id', 'name']),
+            ...RecordFilters::options(),
         ]);
     }
 

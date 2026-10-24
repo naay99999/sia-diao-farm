@@ -20,7 +20,7 @@ beforeEach(function () {
 /**
  * Create a record, then stamp who wrote it and how, since provenance is filled from the session.
  */
-function stamp(CareRecord|Observation|Harvest|Sale|Expense $record, User $user, string $via): void
+function stampProvenance(CareRecord|Observation|Harvest|Sale|Expense $record, User $user, string $via): void
 {
     $record->newQuery()->whereKey($record->getKey())->update([
         'created_by' => $user->id,
@@ -87,7 +87,7 @@ test('observations on the same day are ordered by id descending and carry issue 
 test('ai written rows are flagged with the member who used ai', function () {
     $member = User::factory()->create();
     $record = CareRecord::factory()->create();
-    stamp($record, $member, 'mcp');
+    stampProvenance($record, $member, 'mcp');
     $record->newQuery()->whereKey($record->id)->update(['updated_via' => 'mcp', 'updated_by' => $member->id]);
 
     $this->get(route('records.index', 'care'))
@@ -103,9 +103,9 @@ test('records filter by orchard, dates, who and via', function () {
     $orchardB = Orchard::factory()->create();
 
     $a = CareRecord::factory()->for($orchardA)->create(['performed_on' => '2026-10-01']);
-    stamp($a, $member, 'mcp');
+    stampProvenance($a, $member, 'mcp');
     $b = CareRecord::factory()->for($orchardB)->create(['performed_on' => '2026-09-01']);
-    stamp($b, $this->owner, 'app');
+    stampProvenance($b, $this->owner, 'app');
 
     $count = fn (array $query) => $this->get(route('records.index', ['type' => 'care', ...$query]))
         ->assertOk()
@@ -187,4 +187,26 @@ test('records index paginates at 50', function () {
 
     $this->get(route('records.index', 'harvests'))
         ->assertInertia(fn (Assert $page) => $page->has('records.data', 50)->where('records.last_page', 2));
+});
+
+test('expenses carry the filter options and who recorded each row', function () {
+    $member = User::factory()->create();
+    $mcp = Expense::factory()->create();
+    stampProvenance($mcp, $member, 'mcp');
+    $mcp->newQuery()->whereKey($mcp->id)->update(['updated_via' => 'mcp', 'updated_by' => $member->id]);
+    $app = Expense::factory()->create();
+    stampProvenance($app, $this->owner, 'app');
+
+    $this->get(route('expenses.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('orchards')
+            ->has('members', 2)
+            ->has('seasons')
+            ->where('expenses', fn ($rows) => collect($rows)->firstWhere('id', $mcp->id)['fromAi'] === true
+                && collect($rows)->firstWhere('id', $mcp->id)['aiBy'] === $member->name
+                && collect($rows)->firstWhere('id', $mcp->id)['createdBy'] === $member->name
+                && collect($rows)->firstWhere('id', $app->id)['fromAi'] === false));
+
+    $this->get(route('expenses.index', ['via' => 'mcp']))
+        ->assertInertia(fn (Assert $page) => $page->has('expenses', 1)->where('filters.via', 'mcp'));
 });

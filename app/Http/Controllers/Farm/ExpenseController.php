@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\RecordFilterRequest;
 use App\Http\Requests\Farm\StoreExpenseRequest;
 use App\Models\Expense;
-use App\Models\Season;
 use App\Support\RecordFilters;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -22,7 +21,7 @@ class ExpenseController extends Controller
         $query = RecordFilters::apply(Expense::query(), $filters, 'spent_on', null, 'season');
 
         $expenses = (clone $query)
-            ->with('season.orchard')
+            ->with(['season.orchard', 'creator:id,name', 'updater:id,name'])
             ->orderByDesc('spent_on')
             ->orderByDesc('id')
             ->get();
@@ -38,19 +37,16 @@ class ExpenseController extends Controller
             ->values();
 
         return Inertia::render('farm/expenses/index', [
-            'expenses' => $expenses,
+            'expenses' => $expenses->map(fn (Expense $expense): array => [
+                ...$expense->makeHidden(['creator', 'updater'])->toArray(),
+                'fromAi' => $expense->isFromAi(),
+                'aiBy' => $expense->aiActorName(),
+                'createdBy' => $expense->creator?->name,
+            ])->all(),
             'total' => (float) $expenses->sum('amount'),
             'totalsByCategory' => $totalsByCategory,
             'filters' => $filters,
-            'seasons' => Season::query()
-                ->with('orchard')
-                ->orderByDesc('started_on')
-                ->get()
-                ->map(fn (Season $season) => [
-                    'id' => $season->id,
-                    'label' => "{$season->orchard->name} · {$season->name}",
-                ])
-                ->values(),
+            ...RecordFilters::options(),
             'categories' => collect(ExpenseCategory::cases())
                 ->map(fn (ExpenseCategory $category) => ['value' => $category->value, 'label' => $category->label()])
                 ->values(),
