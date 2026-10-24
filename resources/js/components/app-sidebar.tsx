@@ -12,7 +12,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { mainNavItems } from '@/lib/navigation';
-import { index as orchardsIndex } from '@/routes/orchards';
+import { overview } from '@/routes';
 
 export function AppSidebar() {
     return (
@@ -21,7 +21,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={orchardsIndex()} prefetch>
+                            <Link href={overview()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

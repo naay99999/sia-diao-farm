@@ -1,8 +1,16 @@
-import { Sparkles, Trees, UserRound, Wallet } from 'lucide-react';
+import {
+    LayoutDashboard,
+    NotebookText,
+    Settings,
+    Sparkles,
+    Trees,
+    UserRound,
+} from 'lucide-react';
+import { overview } from '@/routes';
 import { index as assistantIndex } from '@/routes/assistant';
-import { index as expensesIndex } from '@/routes/expenses';
 import { index as orchardsIndex } from '@/routes/orchards';
 import { edit as profileEdit } from '@/routes/profile';
+import { index as recordsIndex } from '@/routes/records';
 import type { NavItem } from '@/types';
 
 /**
@@ -10,16 +18,23 @@ import type { NavItem } from '@/types';
  */
 export const mainNavItems: NavItem[] = [
     {
+        title: 'ภาพรวม',
+        href: overview(),
+        icon: LayoutDashboard,
+        matches: ['/overview'],
+    },
+    {
         title: 'สวน',
         href: orchardsIndex(),
         icon: Trees,
         matches: ['/orchards', '/trees', '/seasons', '/t/'],
     },
     {
-        title: 'ค่าใช้จ่าย',
-        href: expensesIndex(),
-        icon: Wallet,
-        matches: ['/expenses'],
+        title: 'บันทึก',
+        href: recordsIndex('care'),
+        icon: NotebookText,
+        matches: ['/records', '/expenses'],
+        placement: 'desktop',
     },
     {
         title: 'ผู้ช่วย AI',
@@ -27,7 +42,15 @@ export const mainNavItems: NavItem[] = [
         icon: Sparkles,
         matches: ['/assistant'],
     },
+    {
+        title: 'ตั้งค่า',
+        href: profileEdit(),
+        icon: Settings,
+        matches: ['/settings'],
+        placement: 'desktop',
+    },
 ];
+
 
 export const accountNavItem: NavItem = {
     title: 'บัญชี',
@@ -35,6 +58,14 @@ export const accountNavItem: NavItem = {
     icon: UserRound,
     matches: ['/settings'],
 };
+
+/**
+ * The phone's bottom bar: items made for everywhere, plus the account entry.
+ */
+export const bottomNavItems: NavItem[] = [
+    ...mainNavItems.filter((item) => item.placement !== 'desktop'),
+    accountNavItem,
+];
 
 export function isNavItemActive(item: NavItem, currentPath: string): boolean {
     return (item.matches ?? []).some((prefix) =>

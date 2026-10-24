@@ -9,6 +9,7 @@ import { index as aiConnectionsIndex } from '@/routes/ai-connections';
 import { index as findingsIndex } from '@/routes/findings';
 import { index as membersIndex } from '@/routes/members';
 import { edit as profileEdit } from '@/routes/profile';
+import { index as recordsIndex } from '@/routes/records';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { isCurrentUrl } = useCurrentUrl();
@@ -54,6 +55,14 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     );
                 })}
             </nav>
+
+            <Link
+                href={recordsIndex('care')}
+                prefetch
+                className="flex h-12 items-center text-lg font-medium text-primary md:hidden"
+            >
+                บันทึกทั้งหมด
+            </Link>
 
             {/* Each settings page sets its own width: forms stay narrow, overviews use the canvas. */}
             {children}

@@ -13,4 +13,6 @@ export type NavItem = {
     isActive?: boolean;
     /** Path prefixes that also mark this item as the current section. */
     matches?: string[];
+    /** Where the item is shown: 'desktop' keeps it out of the phone's bottom bar. */
+    placement?: 'everywhere' | 'desktop';
 };

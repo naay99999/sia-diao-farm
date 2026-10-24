@@ -1,10 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import {
-    accountNavItem,
-    isNavItemActive,
-    mainNavItems,
-} from '@/lib/navigation';
+import { bottomNavItems, isNavItemActive } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,7 +15,7 @@ export function AppBottomNav() {
             className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden"
         >
             <ul className="grid grid-cols-4">
-                {[...mainNavItems, accountNavItem].map((item) => {
+                {bottomNavItems.map((item) => {
                     const isActive = isNavItemActive(item, currentUrl);
 
                     return (
