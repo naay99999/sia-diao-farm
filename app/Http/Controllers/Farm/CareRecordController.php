@@ -9,7 +9,9 @@ use App\Http\Requests\Farm\StoreCareRecordRequest;
 use App\Models\CareRecord;
 use App\Models\Orchard;
 use App\Support\IssueSummary;
+use App\Support\ReturnTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -46,16 +48,16 @@ class CareRecordController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกการดูแลแล้ว']);
 
-        return $this->redirectAfterSave($request, $careRecord->orchard_id, $data['tree_ids']);
+        return ReturnTo::recordsOr($request, $this->redirectAfterSave($request, $careRecord->orchard_id, $data['tree_ids']));
     }
 
-    public function destroy(CareRecord $careRecord): RedirectResponse
+    public function destroy(Request $request, CareRecord $careRecord): RedirectResponse
     {
         $careRecord->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบบันทึกแล้ว']);
 
-        return back();
+        return ReturnTo::recordsOr($request, back());
     }
 
     /**

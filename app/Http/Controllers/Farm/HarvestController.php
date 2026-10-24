@@ -9,7 +9,9 @@ use App\Http\Requests\Farm\UpdateHarvestRequest;
 use App\Models\Harvest;
 use App\Models\Orchard;
 use App\Models\Tree;
+use App\Support\ReturnTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -59,15 +61,15 @@ class HarvestController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกผลผลิตแล้ว']);
 
-        return back();
+        return ReturnTo::recordsOr($request, back());
     }
 
-    public function destroy(Harvest $harvest): RedirectResponse
+    public function destroy(Request $request, Harvest $harvest): RedirectResponse
     {
         $harvest->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบบันทึกผลผลิตแล้ว']);
 
-        return back();
+        return ReturnTo::recordsOr($request, back());
     }
 }

@@ -14,7 +14,9 @@ use App\Models\Finding;
 use App\Models\Observation;
 use App\Models\Tree;
 use App\Models\TreeIssue;
+use App\Support\ReturnTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ObservationController extends Controller
@@ -66,15 +68,15 @@ class ObservationController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกสภาพต้นแล้ว']);
 
-        return to_route('trees.show', $observation->tree_id);
+        return ReturnTo::recordsOr($request, to_route('trees.show', $observation->tree_id));
     }
 
-    public function destroy(Observation $observation): RedirectResponse
+    public function destroy(Request $request, Observation $observation): RedirectResponse
     {
         $observation->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบบันทึกสภาพต้นแล้ว']);
 
-        return to_route('trees.show', $observation->tree_id);
+        return ReturnTo::recordsOr($request, to_route('trees.show', $observation->tree_id));
     }
 }

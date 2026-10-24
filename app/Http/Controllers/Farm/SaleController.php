@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Farm\StoreSaleRequest;
 use App\Models\Orchard;
 use App\Models\Sale;
+use App\Support\ReturnTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SaleController extends Controller
@@ -26,15 +28,15 @@ class SaleController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'บันทึกการขายแล้ว']);
 
-        return to_route('orchards.show', $sale->orchard_id);
+        return ReturnTo::recordsOr($request, to_route('orchards.show', $sale->orchard_id));
     }
 
-    public function destroy(Sale $sale): RedirectResponse
+    public function destroy(Request $request, Sale $sale): RedirectResponse
     {
         $sale->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'ลบการขายแล้ว']);
 
-        return to_route('orchards.show', $sale->orchard_id);
+        return ReturnTo::recordsOr($request, to_route('orchards.show', $sale->orchard_id));
     }
 }
