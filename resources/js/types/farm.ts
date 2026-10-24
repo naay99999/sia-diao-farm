@@ -162,3 +162,54 @@ export type Expense = {
     notes: string | null;
     season: (Season & { orchard: Orchard }) | null;
 };
+
+export type TreeStatus = 'due' | 'issue' | 'normal';
+
+export type TreeMapTree = {
+    id: number;
+    code: string;
+    position: number | null;
+    status: TreeStatus;
+};
+
+export type TreeMapRow = {
+    row: string | null;
+    trees: TreeMapTree[];
+};
+
+export type OrchardCareLatest = {
+    date: string;
+    product: string | null;
+};
+
+export type OrchardOverview = {
+    id: number;
+    name: string;
+    treeCount: number;
+    statusCounts: Record<TreeStatus, number>;
+    layout: TreeMapRow[];
+    season: {
+        id: number;
+        name: string;
+        startedOn: string;
+        yieldKg: number;
+        salesTotal: number;
+        expensesTotal: number;
+    } | null;
+    latestFertilizer: OrchardCareLatest | null;
+    latestPesticide: OrchardCareLatest | null;
+};
+
+export type FarmIssueSummary = IssueSummary & {
+    orchardId: number;
+    orchardName: string;
+};
+
+export type RecentAiRecord = {
+    kind: string;
+    title: string;
+    subject: string;
+    recordedOn: string;
+    href: string | null;
+    by: string | null;
+};

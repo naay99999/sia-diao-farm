@@ -22,6 +22,7 @@ import { formatPricePerKg, SaleFields } from '@/components/farm/sale-form';
 import { SectionTabs } from '@/components/farm/section-tabs';
 import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
+import { TreeMap } from '@/components/farm/tree-map';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import OrchardFormFields from '@/components/orchard-form-fields';
@@ -61,6 +62,7 @@ import type {
     Sale,
     Season,
     Tree,
+    TreeMapRow,
 } from '@/types/farm';
 
 type OrchardTab = 'trees' | 'care' | 'sales' | 'seasons';
@@ -101,6 +103,7 @@ export default function OrchardShow({
     currentSeasonYieldKg,
     dueIssues,
     openIssues,
+    treeLayout,
 }: {
     orchard: Orchard;
     trees: Tree[];
@@ -113,6 +116,7 @@ export default function OrchardShow({
     currentSeasonYieldKg: Record<number, number>;
     dueIssues: IssueSummary[];
     openIssues: IssueSummary[];
+    treeLayout: TreeMapRow[];
 }) {
     const confirm = useConfirm();
     const pageErrors =
@@ -227,6 +231,8 @@ export default function OrchardShow({
                 />
 
                 <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
+                    <TreeMap rows={treeLayout} />
+
                     <SectionTabs
                         label="ข้อมูลในสวน"
                         value={tab}
