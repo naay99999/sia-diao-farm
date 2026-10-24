@@ -7,9 +7,11 @@ use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\ObservationController;
 use App\Http\Controllers\Farm\OrchardController;
 use App\Http\Controllers\Farm\OverviewController;
+use App\Http\Controllers\Farm\RecordController;
 use App\Http\Controllers\Farm\SaleController;
 use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -54,7 +56,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('orchards/{orchard}/sales', [SaleController::class, 'store'])->name('orchards.sales.store');
     Route::patch('sales/{sale}', [SaleController::class, 'update'])->name('sales.update');
     Route::delete('sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
-    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('records', [RecordController::class, 'redirect']);
+    Route::get('records/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('records/{type}', [RecordController::class, 'index'])
+        ->whereIn('type', ['care', 'observations', 'harvests', 'sales'])
+        ->name('records.index');
+    Route::get('expenses', fn (Request $request) => to_route('expenses.index', $request->query()))->name('expenses.legacy');
     Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::patch('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');

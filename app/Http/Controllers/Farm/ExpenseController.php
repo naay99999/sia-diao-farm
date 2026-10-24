@@ -4,26 +4,22 @@ namespace App\Http\Controllers\Farm;
 
 use App\Enums\ExpenseCategory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Farm\RecordFilterRequest;
 use App\Http\Requests\Farm\StoreExpenseRequest;
 use App\Models\Expense;
 use App\Models\Season;
+use App\Support\RecordFilters;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ExpenseController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(RecordFilterRequest $request): Response
     {
-        $filters = $request->validate([
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
-        ]);
+        $filters = $request->filters();
 
-        $query = Expense::query()
-            ->when($filters['from'] ?? null, fn ($q, string $from) => $q->whereDate('spent_on', '>=', $from))
-            ->when($filters['to'] ?? null, fn ($q, string $to) => $q->whereDate('spent_on', '<=', $to));
+        $query = RecordFilters::apply(Expense::query(), $filters, 'spent_on', null, 'season');
 
         $expenses = (clone $query)
             ->with('season.orchard')
@@ -45,7 +41,7 @@ class ExpenseController extends Controller
             'expenses' => $expenses,
             'total' => (float) $expenses->sum('amount'),
             'totalsByCategory' => $totalsByCategory,
-            'filters' => ['from' => $filters['from'] ?? null, 'to' => $filters['to'] ?? null],
+            'filters' => $filters,
             'seasons' => Season::query()
                 ->with('orchard')
                 ->orderByDesc('started_on')
