@@ -35,6 +35,7 @@ type Member = {
     isOwner: boolean;
     isActive: boolean;
     isConnected: boolean;
+    hasPasskey: boolean;
 };
 
 function PasswordField({
@@ -141,6 +142,17 @@ export default function Members({
                                     {member.isOwner && (
                                         <Badge variant="outline">เจ้าของ</Badge>
                                     )}
+                                    <Badge
+                                        variant={
+                                            member.hasPasskey
+                                                ? 'secondary'
+                                                : 'outline'
+                                        }
+                                    >
+                                        {member.hasPasskey
+                                            ? 'มี passkey'
+                                            : 'ยังไม่มี passkey'}
+                                    </Badge>
                                     {!member.isActive && (
                                         <Badge variant="secondary">
                                             ปิดใช้งาน

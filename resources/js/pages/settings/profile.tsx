@@ -3,6 +3,8 @@ import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { AddPasskeyButton, PasskeyList } from '@/components/passkey-list';
+import type { Passkey } from '@/components/passkey-list';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +15,11 @@ import type { Auth } from '@/types';
 type PageProps = {
     auth: Auth;
     passwordRules: string;
+    passkeys: Passkey[];
 };
 
 export default function Profile() {
-    const { auth, passwordRules } = usePage<PageProps>().props;
+    const { auth, passwordRules, passkeys } = usePage<PageProps>().props;
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
@@ -91,6 +94,17 @@ export default function Profile() {
                             </>
                         )}
                     </Form>
+                </div>
+
+                <div className="space-y-6">
+                    <Heading
+                        variant="small"
+                        title="Passkey"
+                        description="เข้าสู่ระบบด้วยการสแกนนิ้วหรือใบหน้าแทนการพิมพ์รหัสผ่าน"
+                    />
+
+                    <PasskeyList passkeys={passkeys} />
+                    <AddPasskeyButton />
                 </div>
 
                 <div className="space-y-6">
