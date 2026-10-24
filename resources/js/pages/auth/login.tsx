@@ -1,4 +1,7 @@
 import { Form, Head } from '@inertiajs/react';
+import { UserCancelledError } from '@laravel/passkeys';
+import { usePasskeyVerify } from '@laravel/passkeys/react';
+import { Fingerprint } from 'lucide-react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -7,15 +10,61 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/login';
+import { login as passkeyLogin, loginOptions } from '@/routes/passkey';
 
 type Props = {
     status?: string;
 };
 
+const DEACTIVATED_MESSAGE = 'บัญชีนี้ถูกปิดใช้งานแล้ว';
+const PASSKEY_FAILED_MESSAGE = 'เข้าสู่ระบบด้วย passkey ไม่สำเร็จ ลองอีกครั้ง';
+
 export default function Login({ status }: Props) {
+    const { verify, isLoading, errorInstance, isSupported } = usePasskeyVerify({
+        routes: {
+            options: loginOptions.url(),
+            // The package cannot send `remember`; the server reads it from the query string.
+            submit: passkeyLogin.url({ query: { remember: 1 } }),
+        },
+        onSuccess: (response) => {
+            window.location.href = response.redirect ?? '/';
+        },
+    });
+
+    const passkeyError =
+        errorInstance === null || errorInstance instanceof UserCancelledError
+            ? undefined
+            : errorInstance.message === DEACTIVATED_MESSAGE
+              ? DEACTIVATED_MESSAGE
+              : PASSKEY_FAILED_MESSAGE;
+
     return (
         <>
             <Head title="เข้าสู่ระบบ" />
+
+            {isSupported && (
+                <div className="mb-6 grid gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        disabled={isLoading}
+                        onClick={() => verify()}
+                        data-test="passkey-login-button"
+                    >
+                        {isLoading ? <Spinner /> : <Fingerprint />}
+                        เข้าสู่ระบบด้วย passkey
+                    </Button>
+                    <InputError message={passkeyError} />
+
+                    <div className="relative mt-3 flex items-center justify-center">
+                        <div className="absolute inset-x-0 border-t" />
+                        <span className="relative bg-background px-3 text-sm text-muted-foreground">
+                            หรือใช้รหัสผ่าน
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <Form
                 {...store.form()}
@@ -88,5 +137,5 @@ export default function Login({ status }: Props) {
 
 Login.layout = {
     title: 'เข้าสู่ระบบ',
-    description: 'กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่ระบบ',
+    description: 'สแกนนิ้วหรือใบหน้าด้วย passkey หรือกรอกอีเมลและรหัสผ่าน',
 };
