@@ -2,9 +2,10 @@
 
 namespace App\Mcp\Tools;
 
+use App\Enums\RestoreConflict;
 use App\Mcp\Support\RecordSerializer;
 use App\Mcp\Support\RecordTypes;
-use App\Models\TreeIssue;
+use App\Support\RecordRestorer;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Illuminate\Validation\ValidationException;
@@ -50,38 +51,23 @@ class RestoreRecord extends FarmWriteTool
             ]);
         }
 
-        if ($record->getAttribute('deleted_at') === null) {
+        $conflict = RecordRestorer::conflict($record);
+
+        if ($conflict !== null) {
             throw ValidationException::withMessages([
-                'id' => ucfirst($label)." {$id} is not deleted, so there is nothing to restore.",
+                'id' => match ($conflict) {
+                    RestoreConflict::NotDeleted => ucfirst($label)." {$id} is not deleted, so there is nothing to restore.",
+                    RestoreConflict::OpenIssueExists => "Tree {$record->getAttribute('tree_id')} already has another open issue for the same finding, so issue {$id} cannot be restored as open. Record a follow-up on the open issue instead.",
+                },
             ]);
         }
 
-        if ($record instanceof TreeIssue && $record->isOpen() && $this->hasOtherOpenIssue($record)) {
-            throw ValidationException::withMessages([
-                'id' => "Tree {$record->tree_id} already has another open issue for the same finding, so issue {$id} cannot be restored as open. Record a follow-up on the open issue instead.",
-            ]);
-        }
-
-        RecordTypes::restore($record);
+        RecordRestorer::restore($record);
 
         return Response::json([
             'type' => $type,
             'id' => $id,
             'record' => RecordSerializer::serialize($record),
         ]);
-    }
-
-    /**
-     * Restoring an open issue next to another open one for the same tree and finding would split
-     * one ongoing problem into two.
-     */
-    private function hasOtherOpenIssue(TreeIssue $issue): bool
-    {
-        return TreeIssue::query()
-            ->open()
-            ->where('tree_id', $issue->tree_id)
-            ->where('finding_id', $issue->finding_id)
-            ->whereKeyNot($issue->id)
-            ->exists();
     }
 }
