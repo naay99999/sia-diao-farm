@@ -64,7 +64,7 @@ class RecordFilters
     /**
      * The choices every records filter bar offers.
      *
-     * @return array{orchards: Collection<int, Orchard>, seasons: SupportCollection<int, array{id: int, label: string}>, members: Collection<int, User>}
+     * @return array{orchards: Collection<int, Orchard>, seasons: SupportCollection<int, array{id: int, label: non-falsy-string}>, members: Collection<int, User>}
      */
     public static function options(): array
     {
