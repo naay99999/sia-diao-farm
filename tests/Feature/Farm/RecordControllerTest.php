@@ -235,3 +235,17 @@ test('observation rows carry the finding kind', function () {
     $this->get(route('records.index', 'observations'))
         ->assertInertia(fn (Assert $page) => $page->has('records.data.0.finding.kind'));
 });
+
+test('a page past the last one redirects to the last page keeping the filters', function () {
+    $this->actingAs($this->owner);
+    Harvest::factory()->count(50)->create();
+
+    $this->get(route('records.index', ['type' => 'harvests', 'page' => 2, 'via' => 'app']))
+        ->assertRedirect(route('records.index', ['type' => 'harvests', 'page' => 1, 'via' => 'app']));
+
+    $this->get(route('records.index', ['type' => 'harvests', 'page' => 1]))->assertOk();
+});
+
+test('an empty record list does not redirect for a high page', function () {
+    $this->get(route('records.index', ['type' => 'harvests', 'page' => 3]))->assertOk();
+});

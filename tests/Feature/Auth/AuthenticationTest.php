@@ -19,7 +19,7 @@ test('users can authenticate using the login screen', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('orchards.index', absolute: false));
+    $response->assertRedirect(route('overview', absolute: false));
 });
 
 test('password reset routes are disabled', function () {

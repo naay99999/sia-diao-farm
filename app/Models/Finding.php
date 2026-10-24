@@ -50,12 +50,21 @@ class Finding extends Model
     }
 
     /**
-     * Whether any observation or issue, trashed ones included, still points at this finding.
+     * @return HasMany<FarmNote, $this>
+     */
+    public function farmNotes(): HasMany
+    {
+        return $this->hasMany(FarmNote::class);
+    }
+
+    /**
+     * Whether any observation, issue or knowledge note, trashed ones included, still points at this finding.
      */
     public function isInUse(): bool
     {
         return $this->observations()->withTrashed()->exists()
-            || $this->treeIssues()->withTrashed()->exists();
+            || $this->treeIssues()->withTrashed()->exists()
+            || $this->farmNotes()->withTrashed()->exists();
     }
 
     /**

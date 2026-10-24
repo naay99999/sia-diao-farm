@@ -27,7 +27,7 @@ class RecordController extends Controller
         return to_route('records.index', ['type' => 'care']);
     }
 
-    public function index(RecordFilterRequest $request, string $type): Response
+    public function index(RecordFilterRequest $request, string $type): Response|RedirectResponse
     {
         $filters = $request->filters();
 
@@ -38,6 +38,14 @@ class RecordController extends Controller
             'sales' => $this->sales($filters),
             default => abort(404),
         };
+
+        if ($records->total() > 0 && $records->currentPage() > $records->lastPage()) {
+            return redirect()->route('records.index', [
+                'type' => $type,
+                ...$request->query(),
+                'page' => $records->lastPage(),
+            ]);
+        }
 
         return Inertia::render('records/index', [
             'type' => $type,

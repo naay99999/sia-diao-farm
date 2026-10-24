@@ -51,7 +51,6 @@ export const mainNavItems: NavItem[] = [
     },
 ];
 
-
 export const accountNavItem: NavItem = {
     title: 'บัญชี',
     href: profileEdit(),

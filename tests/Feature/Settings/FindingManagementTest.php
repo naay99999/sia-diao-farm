@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FindingKind;
+use App\Models\FarmNote;
 use App\Models\Finding;
 use App\Models\Observation;
 use App\Models\TreeIssue;
@@ -95,4 +96,33 @@ test('finding used by a trashed issue cannot be deleted', function () {
     $this->actingAs($this->user)->delete(route('findings.destroy', $finding));
 
     $this->assertModelExists($finding);
+});
+
+test('finding used by a note cannot be deleted', function () {
+    $finding = Finding::factory()->create();
+    FarmNote::factory()->create(['finding_id' => $finding->id]);
+
+    $this->actingAs($this->user)->delete(route('findings.destroy', $finding))
+        ->assertInertiaFlash('toast.message', 'รายการนี้มีบันทึกใช้อยู่ ลบไม่ได้');
+
+    $this->assertModelExists($finding);
+    expect(FarmNote::query()->whereNotNull('finding_id')->count())->toBe(1);
+});
+
+test('finding used by a trashed note cannot be deleted', function () {
+    $finding = Finding::factory()->create();
+    FarmNote::factory()->create(['finding_id' => $finding->id])->delete();
+
+    $this->actingAs($this->user)->delete(route('findings.destroy', $finding));
+
+    $this->assertModelExists($finding);
+});
+
+test('the finding list marks findings used only by a note as in use', function () {
+    $finding = Finding::factory()->create(['name' => 'ก-ใช้โดยโน้ต']);
+    FarmNote::factory()->create(['finding_id' => $finding->id]);
+
+    $this->actingAs($this->user)->get(route('findings.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('findings', fn ($findings) => collect($findings)->firstWhere('id', $finding->id)['inUse'] === true));
 });

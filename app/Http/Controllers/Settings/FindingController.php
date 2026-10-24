@@ -20,6 +20,7 @@ class FindingController extends Controller
             ->withExists([
                 'observations as in_use_by_observations' => fn ($query) => $query->withTrashed(),
                 'treeIssues as in_use_by_issues' => fn ($query) => $query->withTrashed(),
+                'farmNotes as in_use_by_notes' => fn ($query) => $query->withTrashed(),
             ])
             ->orderBy('name')
             ->get()
@@ -27,7 +28,7 @@ class FindingController extends Controller
                 'id' => $finding->id,
                 'name' => $finding->name,
                 'kind' => $finding->kind->value,
-                'inUse' => $finding->in_use_by_observations || $finding->in_use_by_issues,
+                'inUse' => $finding->in_use_by_observations || $finding->in_use_by_issues || $finding->in_use_by_notes,
             ]);
 
         return Inertia::render('settings/findings', ['findings' => $findings]);

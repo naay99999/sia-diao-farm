@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatThaiDate } from '@/lib/thai-date';
-import { trash } from '@/routes/records';
+import { index as recordsIndex, trash } from '@/routes/records';
 import type { TrashItem } from '@/types/farm';
 
 export default function RecordsTrash({ items }: { items: TrashItem[] }) {
@@ -15,7 +15,7 @@ export default function RecordsTrash({ items }: { items: TrashItem[] }) {
 
     setLayoutProps({
         breadcrumbs: [
-            { title: 'บันทึก', href: '/records' },
+            { title: 'บันทึก', href: recordsIndex.url('care') },
             { title: 'ถังขยะ', href: trash.url() },
         ],
     });

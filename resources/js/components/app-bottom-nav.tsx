@@ -4,7 +4,7 @@ import { bottomNavItems, isNavItemActive } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 
 /**
- * The phone's navigation: every destination one thumb-tap away, below the md breakpoint only.
+ * The phone's navigation, below the md breakpoint only: the daily destinations one thumb-tap away, with records and settings reached from the account page.
  */
 export function AppBottomNav() {
     const { currentUrl } = useCurrentUrl();
