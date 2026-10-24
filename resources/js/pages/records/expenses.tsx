@@ -2,14 +2,14 @@ import { Form, Head, router, setLayoutProps } from '@inertiajs/react';
 import { useState } from 'react';
 import ExpenseController from '@/actions/App/Http/Controllers/Farm/ExpenseController';
 import { useConfirm } from '@/components/confirm-dialog';
+import { AiBadge } from '@/components/farm/ai-badge';
 import { todayIso } from '@/components/farm/care-record-form';
 import { EmptyState } from '@/components/farm/empty-state';
+import { RecordFilters } from '@/components/farm/record-filters';
 import { RowActions } from '@/components/farm/row-actions';
 import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { PageContainer } from '@/components/page-container';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -24,7 +24,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatBaht } from '@/lib/format';
 import { formatThaiDate } from '@/lib/thai-date';
 import { index } from '@/routes/expenses';
-import type { Expense, ExpenseCategory } from '@/types/farm';
+import { index as recordsIndex } from '@/routes/records';
+import type {
+    Expense,
+    ExpenseCategory,
+    ExpenseRow,
+    RecordFilterOptions,
+    RecordFilterValues,
+} from '@/types/farm';
 
 type Errors = Record<string, string | undefined>;
 
@@ -125,47 +132,51 @@ export default function ExpensesIndex({
     total,
     totalsByCategory,
     filters,
+    orchards,
     seasons,
+    members,
     categories,
 }: {
-    expenses: Expense[];
+    expenses: ExpenseRow[];
     total: number;
     totalsByCategory: {
         category: ExpenseCategory;
         label: string;
         total: number;
     }[];
-    filters: { from: string | null; to: string | null };
-    seasons: { id: number; label: string }[];
+    filters: RecordFilterValues;
     categories: CategoryOption[];
-}) {
+} & RecordFilterOptions) {
     const confirm = useConfirm();
-    const [dialog, setDialog] = useState<Expense | 'new' | null>(null);
+    const [dialog, setDialog] = useState<ExpenseRow | 'new' | null>(null);
     const categoryLabels = Object.fromEntries(
         categories.map((category) => [category.value, category.label]),
     );
-    const isFiltered = Boolean(filters.from || filters.to);
+    const isFiltered = Object.values(filters).some((value) => value !== null);
     const largestCategory = Math.max(
         0,
         ...totalsByCategory.map((row) => Number(row.total)),
     );
 
     setLayoutProps({
-        breadcrumbs: [{ title: 'ค่าใช้จ่าย', href: index() }],
+        breadcrumbs: [
+            { title: 'บันทึก', href: recordsIndex.url('care') },
+            { title: 'ค่าใช้จ่าย', href: index() },
+        ],
     });
 
     return (
-        <PageContainer>
+        <>
             <Head title="ค่าใช้จ่าย" />
-            <div className="flex items-start justify-between gap-3">
-                <Heading
-                    title="ค่าใช้จ่าย"
-                    description={
-                        isFiltered
-                            ? `${filters.from ? formatThaiDate(filters.from) : 'แรกสุด'} – ${filters.to ? formatThaiDate(filters.to) : 'วันนี้'}`
-                            : 'รายจ่ายทั้งหมดของฟาร์ม'
-                    }
-                />
+            <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                    <RecordFilters
+                        filters={filters}
+                        orchards={orchards}
+                        seasons={seasons}
+                        members={members}
+                    />
+                </div>
                 <Button onClick={() => setDialog('new')}>
                     บันทึกค่าใช้จ่าย
                 </Button>
@@ -210,52 +221,10 @@ export default function ExpensesIndex({
                 </section>
 
                 <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
-                    <form
-                        method="get"
-                        action={index.url()}
-                        className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:gap-3"
-                    >
-                        <div className="grid gap-2">
-                            <Label htmlFor="filter-from">ตั้งแต่วันที่</Label>
-                            <Input
-                                id="filter-from"
-                                name="from"
-                                type="date"
-                                defaultValue={filters.from ?? ''}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="filter-to">ถึงวันที่</Label>
-                            <Input
-                                id="filter-to"
-                                name="to"
-                                type="date"
-                                defaultValue={filters.to ?? ''}
-                            />
-                        </div>
-                        <Button
-                            type="submit"
-                            variant="outline"
-                            className="col-span-2 sm:col-auto"
-                        >
-                            กรองตามวันที่
-                        </Button>
-                        {isFiltered && (
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                className="col-span-2 sm:col-auto"
-                                onClick={() => router.get(index.url())}
-                            >
-                                ล้างตัวกรอง
-                            </Button>
-                        )}
-                    </form>
-
                     {expenses.length === 0 ? (
                         <EmptyState>
                             {isFiltered
-                                ? 'ไม่มีค่าใช้จ่ายในช่วงวันที่นี้'
+                                ? 'ไม่มีค่าใช้จ่ายตามตัวกรองนี้'
                                 : 'ยังไม่มีค่าใช้จ่าย'}
                         </EmptyState>
                     ) : (
@@ -287,6 +256,12 @@ export default function ExpensesIndex({
                                                 ` · ${expense.season.orchard.name} · ${expense.season.name}`}
                                             {expense.notes &&
                                                 ` · ${expense.notes}`}
+                                        </p>
+                                        <p className="flex flex-wrap items-center gap-x-2 text-base text-muted-foreground md:text-sm">
+                                            {expense.createdBy ?? '-'}
+                                            {expense.fromAi && (
+                                                <AiBadge by={expense.aiBy} />
+                                            )}
                                         </p>
                                     </div>
                                     <RowActions
@@ -359,6 +334,6 @@ export default function ExpensesIndex({
                     )}
                 </DialogContent>
             </Dialog>
-        </PageContainer>
+        </>
     );
 }

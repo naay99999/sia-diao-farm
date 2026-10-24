@@ -146,12 +146,7 @@ export type Sale = {
 };
 
 export type ExpenseCategory =
-    | 'fertilizer'
-    | 'pesticide'
-    | 'labor'
-    | 'utilities'
-    | 'equipment'
-    | 'other';
+    'fertilizer' | 'pesticide' | 'labor' | 'utilities' | 'equipment' | 'other';
 
 export type Expense = {
     id: number;
@@ -212,4 +207,83 @@ export type RecentAiRecord = {
     recordedOn: string;
     href: string | null;
     by: string | null;
+};
+
+export type RecordType = 'care' | 'observations' | 'harvests' | 'sales';
+
+export type RecordFilterValues = {
+    orchard_id: number | null;
+    season_id: number | null;
+    from: string | null;
+    to: string | null;
+    created_by: number | null;
+    via: 'app' | 'mcp' | null;
+};
+
+export type RecordFilterOptions = {
+    orchards: Pick<Orchard, 'id' | 'name'>[];
+    seasons: { id: number; label: string }[];
+    members: { id: number; name: string }[];
+};
+
+export type RecordProvenance = {
+    fromAi: boolean;
+    aiBy: string | null;
+    createdBy: string | null;
+};
+
+type OrchardRef = Pick<Orchard, 'id' | 'name'>;
+type TreeRef = Pick<Tree, 'id' | 'code'>;
+
+export type CareRow = CareRecord &
+    RecordProvenance & {
+        typeLabel: string;
+        orchard: OrchardRef;
+    };
+
+export type ObservationRow = Observation &
+    RecordProvenance & {
+        finding: Pick<Finding, 'id' | 'name' | 'kind'>;
+        issueStatus: 'open' | 'resolved' | null;
+        tree: TreeRef;
+        orchard: OrchardRef;
+    };
+
+export type HarvestRow = Harvest &
+    RecordProvenance & {
+        tree: TreeRef;
+        orchard: OrchardRef;
+    };
+
+export type SaleRow = Sale &
+    RecordProvenance & {
+        orchard: OrchardRef;
+    };
+
+export type ExpenseRow = Expense & RecordProvenance;
+
+export type PaginatorLink = {
+    url: string | null;
+    label: string;
+    active: boolean;
+};
+
+export type Paginated<T> = {
+    data: T[];
+    links: PaginatorLink[];
+    current_page: number;
+    last_page: number;
+    from: number | null;
+    to: number | null;
+    total: number;
+};
+
+export type TrashItem = {
+    type: string;
+    id: number;
+    kind: string;
+    title: string;
+    subject: string;
+    href: string | null;
+    deletedAt: string;
 };

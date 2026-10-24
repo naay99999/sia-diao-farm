@@ -1,10 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
+import { AiBadge } from '@/components/farm/ai-badge';
 import { EmptyState } from '@/components/farm/empty-state';
 import { OrchardSummaryCard } from '@/components/farm/orchard-summary-card';
 import Heading from '@/components/heading';
 import { PageContainer } from '@/components/page-container';
-import { Badge } from '@/components/ui/badge';
 import { formatThaiDate } from '@/lib/thai-date';
 import { show as showTree } from '@/routes/trees';
 import type {
@@ -86,12 +86,7 @@ function RecentRecords({ records }: { records: RecentAiRecord[] }) {
                             <div className="min-w-0 flex-1">
                                 <p className="flex flex-wrap items-center gap-x-2 text-lg font-medium md:text-base">
                                     {record.title}
-                                    <Badge variant="outline">
-                                        <span className="sr-only">
-                                            บันทึกโดย{' '}
-                                        </span>
-                                        AI{record.by && ` · ${record.by}`}
-                                    </Badge>
+                                    <AiBadge by={record.by} />
                                 </p>
                                 <p className="text-base text-muted-foreground md:text-sm">
                                     {record.kind} · {record.subject}

@@ -8,6 +8,8 @@ use App\Models\CareRecord;
 use App\Models\Harvest;
 use App\Models\Observation;
 use App\Models\Sale;
+use App\Models\Tree;
+use App\Support\IssueSummary;
 use App\Support\RecordFilters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +44,25 @@ class RecordController extends Controller
             'records' => $records->withQueryString(),
             'filters' => $filters,
             ...RecordFilters::options(),
+            ...($type === 'care' ? $this->careEditOptions() : []),
         ]);
+    }
+
+    /**
+     * What the care record form needs beyond the row itself: each orchard's standing trees and the open problems
+     * on them, in two queries however many rows the page shows.
+     *
+     * @return array{orchardTrees: array<int, list<array{id: int, code: string}>>, openIssues: array<int, array<string, mixed>>}
+     */
+    private function careEditOptions(): array
+    {
+        return [
+            'orchardTrees' => Tree::query()->active()->orderBy('code')->get(['id', 'orchard_id', 'code'])
+                ->groupBy('orchard_id')
+                ->map(fn ($trees) => $trees->map->only(['id', 'code'])->values()->all())
+                ->all(),
+            'openIssues' => IssueSummary::openForFarm(),
+        ];
     }
 
     /**
@@ -100,7 +120,7 @@ class RecordController extends Controller
             ...$this->provenance($observation),
             'id' => $observation->id,
             'finding_id' => $observation->finding_id,
-            'finding' => $observation->finding->only(['id', 'name']),
+            'finding' => $observation->finding->only(['id', 'name', 'kind']),
             'tree_issue_id' => $observation->tree_issue_id,
             'observed_on' => $observation->observed_on->toDateString(),
             'severity' => $observation->severity?->value,

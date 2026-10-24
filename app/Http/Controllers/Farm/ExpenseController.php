@@ -36,7 +36,7 @@ class ExpenseController extends Controller
             ->sortByDesc('total')
             ->values();
 
-        return Inertia::render('farm/expenses/index', [
+        return Inertia::render('records/expenses', [
             'expenses' => $expenses->map(fn (Expense $expense): array => [
                 ...$expense->makeHidden(['creator', 'updater'])->toArray(),
                 'fromAi' => $expense->isFromAi(),

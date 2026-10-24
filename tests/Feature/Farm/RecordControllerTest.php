@@ -210,3 +210,28 @@ test('expenses carry the filter options and who recorded each row', function () 
     $this->get(route('expenses.index', ['via' => 'mcp']))
         ->assertInertia(fn (Assert $page) => $page->has('expenses', 1)->where('filters.via', 'mcp'));
 });
+
+test('care records carry the trees and open problems the edit form needs', function () {
+    $orchard = Orchard::factory()->create();
+    $tree = Tree::factory()->for($orchard)->create(['code' => 'A1']);
+    Tree::factory()->for($orchard)->create(['code' => 'A2', 'removed_on' => '2026-01-01']);
+    $issue = TreeIssue::factory()->for($tree)->create(['resolved_on' => null]);
+    CareRecord::factory()->for($orchard)->create();
+
+    $this->get(route('records.index', 'care'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has("orchardTrees.{$orchard->id}", 1)
+            ->where("orchardTrees.{$orchard->id}.0.code", 'A1')
+            ->has('openIssues', 1)
+            ->where('openIssues.0.id', $issue->id));
+
+    $this->get(route('records.index', 'harvests'))
+        ->assertInertia(fn (Assert $page) => $page->missing('orchardTrees')->missing('openIssues'));
+});
+
+test('observation rows carry the finding kind', function () {
+    Observation::factory()->create();
+
+    $this->get(route('records.index', 'observations'))
+        ->assertInertia(fn (Assert $page) => $page->has('records.data.0.finding.kind'));
+});

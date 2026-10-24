@@ -6,6 +6,7 @@ import HarvestController from '@/actions/App/Http/Controllers/Farm/HarvestContro
 import ObservationController from '@/actions/App/Http/Controllers/Farm/ObservationController';
 import TreeController from '@/actions/App/Http/Controllers/Farm/TreeController';
 import { useConfirm } from '@/components/confirm-dialog';
+import { AiBadge } from '@/components/farm/ai-badge';
 import {
     CareRecordFormBody,
     todayIso,
@@ -368,14 +369,7 @@ export default function TreeShow({
                                                 {entry.title}
                                             </p>
                                             {entry.fromAi && (
-                                                <Badge variant="outline">
-                                                    <span className="sr-only">
-                                                        บันทึกโดย{' '}
-                                                    </span>
-                                                    AI
-                                                    {entry.aiBy &&
-                                                        ` · ${entry.aiBy}`}
-                                                </Badge>
+                                                <AiBadge by={entry.aiBy} />
                                             )}
                                         </div>
                                         <p className="text-base text-muted-foreground md:text-sm">
