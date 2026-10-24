@@ -12,9 +12,12 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Fortify\Fortify;
+use Laravel\Passkeys\Passkeys;
 
 class FortifyServiceProvider extends ServiceProvider
 {
+    private const DEACTIVATED_MESSAGE = 'บัญชีนี้ถูกปิดใช้งานแล้ว';
+
     /**
      * Register any application services.
      */
@@ -57,11 +60,21 @@ class FortifyServiceProvider extends ServiceProvider
 
             if (! $user->isActive()) {
                 throw ValidationException::withMessages([
-                    Fortify::username() => 'บัญชีนี้ถูกปิดใช้งานแล้ว',
+                    Fortify::username() => self::DEACTIVATED_MESSAGE,
                 ]);
             }
 
             return $user;
+        });
+
+        Passkeys::authorizeLoginUsing(function (Request $request, User $user): bool {
+            if (! $user->isActive()) {
+                throw ValidationException::withMessages([
+                    'passkey' => self::DEACTIVATED_MESSAGE,
+                ]);
+            }
+
+            return true;
         });
     }
 
