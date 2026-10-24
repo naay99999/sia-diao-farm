@@ -64,6 +64,10 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if ($user->passkeys()->doesntExist()) {
+                Inertia::flash('suggestPasskey', true);
+            }
+
             return $user;
         });
 

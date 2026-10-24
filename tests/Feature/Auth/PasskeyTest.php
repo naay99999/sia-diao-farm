@@ -58,3 +58,25 @@ test('deactivated users cannot log in with a passkey', function () {
     expect(fn () => Passkeys::allowsLogin(request(), $passkey))
         ->toThrow(ValidationException::class, 'บัญชีนี้ถูกปิดใช้งานแล้ว');
 });
+
+test('password login suggests a passkey when the user has none', function () {
+    $user = User::factory()->create();
+
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+        ->assertSessionHas('inertia.flash_data.suggestPasskey', true);
+});
+
+test('no passkey suggestion when the user already has one', function () {
+    $user = User::factory()->create();
+    createPasskey($user);
+
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
+        ->assertSessionMissing('inertia.flash_data.suggestPasskey');
+});
+
+test('failed login does not suggest a passkey', function () {
+    $user = User::factory()->create();
+
+    $this->post(route('login.store'), ['email' => $user->email, 'password' => 'wrong'])
+        ->assertSessionMissing('inertia.flash_data.suggestPasskey');
+});
