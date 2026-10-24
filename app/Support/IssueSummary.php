@@ -68,6 +68,56 @@ class IssueSummary
     }
 
     /**
+     * Open issues on standing trees across every orchard, soonest follow-up first.
+     *
+     * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool, orchardId: int, orchardName: string}>
+     */
+    public static function openForFarm(): array
+    {
+        return self::withOrchard(self::farmQuery()->open()->get());
+    }
+
+    /**
+     * Open issues already due on standing trees across every orchard, soonest follow-up first.
+     *
+     * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool, orchardId: int, orchardName: string}>
+     */
+    public static function dueForFarm(): array
+    {
+        return self::withOrchard(self::farmQuery()->due(Date::today())->get());
+    }
+
+    /**
+     * @param  iterable<TreeIssue>  $issues
+     * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool, orchardId: int, orchardName: string}>
+     */
+    private static function withOrchard(iterable $issues): array
+    {
+        $summaries = [];
+
+        foreach ($issues as $issue) {
+            $summaries[] = self::forIssue($issue) + [
+                'orchardId' => $issue->tree->orchard->id,
+                'orchardName' => $issue->tree->orchard->name,
+            ];
+        }
+
+        return $summaries;
+    }
+
+    /**
+     * @return Builder<TreeIssue>
+     */
+    private static function farmQuery(): Builder
+    {
+        return TreeIssue::query()
+            ->whereIn('tree_id', Tree::query()->active()->select('id'))
+            ->with(['tree:id,code,orchard_id', 'tree.orchard:id,name', 'finding:id,name'])
+            ->orderBy('follow_up_on')
+            ->orderBy('id');
+    }
+
+    /**
      * @return Builder<TreeIssue>
      */
     private static function orchardQuery(Orchard $orchard): Builder
