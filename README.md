@@ -1,24 +1,32 @@
 # Sia Diao Farm
 
-A personal farm management app built for tracking a family fruit orchard. This is a hobby project — not production-grade software, but it works well enough for daily use in the field.
+A personal farm management app for a family's orchards. This is a hobby project — not production-grade software, but it works well enough for daily use in the field.
 
 Feel free to fork it and adapt it for your own farm. No license restrictions.
 
 ## About
 
-Sia Diao Farm (เสี่ยเดียวฟาร์ม) is a lean, single-owner durian tree tracker. It replaces paper notebooks with a mobile-friendly web app: scan a tree's QR label in the orchard to see its history and record what happened.
+Sia Diao Farm (เสี่ยเดียวฟาร์ม) is a farm management app for one owner with several orchards, tracked tree by tree. It supports durian today; the data model is meant to take more crops later.
+
+- **Desktop first.** The web app covers everything: orchards, trees, records, edits, reports.
+- **Mobile for viewing.** Every page is responsive, and each tree's QR label opens its page on the phone.
+- **Claude through MCP.** The standout feature. The farm data is exposed as an MCP server, so family members can ask Claude to analyse an orchard, suggest fertilizer or pesticide, and then record the work straight from the chat. Field work is meant to be recorded this way rather than through mobile forms.
 
 **Core features:**
 - Orchards, each with its own trees
 - Trees with printable QR labels (one sheet per orchard) that open the tree page directly
 - Seasons per orchard (no overlapping dates, at most one open season)
 - Care records (fertilizer, pesticide, other) applied to one or many trees at once
+- Tree observations (problems and growth stages) with follow-ups
 - Harvest recording per tree
 - Sales per orchard
 - Expenses with fixed categories, optionally tied to a season
 - Season summaries and an orchard overview
+- Farm MCP server (OAuth) with read and write tools, and an in-app "ผู้ช่วย AI" page that shows what to ask Claude
 
-The UI is Thai-only. There is a single owner account and no roles.
+The UI is Thai-only. There is one owner, who manages family member accounts; members see and edit every orchard. Every record keeps who made it and whether it came from the app or from Claude.
+
+Product direction: [`docs/superpowers/specs/2026-10-24-product-direction-design.md`](docs/superpowers/specs/2026-10-24-product-direction-design.md).
 
 ## Tech Stack
 
