@@ -9,6 +9,7 @@ use App\Models\Harvest;
 use App\Models\Orchard;
 use App\Models\Tree;
 use App\Support\IssueSummary;
+use App\Support\TreeLayout;
 use App\Support\TreeQrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -83,6 +84,7 @@ class OrchardController extends Controller
                 ->when(! $showRemoved, fn ($query) => $query->active())
                 ->orderBy('code')
                 ->get(),
+            'treeLayout' => TreeLayout::forOrchard($orchard),
             'showRemoved' => $showRemoved,
             'recentCareRecords' => $orchard->careRecords()
                 ->with(['trees:id,code,removed_on', 'issues:id'])

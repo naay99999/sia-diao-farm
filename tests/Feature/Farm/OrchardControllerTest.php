@@ -15,10 +15,10 @@ test('guests are redirected to login from orchards index', function () {
     $this->get(route('orchards.index'))->assertRedirect(route('login'));
 });
 
-test('home redirects to orchards', function () {
+test('home redirects to the overview', function () {
     $this->actingAs(User::factory()->create())
         ->get('/')
-        ->assertRedirect(route('orchards.index'));
+        ->assertRedirect(route('overview'));
 });
 
 test('home redirects guests to login', function () {
@@ -153,4 +153,13 @@ test('orchard show gives current season yield per tree', function () {
         ->assertInertia(fn ($page) => $page
             ->where("currentSeasonYieldKg.{$tree->id}", 4)
             ->missing("currentSeasonYieldKg.{$idle->id}"));
+});
+
+test('orchard page carries its tree layout', function () {
+    $orchard = Orchard::factory()->create();
+    Tree::factory()->for($orchard)->create(['code' => 'A1']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('orchards.show', $orchard))
+        ->assertInertia(fn ($page) => $page->has('treeLayout.0.trees'));
 });

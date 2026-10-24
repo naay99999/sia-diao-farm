@@ -6,6 +6,7 @@ use App\Http\Controllers\Farm\ExpenseController;
 use App\Http\Controllers\Farm\HarvestController;
 use App\Http\Controllers\Farm\ObservationController;
 use App\Http\Controllers\Farm\OrchardController;
+use App\Http\Controllers\Farm\OverviewController;
 use App\Http\Controllers\Farm\SaleController;
 use App\Http\Controllers\Farm\SeasonController;
 use App\Http\Controllers\Farm\TreeController;
@@ -13,11 +14,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return auth()->check()
-        ? to_route('orchards.index')
+        ? to_route('overview')
         : to_route('login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('overview', [OverviewController::class, 'index'])->name('overview');
+
     Route::resource('orchards', OrchardController::class)
         ->except(['create', 'edit']);
 
