@@ -73,7 +73,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
     Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
     Route::get('assistant', [AssistantController::class, 'index'])->name('assistant.index');
-    Route::delete('assistant/connections/{user}/{client}', [AssistantController::class, 'destroy'])->name('assistant.connections.destroy');
     Route::get('t/{tree}', [TreeController::class, 'qr'])->name('trees.qr');
 });
 
