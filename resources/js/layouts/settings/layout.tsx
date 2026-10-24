@@ -6,6 +6,7 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { index as aiConnectionsIndex } from '@/routes/ai-connections';
+import { index as findingsIndex } from '@/routes/findings';
 import { index as membersIndex } from '@/routes/members';
 import { edit as profileEdit } from '@/routes/profile';
 
@@ -17,6 +18,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     const settingsNavItems = [
         { title: 'โปรไฟล์', href: profileEdit() },
         ...(isOwner ? [{ title: 'สมาชิก', href: membersIndex() }] : []),
+        { title: 'สิ่งที่พบ', href: findingsIndex() },
         { title: 'เชื่อมต่อ Claude', href: aiConnectionsIndex() },
     ];
 

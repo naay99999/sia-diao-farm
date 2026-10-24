@@ -7,6 +7,7 @@ use Database\Factories\FindingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -30,6 +31,31 @@ class Finding extends Model
         return [
             'kind' => FindingKind::class,
         ];
+    }
+
+    /**
+     * @return HasMany<Observation, $this>
+     */
+    public function observations(): HasMany
+    {
+        return $this->hasMany(Observation::class);
+    }
+
+    /**
+     * @return HasMany<TreeIssue, $this>
+     */
+    public function treeIssues(): HasMany
+    {
+        return $this->hasMany(TreeIssue::class);
+    }
+
+    /**
+     * Whether any observation or issue, trashed ones included, still points at this finding.
+     */
+    public function isInUse(): bool
+    {
+        return $this->observations()->withTrashed()->exists()
+            || $this->treeIssues()->withTrashed()->exists();
     }
 
     /**

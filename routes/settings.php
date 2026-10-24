@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AiConnectionController;
+use App\Http\Controllers\Settings\FindingController;
 use App\Http\Controllers\Settings\MemberController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,11 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('settings/members/{user}/deactivate', [MemberController::class, 'deactivate'])->name('members.deactivate');
         Route::patch('settings/members/{user}/activate', [MemberController::class, 'activate'])->name('members.activate');
     });
+
+    Route::get('settings/findings', [FindingController::class, 'index'])->name('findings.index');
+    Route::post('settings/findings', [FindingController::class, 'store'])->name('findings.store');
+    Route::patch('settings/findings/{finding}', [FindingController::class, 'update'])->name('findings.update');
+    Route::delete('settings/findings/{finding}', [FindingController::class, 'destroy'])->name('findings.destroy');
 
     Route::get('settings/ai', [AiConnectionController::class, 'index'])->name('ai-connections.index');
     Route::delete('settings/ai/{user}/{client}', [AiConnectionController::class, 'destroy'])->name('ai-connections.destroy');
