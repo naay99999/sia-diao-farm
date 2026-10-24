@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { ConfirmProvider } from '@/components/confirm-dialog';
+import { PasskeyPrompt } from '@/components/passkey-prompt';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
@@ -27,6 +28,7 @@ createInertiaApp({
                 <ConfirmProvider>
                     {app}
                     <Toaster />
+                    <PasskeyPrompt />
                 </ConfirmProvider>
             </TooltipProvider>
         );
