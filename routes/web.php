@@ -10,7 +10,9 @@ use App\Http\Controllers\Farm\OverviewController;
 use App\Http\Controllers\Farm\RecordController;
 use App\Http\Controllers\Farm\SaleController;
 use App\Http\Controllers\Farm\SeasonController;
+use App\Http\Controllers\Farm\TrashController;
 use App\Http\Controllers\Farm\TreeController;
+use App\Mcp\Support\RecordTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +60,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
     Route::get('records', [RecordController::class, 'redirect']);
     Route::get('records/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('records/trash', [TrashController::class, 'index'])->name('records.trash');
+    Route::patch('records/trash/{type}/{id}', [TrashController::class, 'restore'])
+        ->whereIn('type', RecordTypes::DELETABLE)
+        ->whereNumber('id')
+        ->name('records.trash.restore');
     Route::get('records/{type}', [RecordController::class, 'index'])
         ->whereIn('type', ['care', 'observations', 'harvests', 'sales'])
         ->name('records.index');
