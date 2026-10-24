@@ -102,3 +102,14 @@ test('deactivated members are marked on the page', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->where('members', fn ($members) => collect($members)->where('isActive', false)->count() === 1));
 });
+
+test('members page shows who has a passkey', function () {
+    $this->user->update(['name' => 'ก']);
+    $member = User::factory()->create(['name' => 'ข']);
+    createPasskey($member);
+
+    $this->actingAs($this->user)->get(route('members.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('members.0.hasPasskey', false)
+            ->where('members.1.hasPasskey', true));
+});

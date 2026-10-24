@@ -21,6 +21,7 @@ class MemberController extends Controller
     public function index(): Response
     {
         $members = User::query()
+            ->withExists('passkeys')
             ->orderByDesc('is_owner')
             ->orderBy('name')
             ->get()
@@ -30,6 +31,7 @@ class MemberController extends Controller
                 'email' => $user->email,
                 'isOwner' => $user->is_owner,
                 'isActive' => $user->isActive(),
+                'hasPasskey' => $user->passkeys_exists,
                 'isConnected' => AiConnections::forUser($user->id) !== [],
             ]);
 

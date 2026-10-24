@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Mcp\Server\Testing\TestResponse as McpTestResponse;
+use Laravel\Passkeys\Passkey;
 use Laravel\Passport\Client;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
@@ -87,3 +88,15 @@ McpTestResponse::macro('payload', function (): array {
     /** @var McpTestResponse $this */
     return json_decode($this->content()[0] ?? '[]', true, flags: JSON_THROW_ON_ERROR);
 });
+
+/*
+| Creates a passkey row for a user without a real WebAuthn ceremony.
+*/
+function createPasskey(User $user, string $name = 'iPhone'): Passkey
+{
+    return $user->passkeys()->create([
+        'name' => $name,
+        'credential_id' => Str::random(32),
+        'credential' => [],
+    ]);
+}

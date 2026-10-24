@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Inertia\Testing\AssertableInertia as Assert;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -95,4 +96,17 @@ test('account deletion route no longer exists', function () {
 test('appearance and security pages no longer exist', function () {
     expect(Route::has('appearance.edit'))->toBeFalse();
     expect(Route::has('security.edit'))->toBeFalse();
+});
+
+test('profile lists only the signed-in user\'s passkeys', function () {
+    $user = User::factory()->create();
+    createPasskey($user, 'iPhone · Safari');
+    createPasskey(User::factory()->create(), 'อื่น');
+
+    $this->actingAs($user)->get(route('profile.edit'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('passkeys', 1)
+            ->where('passkeys.0.name', 'iPhone · Safari')
+            ->has('passkeys.0.createdAt')
+            ->where('passkeys.0.lastUsedAt', null));
 });

@@ -2,19 +2,8 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Laravel\Passkeys\Passkey;
 use Laravel\Passkeys\Passkeys;
-
-function createPasskey(User $user, string $name = 'iPhone'): Passkey
-{
-    return $user->passkeys()->create([
-        'name' => $name,
-        'credential_id' => Str::random(32),
-        'credential' => [],
-    ]);
-}
 
 test('passkey routes are registered', function () {
     foreach (['passkey.login-options', 'passkey.login', 'passkey.registration-options', 'passkey.store', 'passkey.destroy'] as $name) {

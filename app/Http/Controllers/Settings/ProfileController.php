@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Passkeys\Passkey;
 
 class ProfileController extends Controller
 {
@@ -23,6 +24,15 @@ class ProfileController extends Controller
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'passkeys' => $request->user()->passkeys()->latest()->get()
+                ->map(fn (Passkey $passkey): array => [
+                    'id' => $passkey->id,
+                    'name' => $passkey->name,
+                    'authenticator' => $passkey->authenticator,
+                    'createdAt' => $passkey->created_at->toIso8601String(),
+                    'lastUsedAt' => $passkey->last_used_at?->toIso8601String(),
+                ])
+                ->all(),
         ]);
     }
 
