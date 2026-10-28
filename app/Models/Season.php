@@ -31,6 +31,10 @@ class Season extends Model
     /** @use HasFactory<SeasonFactory> */
     use HasFactory;
 
+    public const CONFLICT_OPEN = 'open';
+
+    public const CONFLICT_OVERLAP = 'overlap';
+
     /**
      * @return array<string, string>
      */
@@ -74,6 +78,33 @@ class Season extends Model
 
         return $day >= $this->started_on->toDateString()
             && $day <= $this->effectiveEnd()->toDateString();
+    }
+
+    /**
+     * Why a season with these dates cannot sit beside the orchard's other seasons, or null when it can:
+     * an orchard has at most one open season, and season date ranges never overlap.
+     *
+     * @return self::CONFLICT_*|null
+     */
+    public static function conflictWith(int $orchardId, string $startedOn, ?string $endedOn, ?int $excludedSeasonId = null): ?string
+    {
+        $others = self::query()
+            ->where('orchard_id', $orchardId)
+            ->when($excludedSeasonId !== null, fn (Builder $query) => $query->whereKeyNot($excludedSeasonId))
+            ->get();
+
+        if ($endedOn === null && $others->contains(fn (Season $other): bool => $other->isOpen())) {
+            return self::CONFLICT_OPEN;
+        }
+
+        $overlaps = $others->contains(function (Season $other) use ($startedOn, $endedOn): bool {
+            $otherEnd = $other->ended_on?->toDateString();
+
+            return ($endedOn === null || $other->started_on->toDateString() <= $endedOn)
+                && ($otherEnd === null || $otherEnd >= $startedOn);
+        });
+
+        return $overlaps ? self::CONFLICT_OVERLAP : null;
     }
 
     /**

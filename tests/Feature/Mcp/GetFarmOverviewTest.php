@@ -16,7 +16,7 @@ beforeEach(function () {
 
     $this->user = User::factory()->create();
     $this->orchard = Orchard::factory()->create(['name' => 'สวนหน้าบ้าน']);
-    Season::factory()->for($this->orchard)->create(['name' => 'ฤดู 2569', 'started_on' => '2026-01-01']);
+    $this->season = Season::factory()->for($this->orchard)->create(['name' => 'ฤดู 2569', 'started_on' => '2026-01-01']);
     $this->tree = Tree::factory()->for($this->orchard)->create(['code' => 'A-001']);
     $this->redMite = Finding::where('name', 'ไรแดง')->firstOrFail();
 });
@@ -43,8 +43,10 @@ test('overview payload has orchards with season and active tree count', function
 
     expect($payload['today'])->toBe('2026-10-21')
         ->and($payload['orchards'])->toBe([
-            ['id' => $this->orchard->id, 'name' => 'สวนหน้าบ้าน', 'current_season' => 'ฤดู 2569', 'active_tree_count' => 2],
-            ['id' => $other->id, 'name' => 'สวนหลังบ้าน', 'current_season' => null, 'active_tree_count' => 0],
+            ['id' => $this->orchard->id, 'name' => 'สวนหน้าบ้าน', 'current_season' => 'ฤดู 2569', 'active_tree_count' => 2, 'seasons' => [
+                ['id' => $this->season->id, 'orchard_id' => $this->orchard->id, 'name' => 'ฤดู 2569', 'started_on' => '2026-01-01', 'ended_on' => null, 'notes' => null],
+            ]],
+            ['id' => $other->id, 'name' => 'สวนหลังบ้าน', 'current_season' => null, 'active_tree_count' => 0, 'seasons' => []],
         ])
         ->and(collect($payload['findings'])->firstWhere('name', 'ไรแดง'))
         ->toBe(['id' => $this->redMite->id, 'name' => 'ไรแดง', 'kind' => 'problem']);

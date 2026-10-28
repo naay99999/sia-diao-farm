@@ -58,7 +58,7 @@ class TreeLookup
         $orchards = Orchard::query()->orderBy('id')->limit(2)->get();
 
         return match ($orchards->count()) {
-            0 => throw ValidationException::withMessages(['orchard_id' => 'No orchards exist yet; create one in the app first.']),
+            0 => throw ValidationException::withMessages(['orchard_id' => 'No orchards exist yet; create one with save_orchard first.']),
             1 => $orchards->first(),
             default => throw ValidationException::withMessages(['orchard_id' => 'Multiple orchards exist; pass orchard_id from get_farm_overview.']),
         };

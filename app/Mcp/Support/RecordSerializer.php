@@ -7,7 +7,10 @@ use App\Models\Expense;
 use App\Models\FarmNote;
 use App\Models\Harvest;
 use App\Models\Observation;
+use App\Models\Orchard;
 use App\Models\Sale;
+use App\Models\Season;
+use App\Models\Tree;
 use App\Models\TreeIssue;
 use Illuminate\Database\Eloquent\Model;
 
@@ -93,10 +96,35 @@ class RecordSerializer
                 'orchard_id' => $record->tree?->orchard_id,
                 'created_on' => $record->created_at?->toDateString(),
             ],
+            $record instanceof Orchard => [
+                'id' => $record->id,
+                'name' => $record->name,
+                'location' => $record->location,
+                'notes' => $record->notes,
+            ],
+            $record instanceof Season => [
+                'id' => $record->id,
+                'orchard_id' => $record->orchard_id,
+                'name' => $record->name,
+                'started_on' => $record->started_on->toDateString(),
+                'ended_on' => $record->ended_on?->toDateString(),
+                'notes' => $record->notes,
+            ],
+            $record instanceof Tree => [
+                'id' => $record->id,
+                'orchard_id' => $record->orchard_id,
+                'code' => $record->code,
+                'variety' => $record->variety,
+                'planted_on' => $record->planted_on?->toDateString(),
+                'removed_on' => $record->removed_on?->toDateString(),
+                'notes' => $record->notes,
+            ],
             default => ['id' => $record->getKey()],
         };
 
-        $data['from_ai'] = method_exists($record, 'isFromAi') ? $record->isFromAi() : false;
+        if (method_exists($record, 'isFromAi')) {
+            $data['from_ai'] = $record->isFromAi();
+        }
 
         if ($includeDeleted) {
             $data['deleted_at'] = $record->getAttribute('deleted_at')?->toIso8601String();

@@ -54,29 +54,18 @@ class StoreSeasonRequest extends FormRequest
             $orchardId = $orchard->id;
         }
 
-        $startedOn = $this->date('started_on')->toDateString();
-        $endedOn = $this->filled('ended_on') ? $this->date('ended_on')->toDateString() : null;
+        $conflict = Season::conflictWith(
+            $orchardId,
+            $this->date('started_on')->toDateString(),
+            $this->filled('ended_on') ? $this->date('ended_on')->toDateString() : null,
+            $excludedSeasonId,
+        );
 
-        $others = Season::query()
-            ->where('orchard_id', $orchardId)
-            ->when($excludedSeasonId !== null, fn ($query) => $query->whereKeyNot($excludedSeasonId))
-            ->get();
-
-        if ($endedOn === null && $others->contains(fn (Season $other) => $other->isOpen())) {
-            $validator->errors()->add('started_on', 'มีรอบที่ยังไม่ปิดอยู่แล้ว');
-
-            return;
-        }
-
-        $overlaps = $others->contains(function (Season $other) use ($startedOn, $endedOn): bool {
-            $otherEnd = $other->ended_on?->toDateString();
-
-            return ($endedOn === null || $other->started_on->toDateString() <= $endedOn)
-                && ($otherEnd === null || $otherEnd >= $startedOn);
-        });
-
-        if ($overlaps) {
-            $validator->errors()->add('started_on', 'ช่วงวันซ้อนกับรอบอื่น');
+        if ($conflict !== null) {
+            $validator->errors()->add('started_on', match ($conflict) {
+                Season::CONFLICT_OPEN => 'มีรอบที่ยังไม่ปิดอยู่แล้ว',
+                Season::CONFLICT_OVERLAP => 'ช่วงวันซ้อนกับรอบอื่น',
+            });
         }
     }
 }

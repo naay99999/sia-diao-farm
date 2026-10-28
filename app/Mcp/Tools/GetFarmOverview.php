@@ -2,8 +2,10 @@
 
 namespace App\Mcp\Tools;
 
+use App\Mcp\Support\RecordSerializer;
 use App\Models\Finding;
 use App\Models\Orchard;
+use App\Models\Season;
 use App\Models\Tree;
 use App\Models\TreeIssue;
 use App\Support\IssueSummary;
@@ -17,7 +19,7 @@ use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('get_farm_overview')]
-#[Description('Call this first in every conversation. Returns the orchards (id, name, current season, active tree count), issues due for follow-up, all open issues (each with orchard_id), the known findings (id, name, kind) and today\'s date. Use the returned ids in other tools.')]
+#[Description('Call this first in every conversation. Returns the orchards (id, name, current season, active tree count, and every season newest first with its id and dates), issues due for follow-up, all open issues (each with orchard_id), the known findings (id, name, kind) and today\'s date. Use the returned ids in other tools.')]
 #[IsReadOnly]
 class GetFarmOverview extends Tool
 {
@@ -25,7 +27,7 @@ class GetFarmOverview extends Tool
     {
         $orchards = Orchard::query()
             ->withCount(['trees' => fn ($query) => $query->active()])
-            ->with('currentSeason:id,orchard_id,name')
+            ->with(['seasons' => fn ($query) => $query->orderByDesc('started_on')->orderByDesc('id')])
             ->orderBy('name')
             ->orderBy('id')
             ->get();
@@ -52,8 +54,9 @@ class GetFarmOverview extends Tool
             'orchards' => $orchards->map(fn (Orchard $orchard): array => [
                 'id' => $orchard->id,
                 'name' => $orchard->name,
-                'current_season' => $orchard->currentSeason?->name,
+                'current_season' => $orchard->seasons->first(fn (Season $season): bool => $season->isOpen())?->name,
                 'active_tree_count' => $orchard->trees_count,
+                'seasons' => $orchard->seasons->map(fn (Season $season): array => RecordSerializer::serialize($season))->all(),
             ])->all(),
             'due_issues' => array_values(array_filter($summaries, fn (array $summary): bool => $summary['isDue'])),
             'open_issues' => $summaries,
