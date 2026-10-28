@@ -58,7 +58,7 @@
 - Modify: `database/factories/UserFactory.php`
 - Test: `tests/Feature/Farm/UserRoleTest.php`
 
-- [ ] **Step 1: Create the enum**
+- [x] **Step 1: Create the enum**
 
 ```php
 <?php
@@ -72,7 +72,7 @@ enum UserRole: string
 }
 ```
 
-- [ ] **Step 2: Create the migration**
+- [x] **Step 2: Create the migration**
 
 Create `database/migrations/2026_06_27_100000_add_role_to_users_table.php`:
 
@@ -101,7 +101,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 3: Update the User model**
+- [x] **Step 3: Update the User model**
 
 In `app/Models/User.php`: add `use App\Enums\UserRole;`, add `@property UserRole $role` to the docblock, add the cast and helper method.
 
@@ -120,7 +120,7 @@ public function isAdmin(): bool
 }
 ```
 
-- [ ] **Step 4: Update the UserFactory**
+- [x] **Step 4: Update the UserFactory**
 
 In `database/factories/UserFactory.php` add `use App\Enums\UserRole;`, add `'role' => UserRole::User,` to the `definition()` array, and add this state method:
 
@@ -133,7 +133,7 @@ public function admin(): static
 }
 ```
 
-- [ ] **Step 5: Write the test**
+- [x] **Step 5: Write the test**
 
 Create with `php artisan make:test --pest Farm/UserRoleTest`, then replace contents:
 
@@ -158,12 +158,12 @@ test('admin factory state creates an admin', function () {
 });
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `php artisan test --compact --filter=UserRoleTest`
 Expected: PASS (2 tests)
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -181,7 +181,7 @@ git commit -m "feat: add user role foundation (admin/user)"
 - Create: `database/factories/FruitTypeFactory.php`
 - Test: `tests/Feature/Farm/FruitTypeModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/FruitTypeModelTest`, then:
 
@@ -199,12 +199,12 @@ test('a fruit type has many varieties', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=FruitTypeModelTest`
 Expected: FAIL ("Class FruitType not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_100100_create_fruit_types_table.php`:
 
@@ -233,7 +233,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/FruitType.php`:
 
@@ -271,7 +271,7 @@ class FruitType extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/FruitTypeFactory.php`:
 
@@ -297,12 +297,12 @@ class FruitTypeFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test to verify it passes**
+- [x] **Step 6: Run test to verify it passes**
 
 Run: `php artisan test --compact --filter=FruitTypeModelTest`
 Expected: PASS (depends on FruitVariety from Task 3; if run before Task 3, expect FAIL on FruitVariety — run after Task 3, or temporarily stub. To keep tasks independent, run this test together with Task 3.)
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -320,7 +320,7 @@ git commit -m "feat: add FruitType model"
 - Create: `database/factories/FruitVarietyFactory.php`
 - Test: `tests/Feature/Farm/FruitVarietyModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/FruitVarietyModelTest`, then:
 
@@ -342,12 +342,12 @@ test('a variety belongs to a fruit type', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=FruitVarietyModelTest`
 Expected: FAIL ("Class FruitVariety not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_100200_create_fruit_varieties_table.php`:
 
@@ -378,7 +378,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/FruitVariety.php`:
 
@@ -427,7 +427,7 @@ class FruitVariety extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/FruitVarietyFactory.php`:
 
@@ -456,12 +456,12 @@ class FruitVarietyFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `php artisan test --compact --filter="FruitVarietyModelTest|FruitTypeModelTest"`
 Expected: PASS (both Task 2 and Task 3 model tests)
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -479,7 +479,7 @@ git commit -m "feat: add FruitVariety model"
 - Create: `database/factories/PlotFactory.php`
 - Test: `tests/Feature/Farm/PlotModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/PlotModelTest`, then:
 
@@ -511,12 +511,12 @@ test('tree age is null when planted_at is missing', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=PlotModelTest`
 Expected: FAIL ("Class Plot not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_100300_create_plots_table.php`:
 
@@ -550,7 +550,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/Plot.php`:
 
@@ -634,7 +634,7 @@ class Plot extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/PlotFactory.php`:
 
@@ -666,12 +666,12 @@ class PlotFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test to verify it passes**
+- [x] **Step 6: Run test to verify it passes**
 
 Run: `php artisan test --compact --filter=PlotModelTest`
 Expected: PASS (3 tests). The `activeCropCycle` relation references `CropCycle` (Task 5) but is not exercised by these tests; it will resolve once Task 5 lands. If autoload errors occur, complete Task 5 then re-run.
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -690,7 +690,7 @@ git commit -m "feat: add Plot model with tree-age accessor"
 - Create: `database/factories/CropCycleFactory.php`
 - Test: `tests/Feature/Farm/CropCycleModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/CropCycleModelTest`, then:
 
@@ -730,12 +730,12 @@ test('a cycle belongs to a plot and is castable', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=CropCycleModelTest`
 Expected: FAIL ("Class CropCycleStage not found")
 
-- [ ] **Step 3: Create the enums**
+- [x] **Step 3: Create the enums**
 
 `app/Enums/CropCycleStage.php`:
 
@@ -787,7 +787,7 @@ enum CropCycleStatus: string
 }
 ```
 
-- [ ] **Step 4: Create the migration**
+- [x] **Step 4: Create the migration**
 
 `database/migrations/2026_06_27_100400_create_crop_cycles_table.php`:
 
@@ -826,7 +826,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 5: Create the model**
+- [x] **Step 5: Create the model**
 
 `app/Models/CropCycle.php`:
 
@@ -916,7 +916,7 @@ class CropCycle extends Model
 }
 ```
 
-- [ ] **Step 6: Create the factory**
+- [x] **Step 6: Create the factory**
 
 `database/factories/CropCycleFactory.php`:
 
@@ -959,12 +959,12 @@ class CropCycleFactory extends Factory
 }
 ```
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
 Run: `php artisan test --compact --filter="CropCycleModelTest|PlotModelTest"`
 Expected: PASS (all model tests including Plot's `activeCropCycle` now resolvable)
 
-- [ ] **Step 8: Format and commit**
+- [x] **Step 8: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -984,7 +984,7 @@ git commit -m "feat: add CropCycle model with harvest-date forecast"
 - Create: `resources/js/pages/farm/fruit-types/index.tsx`, `resources/js/pages/farm/fruit-varieties/index.tsx`
 - Test: `tests/Feature/Farm/FruitTypeControllerTest.php`, `tests/Feature/Farm/FruitVarietyControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller tests**
+- [x] **Step 1: Write the failing controller tests**
 
 Create with `php artisan make:test --pest Farm/FruitTypeControllerTest`, then:
 
@@ -1105,12 +1105,12 @@ test('a user can delete a variety', function () {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `php artisan test --compact --filter="FruitTypeControllerTest|FruitVarietyControllerTest"`
 Expected: FAIL ("Route [fruit-types.index] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StoreFruitTypeRequest.php`:
 
@@ -1228,7 +1228,7 @@ class UpdateFruitVarietyRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controllers**
+- [x] **Step 4: Create the controllers**
 
 `app/Http/Controllers/Farm/FruitTypeController.php`:
 
@@ -1338,7 +1338,7 @@ class FruitVarietyController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add inside the existing `auth`+`verified` middleware group (after the dashboard route):
 
@@ -1352,17 +1352,17 @@ Route::resource('fruit-varieties', FruitVarietyController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 Expected: regenerates `resources/js/actions/**` and `resources/js/routes/**`
 
-- [ ] **Step 7: Run backend tests to verify they pass**
+- [x] **Step 7: Run backend tests to verify they pass**
 
 Run: `php artisan test --compact --filter="FruitTypeControllerTest|FruitVarietyControllerTest"`
 Expected: PASS (11 tests)
 
-- [ ] **Step 8: Create shared TS types**
+- [x] **Step 8: Create shared TS types**
 
 `resources/js/types/farm.ts`:
 
@@ -1429,7 +1429,7 @@ export const cropCycleStageLabels: Record<CropCycleStage, string> = {
 };
 ```
 
-- [ ] **Step 9: Create the fruit types page**
+- [x] **Step 9: Create the fruit types page**
 
 `resources/js/pages/farm/fruit-types/index.tsx`:
 
@@ -1504,7 +1504,7 @@ FruitTypesIndex.layout = {
 export type { PageProps };
 ```
 
-- [ ] **Step 10: Create the fruit varieties page**
+- [x] **Step 10: Create the fruit varieties page**
 
 `resources/js/pages/farm/fruit-varieties/index.tsx`:
 
@@ -1614,12 +1614,12 @@ FruitVarietiesIndex.layout = {
 };
 ```
 
-- [ ] **Step 11: Build the frontend**
+- [x] **Step 11: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 12: Format and commit**
+- [x] **Step 12: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1638,7 +1638,7 @@ git commit -m "feat: add fruit type and variety management"
 - Create: `resources/js/pages/farm/plots/index.tsx`, `create.tsx`, `edit.tsx`, `show.tsx`
 - Test: `tests/Feature/Farm/PlotControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/PlotControllerTest`, then:
 
@@ -1727,12 +1727,12 @@ test('a user can delete a plot', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=PlotControllerTest`
 Expected: FAIL ("Route [plots.index] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StorePlotRequest.php`:
 
@@ -1800,7 +1800,7 @@ class UpdatePlotRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/PlotController.php`:
 
@@ -1884,7 +1884,7 @@ class PlotController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add inside the `auth`+`verified` group:
 
@@ -1894,17 +1894,17 @@ use App\Http\Controllers\Farm\PlotController;
 Route::resource('plots', PlotController::class);
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 Expected: regenerates plot route/action helpers
 
-- [ ] **Step 7: Run backend tests to verify they pass**
+- [x] **Step 7: Run backend tests to verify they pass**
 
 Run: `php artisan test --compact --filter=PlotControllerTest`
 Expected: PASS (8 tests)
 
-- [ ] **Step 8: Create the plots index page**
+- [x] **Step 8: Create the plots index page**
 
 `resources/js/pages/farm/plots/index.tsx`:
 
@@ -1966,7 +1966,7 @@ PlotsIndex.layout = {
 };
 ```
 
-- [ ] **Step 9: Create a reusable plot form, then the create page**
+- [x] **Step 9: Create a reusable plot form, then the create page**
 
 `resources/js/pages/farm/plots/create.tsx`:
 
@@ -2054,7 +2054,7 @@ PlotCreate.layout = {
 };
 ```
 
-- [ ] **Step 10: Create the edit page**
+- [x] **Step 10: Create the edit page**
 
 `resources/js/pages/farm/plots/edit.tsx`:
 
@@ -2142,7 +2142,7 @@ PlotEdit.layout = {
 };
 ```
 
-- [ ] **Step 11: Create the show page (with crop-cycle list placeholder for Task 8)**
+- [x] **Step 11: Create the show page (with crop-cycle list placeholder for Task 8)**
 
 `resources/js/pages/farm/plots/show.tsx`:
 
@@ -2232,12 +2232,12 @@ PlotShow.layout = {
 };
 ```
 
-- [ ] **Step 12: Build the frontend**
+- [x] **Step 12: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 13: Format and commit**
+- [x] **Step 13: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2256,7 +2256,7 @@ git commit -m "feat: add plot management CRUD"
 - Modify: `resources/js/pages/farm/plots/show.tsx` (add create-cycle + record-flowering forms)
 - Test: `tests/Feature/Farm/CropCycleControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/CropCycleControllerTest`, then:
 
@@ -2329,12 +2329,12 @@ test('a user can update the stage of a cycle', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: FAIL ("Route [plots.crop-cycles.store] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StoreCropCycleRequest.php`:
 
@@ -2402,7 +2402,7 @@ class UpdateCropCycleRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/CropCycleController.php`:
 
@@ -2456,7 +2456,7 @@ class CropCycleController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add inside the `auth`+`verified` group:
 
@@ -2469,17 +2469,17 @@ Route::patch('crop-cycles/{cropCycle}', [CropCycleController::class, 'update'])
     ->name('crop-cycles.update');
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 Expected: regenerates crop cycle route/action helpers
 
-- [ ] **Step 7: Run backend tests to verify they pass**
+- [x] **Step 7: Run backend tests to verify they pass**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: PASS (4 tests)
 
-- [ ] **Step 8: Add cycle forms to the plot show page**
+- [x] **Step 8: Add cycle forms to the plot show page**
 
 In `resources/js/pages/farm/plots/show.tsx`, add these imports at the top:
 
@@ -2554,12 +2554,12 @@ Then, inside the `crop_cycles?.map(...)` block, add a record-flowering form unde
 
 Note: change the per-cycle wrapper `<div className="flex items-center justify-between rounded-md border p-3">` to `<div className="rounded-md border p-3">` and put the existing label/badge row inside an inner `<div className="flex items-center justify-between">` so the flowering form stacks beneath it.
 
-- [ ] **Step 9: Build the frontend**
+- [x] **Step 9: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 10: Format and commit**
+- [x] **Step 10: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2574,7 +2574,7 @@ git commit -m "feat: add crop cycle creation and flowering forecast"
 **Files:**
 - Modify: `resources/js/components/app-sidebar.tsx`
 
-- [ ] **Step 1: Add farm nav items**
+- [x] **Step 1: Add farm nav items**
 
 In `resources/js/components/app-sidebar.tsx`, update the imports and `mainNavItems`:
 
@@ -2615,17 +2615,17 @@ const mainNavItems: NavItem[] = [
 ];
 ```
 
-- [ ] **Step 2: Build the frontend**
+- [x] **Step 2: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 3: Run the full farm test suite**
+- [x] **Step 3: Run the full farm test suite**
 
 Run: `php artisan test --compact --filter=Farm`
 Expected: PASS (all farm model + controller tests)
 
-- [ ] **Step 4: Format and commit**
+- [x] **Step 4: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2637,10 +2637,10 @@ git commit -m "feat: add farm navigation to sidebar"
 
 ## Final Verification
 
-- [ ] Run the full test suite: `php artisan test --compact`
-- [ ] Run linting: `vendor/bin/pint --test --format agent` and `npm run lint`
-- [ ] Run types: `npm run types` (if defined) / `npm run build`
-- [ ] Manually verify: create fruit type → variety → plot → open plot → add cycle → record flowering → confirm forecasted harvest date displays
+- [x] Run the full test suite: `php artisan test --compact`
+- [x] Run linting: `vendor/bin/pint --test --format agent` and `npm run lint`
+- [x] Run types: `npm run types` (if defined) / `npm run build`
+- [x] Manually verify: create fruit type → variety → plot → open plot → add cycle → record flowering → confirm forecasted harvest date displays
 
 ---
 

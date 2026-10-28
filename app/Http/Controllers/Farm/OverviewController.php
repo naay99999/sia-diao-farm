@@ -13,11 +13,13 @@ class OverviewController extends Controller
 {
     public function index(): Response
     {
+        $openIssues = IssueSummary::openForFarm();
+
         return Inertia::render('overview', [
             'orchards' => OrchardSummary::all(),
-            'dueIssues' => IssueSummary::dueForFarm(),
-            'openIssues' => IssueSummary::openForFarm(),
-            'recentAiRecords' => RecentAiRecords::latest(),
+            'dueIssues' => IssueSummary::due($openIssues),
+            'openIssues' => $openIssues,
+            'recentAiRecords' => Inertia::defer(fn (): array => RecentAiRecords::latest()),
         ]);
     }
 }

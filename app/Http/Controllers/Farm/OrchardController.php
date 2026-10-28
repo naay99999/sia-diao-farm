@@ -9,16 +9,19 @@ use App\Models\Harvest;
 use App\Models\Orchard;
 use App\Models\Tree;
 use App\Support\IssueSummary;
+use App\Support\OrchardSummary;
 use App\Support\TreeLayout;
 use App\Support\TreeQrCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OrchardController extends Controller
 {
+    /** How many of the newest sales the orchard page lists; the records page has the rest. */
+    public const RECENT_SALES = 20;
+
     public function index(): Response
     {
         $orchards = Orchard::query()
@@ -27,18 +30,7 @@ class OrchardController extends Controller
             ->orderBy('name')
             ->get();
 
-        $yields = Harvest::query()
-            ->join('trees', 'trees.id', '=', 'harvests.tree_id')
-            ->join('seasons', function ($join): void {
-                $join->on('seasons.orchard_id', '=', 'trees.orchard_id')
-                    ->whereNull('seasons.ended_on')
-                    ->whereRaw('date(harvests.harvested_on) >= date(seasons.started_on)');
-            })
-            ->whereDate('harvests.harvested_on', '<=', Date::today()->toDateString())
-            ->groupBy('trees.orchard_id')
-            ->selectRaw('trees.orchard_id, sum(harvests.weight_kg) as weight_kg')
-            ->pluck('weight_kg', 'orchard_id')
-            ->map(fn ($weight): float => (float) $weight);
+        $yields = OrchardSummary::openSeasonYields($orchards->pluck('currentSeason')->filter()->pluck('id')->all());
 
         return Inertia::render('farm/orchards/index', [
             'orchards' => $orchards->map(fn (Orchard $orchard): array => [
@@ -78,13 +70,17 @@ class OrchardController extends Controller
             ->map(fn ($weight): float => (float) $weight)
             ->all();
 
+        $trees = $orchard->trees()
+            ->when(! $showRemoved, fn ($query) => $query->active())
+            ->orderBy('code')
+            ->get();
+        $activeTrees = $trees->reject(fn (Tree $tree): bool => $tree->isRemoved())->values();
+        $openIssues = IssueSummary::openForOrchard($orchard);
+
         return Inertia::render('farm/orchards/show', [
             'orchard' => $orchard,
-            'trees' => $orchard->trees()
-                ->when(! $showRemoved, fn ($query) => $query->active())
-                ->orderBy('code')
-                ->get(),
-            'treeLayout' => TreeLayout::forOrchard($orchard),
+            'trees' => $trees,
+            'treeLayout' => TreeLayout::arrange($activeTrees, TreeLayout::statusesOf($openIssues)),
             'showRemoved' => $showRemoved,
             'recentCareRecords' => $orchard->careRecords()
                 ->with(['trees:id,code,removed_on', 'issues:id'])
@@ -96,10 +92,11 @@ class OrchardController extends Controller
                     $record->setAttribute('issue_ids', $record->issues->pluck('id')->all());
                     $record->unsetRelation('issues');
                 }),
-            'dueIssues' => IssueSummary::dueForOrchard($orchard),
-            'openIssues' => IssueSummary::openForOrchard($orchard),
-            'activeTrees' => $orchard->trees()->active()->orderBy('code')->get(['id', 'code']),
-            'sales' => $orchard->sales()->latest('sold_on')->latest('id')->get(),
+            'dueIssues' => IssueSummary::due($openIssues),
+            'openIssues' => $openIssues,
+            'activeTrees' => $activeTrees->map->only(['id', 'code'])->values(),
+            'sales' => $orchard->sales()->latest('sold_on')->latest('id')->limit(self::RECENT_SALES)->get(),
+            'salesSummary' => $this->salesSummary($orchard),
             'currentSeason' => $currentSeason,
             'currentSeasonYieldKg' => (object) $currentSeasonYieldKg,
             'seasons' => $orchard->seasons()
@@ -107,6 +104,24 @@ class OrchardController extends Controller
                 ->orderByDesc('started_on')
                 ->get(),
         ]);
+    }
+
+    /**
+     * Totals over every sale of the orchard, since the page lists only the newest ones.
+     *
+     * @return array{count: int, amount: float, weightKg: float}
+     */
+    private function salesSummary(Orchard $orchard): array
+    {
+        $totals = $orchard->sales()->toBase()
+            ->selectRaw('count(*) as count, coalesce(sum(amount), 0) as amount, coalesce(sum(weight_kg), 0) as weight_kg')
+            ->first();
+
+        return [
+            'count' => (int) $totals->count,
+            'amount' => (float) $totals->amount,
+            'weightKg' => (float) $totals->weight_kg,
+        ];
     }
 
     public function qr(Orchard $orchard): Response

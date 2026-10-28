@@ -45,7 +45,7 @@
 - Produces: `User::passkeys(): HasMany` (from trait), routes `passkey.login-options`, `passkey.login`, `passkey.registration-options`, `passkey.store`, `passkey.destroy`. Test helper (top of `PasskeyTest.php`, reused by Tasks 2–3 by copying or moving to `tests/Pest.php`):
   `function createPasskey(User $user, string $name = 'iPhone'): Passkey` → `$user->passkeys()->create(['name' => $name, 'credential_id' => Str::random(32), 'credential' => []])`.
 
-- [ ] **Step 1: Write failing tests in `tests/Feature/Auth/PasskeyTest.php`**
+- [x] **Step 1: Write failing tests in `tests/Feature/Auth/PasskeyTest.php`**
 
 ```php
 test('passkey routes are registered', function () {
@@ -94,17 +94,17 @@ test('deactivated users cannot log in with a passkey', function () {
 
 (`Passkeys` = `Laravel\Passkeys\Passkeys`, `Passkey` = `Laravel\Passkeys\Passkey`.)
 
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Auth/PasskeyTest.php` — Expected: FAIL (routes missing / no `passkeys` relation).
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Auth/PasskeyTest.php` — Expected: FAIL (routes missing / no `passkeys` relation).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
   - `config/fortify.php`: `'features' => [Features::passkeys(['confirmPassword' => false])]` (add `use Laravel\Fortify\Features;`).
   - `php artisan vendor:publish --tag=fortify-migrations --no-interaction`, keep only the passkeys migration (delete any other newly published Fortify migration files, e.g. two-factor columns), then `php artisan migrate --no-interaction`.
   - `User`: `implements OAuthenticatable, PasskeyUser` (`Laravel\Fortify\Contracts\PasskeyUser`) and `use PasskeyAuthenticatable` (`Laravel\Fortify\PasskeyAuthenticatable`).
   - `FortifyServiceProvider::configureAuthentication()`: add `Passkeys::authorizeLoginUsing(function (Request $request, User $user): bool { ... })` that throws `ValidationException::withMessages(['passkey' => 'บัญชีนี้ถูกปิดใช้งานแล้ว'])` when `! $user->isActive()`, else returns `true`. Extract the message into a private const shared with the password path so both use the same string.
 
-- [ ] **Step 4: Run** the same test file plus `tests/Feature/Auth/AuthenticationTest.php tests/Feature/Settings/UserStatusTest.php` — Expected: PASS.
+- [x] **Step 4: Run** the same test file plus `tests/Feature/Auth/AuthenticationTest.php tests/Feature/Settings/UserStatusTest.php` — Expected: PASS.
 
-- [ ] **Step 5: Pint and commit** — `git commit -m "feat: enable fortify passkeys and block deactivated accounts"`
+- [x] **Step 5: Pint and commit** — `git commit -m "feat: enable fortify passkeys and block deactivated accounts"`
 
 ---
 
@@ -117,7 +117,7 @@ test('deactivated users cannot log in with a passkey', function () {
 **Interfaces:**
 - Produces: Inertia flash key `suggestPasskey` (`true`), set only on successful password login when the user has zero passkeys. Frontend (Task 6) reads it from the `flash` router event.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```php
 test('password login suggests a passkey when the user has none', function () {
@@ -143,13 +143,13 @@ test('failed login does not suggest a passkey', function () {
 });
 ```
 
-- [ ] **Step 2: Run** — Expected: first test FAILS.
+- [x] **Step 2: Run** — Expected: first test FAILS.
 
-- [ ] **Step 3: Implement** — in the `authenticateUsing` closure, just before `return $user;`: `if ($user->passkeys()->doesntExist()) { Inertia::flash('suggestPasskey', true); }`. Being a flash, it survives exactly one redirect, which gives "once per login" for free.
+- [x] **Step 3: Implement** — in the `authenticateUsing` closure, just before `return $user;`: `if ($user->passkeys()->doesntExist()) { Inertia::flash('suggestPasskey', true); }`. Being a flash, it survives exactly one redirect, which gives "once per login" for free.
 
-- [ ] **Step 4: Run** `php artisan test --compact tests/Feature/Auth` — Expected: PASS.
+- [x] **Step 4: Run** `php artisan test --compact tests/Feature/Auth` — Expected: PASS.
 
-- [ ] **Step 5: Pint and commit** — `git commit -m "feat: flag password logins without a passkey"`
+- [x] **Step 5: Pint and commit** — `git commit -m "feat: flag password logins without a passkey"`
 
 ---
 
@@ -165,7 +165,7 @@ test('failed login does not suggest a passkey', function () {
   - `settings/profile` → `passkeys: Array<{ id: number; name: string; authenticator: string | null; createdAt: string; lastUsedAt: string | null }>` (ISO 8601 strings, newest first).
   - `settings/members` → each member gains `hasPasskey: boolean`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```php
 // ProfileUpdateTest.php
@@ -197,13 +197,13 @@ test('members page shows who has a passkey', function () {
 
 Move `createPasskey()` into `tests/Pest.php` in this task so all three test files share it.
 
-- [ ] **Step 2: Run** both test files — Expected: new tests FAIL.
+- [x] **Step 2: Run** both test files — Expected: new tests FAIL.
 
-- [ ] **Step 3: Implement** — profile: `$request->user()->passkeys()->latest()->get()->map(...)` to the shape above (build the array explicitly; do not rely on `toArray()`). Members: `->withExists('passkeys')` on the query and `'hasPasskey' => $user->passkeys_exists`.
+- [x] **Step 3: Implement** — profile: `$request->user()->passkeys()->latest()->get()->map(...)` to the shape above (build the array explicitly; do not rely on `toArray()`). Members: `->withExists('passkeys')` on the query and `'hasPasskey' => $user->passkeys_exists`.
 
-- [ ] **Step 4: Run** `php artisan test --compact tests/Feature/Settings` — Expected: PASS.
+- [x] **Step 4: Run** `php artisan test --compact tests/Feature/Settings` — Expected: PASS.
 
-- [ ] **Step 5: Pint and commit** — `git commit -m "feat: expose passkeys on profile and members pages"`
+- [x] **Step 5: Pint and commit** — `git commit -m "feat: expose passkeys on profile and members pages"`
 
 ---
 
@@ -216,18 +216,18 @@ Move `createPasskey()` into `tests/Pest.php` in this task so all three test file
 **Interfaces:**
 - Consumes: Wayfinder routes `@/routes/passkey` (`loginOptions`, `login`) generated from Task 1's route names — run `php artisan wayfinder:generate` if they are missing. Pass them to the hook as `routes: { options: loginOptions.url(), submit: login.url() }` so paths never drift from Fortify.
 
-- [ ] **Step 1: Install** — after the user confirms: `npm install @laravel/passkeys@0.2.0 --save-exact`.
+- [x] **Step 1: Install** — after the user confirms: `npm install @laravel/passkeys@0.2.0 --save-exact`.
 
-- [ ] **Step 2: Implement the login page**
+- [x] **Step 2: Implement the login page**
   - `usePasskeyVerify({ remember: true, routes, onSuccess: (r) => { window.location.href = r.redirect } })` from `@laravel/passkeys/react`. Check the installed package's hook signature in `node_modules/@laravel/passkeys` and adapt if `remember` goes to `verify()` instead.
   - Above the existing form: full-width `<Button>` "เข้าสู่ระบบด้วย passkey" (fingerprint icon from `lucide-react`), rendered only when `isSupported`. Spinner while `isLoading`.
   - Below it: a separator labelled "หรือใช้รหัสผ่าน", then the existing email/password/remember form unchanged.
   - Error under the button via `InputError`: if the server returned the deactivated message show it as-is. Any other failure shows "เข้าสู่ระบบด้วย passkey ไม่สำเร็จ ลองอีกครั้ง". **Cancel is silent:** a user-cancelled sheet (`NotAllowedError` / abort) shows nothing.
   - `Login.layout.description` → "สแกนนิ้วหรือใบหน้าด้วย passkey หรือกรอกอีเมลและรหัสผ่าน".
 
-- [ ] **Step 3: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors. `php artisan test --compact tests/Feature/Auth` still PASS.
+- [x] **Step 3: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors. `php artisan test --compact tests/Feature/Auth` still PASS.
 
-- [ ] **Step 4: Commit** — `git commit -m "feat: passkey sign-in button on the login page"`
+- [x] **Step 4: Commit** — `git commit -m "feat: passkey sign-in button on the login page"`
 
 ---
 
@@ -243,20 +243,20 @@ Move `createPasskey()` into `tests/Pest.php` in this task so all three test file
 - Consumes: Task 3 props (`passkeys`, `hasPasskey`), Wayfinder `@/routes/passkey` (`registrationOptions`, `store`, `destroy`).
 - Produces: `deviceName(userAgent: string): string` (e.g. `"iPhone · Safari"`, `"Android · Chrome"`, `"Mac · Safari"`, fallback `"อุปกรณ์นี้"`), and `<AddPasskeyButton onAdded?: () => void />` exported from `passkey-list.tsx` (reused by Task 6).
 
-- [ ] **Step 1: Implement `deviceName`** — platform from UA (iPhone, iPad, Android, Mac, Windows), browser (Safari, Chrome, Edge, Firefox, Samsung Internet). Joined with " · ".
+- [x] **Step 1: Implement `deviceName`** — platform from UA (iPhone, iPad, Android, Mac, Windows), browser (Safari, Chrome, Edge, Firefox, Samsung Internet). Joined with " · ".
 
-- [ ] **Step 2: Implement `passkey-list.tsx`**
+- [x] **Step 2: Implement `passkey-list.tsx`**
   - `AddPasskeyButton`: `usePasskeyRegister({ routes })`, calls `register(deviceName(navigator.userAgent))`. On success: `toast.success('เพิ่ม passkey แล้ว')`, `router.reload({ only: ['passkeys'] })`, `onAdded?.()`. Hidden when unsupported. Cancel is silent; other errors → `toast.error('เพิ่ม passkey ไม่สำเร็จ')`.
   - `PasskeyList`: each row shows name, `authenticator` if present, "เพิ่มเมื่อ …", "ใช้ล่าสุด …" (or "ยังไม่เคยใช้"), dates via `resources/js/lib/thai-date.ts`. Delete button (`aria-label="ลบ passkey {name}"`) opens the existing `confirm-dialog.tsx`, then `router.delete(destroy.url(id), { preserveScroll: true, onSuccess: () => toast.success('ลบ passkey แล้ว') })`.
   - Empty state: "ยังไม่มี passkey เพิ่มไว้เพื่อเข้าสู่ระบบด้วยการสแกนนิ้วหรือใบหน้า".
 
-- [ ] **Step 3: Profile page** — new section under profile info with `Heading` "Passkey" / description "เข้าสู่ระบบด้วยการสแกนนิ้วหรือใบหน้าแทนการพิมพ์รหัสผ่าน", then `PasskeyList` + `AddPasskeyButton`. Same section styling as its siblings.
+- [x] **Step 3: Profile page** — new section under profile info with `Heading` "Passkey" / description "เข้าสู่ระบบด้วยการสแกนนิ้วหรือใบหน้าแทนการพิมพ์รหัสผ่าน", then `PasskeyList` + `AddPasskeyButton`. Same section styling as its siblings.
 
-- [ ] **Step 4: Members page** — next to the existing Claude connection badge: `<Badge variant="secondary">มี passkey</Badge>` or `<Badge variant="outline">ยังไม่มี passkey</Badge>`. View only.
+- [x] **Step 4: Members page** — next to the existing Claude connection badge: `<Badge variant="secondary">มี passkey</Badge>` or `<Badge variant="outline">ยังไม่มี passkey</Badge>`. View only.
 
-- [ ] **Step 5: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors.
+- [x] **Step 5: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors.
 
-- [ ] **Step 6: Commit** — `git commit -m "feat: manage passkeys on the profile page"`
+- [x] **Step 6: Commit** — `git commit -m "feat: manage passkeys on the profile page"`
 
 ---
 
@@ -269,22 +269,22 @@ Move `createPasskey()` into `tests/Pest.php` in this task so all three test file
 **Interfaces:**
 - Consumes: flash `suggestPasskey` (Task 2), `AddPasskeyButton` (Task 5).
 
-- [ ] **Step 1: Implement `PasskeyPrompt`** — subscribe with `router.on('flash', …)` exactly like `resources/js/hooks/use-flash-toast.ts`; open when `flash.suggestPasskey === true` and passkeys are supported. `Dialog` (`components/ui/dialog.tsx`):
+- [x] **Step 1: Implement `PasskeyPrompt`** — subscribe with `router.on('flash', …)` exactly like `resources/js/hooks/use-flash-toast.ts`; open when `flash.suggestPasskey === true` and passkeys are supported. `Dialog` (`components/ui/dialog.tsx`):
   - title "เข้าสู่ระบบครั้งหน้าง่ายขึ้น"
   - description "เพิ่ม passkey เพื่อเข้าสู่ระบบครั้งหน้าด้วยการสแกนนิ้วหรือใบหน้า"
   - actions `AddPasskeyButton` (label "เพิ่มเลย", `onAdded` closes) and ghost button "ไว้ทีหลัง" (closes).
   No persistence: the flash only fires once per login.
 
-- [ ] **Step 2: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors.
+- [x] **Step 2: Verify** `npm run types:check && npm run lint:check && npm run build` — Expected: no errors.
 
-- [ ] **Step 3: Manual check in the browser** (`localhost`, real device or Chrome's WebAuthn virtual authenticator in DevTools): password login without a passkey → dialog shows once → "เพิ่มเลย" adds it → log out → "เข้าสู่ระบบด้วย passkey" logs in and lands on `/orchards` → reload a page, still logged in → cancel the sheet shows no error → deactivate the member, passkey login shows "บัญชีนี้ถูกปิดใช้งานแล้ว".
+- [x] **Step 3: Manual check in the browser** (`localhost`, real device or Chrome's WebAuthn virtual authenticator in DevTools): password login without a passkey → dialog shows once → "เพิ่มเลย" adds it → log out → "เข้าสู่ระบบด้วย passkey" logs in and lands on `/orchards` → reload a page, still logged in → cancel the sheet shows no error → deactivate the member, passkey login shows "บัญชีนี้ถูกปิดใช้งานแล้ว".
 
-- [ ] **Step 4: Commit** — `git commit -m "feat: suggest adding a passkey after password login"`
+- [x] **Step 4: Commit** — `git commit -m "feat: suggest adding a passkey after password login"`
 
 ---
 
 ### Final verification
 
-- [ ] `php artisan test --compact` — all PASS.
-- [ ] `vendor/bin/pint --dirty --format agent` — clean.
-- [ ] `npm run types:check && npm run lint:check && npm run build` — clean.
+- [x] `php artisan test --compact` — all PASS.
+- [x] `vendor/bin/pint --dirty --format agent` — clean.
+- [x] `npm run types:check && npm run lint:check && npm run build` — clean.

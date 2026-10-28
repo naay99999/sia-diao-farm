@@ -10,6 +10,7 @@ use App\Models\Season;
 use App\Models\Tree;
 use App\Models\TreeIssue;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -160,13 +161,13 @@ test('expenses filter by orchard through their season and drop season-less ones'
     Expense::factory()->create(['season_id' => null, 'amount' => 400]);
 
     $this->get(route('expenses.index', ['orchard_id' => $orchardA->id]))
-        ->assertInertia(fn (Assert $page) => $page->has('expenses', 1)->where('total', 100));
+        ->assertInertia(fn (Assert $page) => $page->has('expenses.data', 1)->where('total', 100));
 
     $this->get(route('expenses.index', ['season_id' => $seasonB->id]))
-        ->assertInertia(fn (Assert $page) => $page->has('expenses', 1)->where('total', 200));
+        ->assertInertia(fn (Assert $page) => $page->has('expenses.data', 1)->where('total', 200));
 
     $this->get(route('expenses.index'))
-        ->assertInertia(fn (Assert $page) => $page->has('expenses', 3));
+        ->assertInertia(fn (Assert $page) => $page->has('expenses.data', 3));
 });
 
 test('unknown record type is not found', function () {
@@ -202,13 +203,13 @@ test('expenses carry the filter options and who recorded each row', function () 
             ->has('orchards')
             ->has('members', 2)
             ->has('seasons')
-            ->where('expenses', fn ($rows) => collect($rows)->firstWhere('id', $mcp->id)['fromAi'] === true
+            ->where('expenses.data', fn ($rows) => collect($rows)->firstWhere('id', $mcp->id)['fromAi'] === true
                 && collect($rows)->firstWhere('id', $mcp->id)['aiBy'] === $member->name
                 && collect($rows)->firstWhere('id', $mcp->id)['createdBy'] === $member->name
                 && collect($rows)->firstWhere('id', $app->id)['fromAi'] === false));
 
     $this->get(route('expenses.index', ['via' => 'mcp']))
-        ->assertInertia(fn (Assert $page) => $page->has('expenses', 1)->where('filters.via', 'mcp'));
+        ->assertInertia(fn (Assert $page) => $page->has('expenses.data', 1)->where('filters.via', 'mcp'));
 });
 
 test('care records carry the trees and open problems the edit form needs', function () {
@@ -249,3 +250,35 @@ test('a page past the last one redirects to the last page keeping the filters', 
 test('an empty record list does not redirect for a high page', function () {
     $this->get(route('records.index', ['type' => 'harvests', 'page' => 3]))->assertOk();
 });
+
+test('changing a filter or page skips the filter and form options without querying them', function (string $route, array $parameters, array $options) {
+    $orchard = Orchard::factory()->create();
+    Season::factory()->for($orchard)->create();
+    TreeIssue::factory()->for(Tree::factory()->for($orchard)->create())->create(['resolved_on' => null]);
+
+    $response = $this->get(route($route, $parameters));
+
+    DB::enableQueryLog();
+    $response->assertInertia(function (Assert $page) use ($options) {
+        foreach ($options as $option) {
+            $page->has($option);
+        }
+
+        $page->reloadExcept(['orchards', 'seasons', 'members', 'orchardTrees', 'openIssues', 'categories'], function (Assert $reload) use ($options) {
+            $reload->has('filters');
+
+            foreach ($options as $option) {
+                $reload->missing($option);
+            }
+        });
+    });
+    $queries = collect(DB::getQueryLog())->pluck('query')->join("\n");
+    DB::disableQueryLog();
+
+    expect($queries)->not->toContain('from "seasons"')
+        ->not->toContain('from "orchards"')
+        ->not->toContain('from "tree_issues"');
+})->with([
+    'care records' => ['records.index', ['type' => 'care'], ['orchards', 'seasons', 'members', 'orchardTrees', 'openIssues']],
+    'expenses' => ['expenses.index', [], ['orchards', 'seasons', 'members', 'categories']],
+]);

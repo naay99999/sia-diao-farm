@@ -40,7 +40,7 @@
 **Interfaces:**
 - Produces: คอลัมน์ `users.is_owner` (boolean, default false) และ `users.deactivated_at` (timestamp nullable), cast เป็น `bool` และ `datetime`, method `User::isActive(): bool`, factory state `UserFactory::owner()` และ `UserFactory::deactivated()`
 
-- [ ] **Step 1: เขียน test ที่ fail**
+- [x] **Step 1: เขียน test ที่ fail**
 
 ใน `DatabaseSeederTest.php`:
 ```php
@@ -79,23 +79,23 @@ test('users are active until deactivated', function () {
 });
 ```
 
-- [ ] **Step 2: รัน test ให้เห็นว่า fail**
+- [x] **Step 2: รัน test ให้เห็นว่า fail**
 
 Run: `php artisan test --compact tests/Feature/Farm/DatabaseSeederTest.php tests/Feature/Settings/UserStatusTest.php`
 Expected: FAIL เพราะยังไม่มีคอลัมน์ `is_owner` และ factory state
 
-- [ ] **Step 3: เขียน migration, model, factory และ seeder**
+- [x] **Step 3: เขียน migration, model, factory และ seeder**
 
 - migration `up()`: เพิ่มสองคอลัมน์ แล้ว backfill โดยตั้ง `is_owner = true` ให้บัญชีที่ `email = config('farm.owner.email')` ถ้าไม่มีบัญชีไหนตรง ให้ใช้บัญชีที่ `id` ต่ำสุด (ถ้าตารางว่างไม่ต้องทำอะไร) ส่วน `down()` ลบสองคอลัมน์
 - `User`: เพิ่ม `@property bool $is_owner` และ `@property Carbon|null $deactivated_at`, cast ทั้งสองคอลัมน์ และเพิ่ม `isActive(): bool` (คืน true เมื่อ `deactivated_at === null`)
 - `DatabaseSeeder::run()`: ถ้ามี `User::where('is_owner', true)` อยู่แล้ว ให้ข้ามการสร้างเจ้าของ ถ้ายังไม่มี ให้ใช้ `firstOrCreate` ตามเดิมแล้ว `forceFill(['is_owner' => true])->save()` ส่วนการเช็ก `OWNER_PASSWORD` ให้คงไว้เฉพาะตอนที่ต้องสร้างเจ้าของ
 
-- [ ] **Step 4: รัน test ให้ผ่าน**
+- [x] **Step 4: รัน test ให้ผ่าน**
 
 Run: `php artisan test --compact tests/Feature/Farm/DatabaseSeederTest.php tests/Feature/Settings/UserStatusTest.php`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add database app/Models/User.php tests/Feature/Farm/DatabaseSeederTest.php tests/Feature/Settings/UserStatusTest.php
@@ -121,7 +121,7 @@ git commit -m "feat: mark the owner account and allow deactivating users"
   - `User::activate(): void` ตั้ง `deactivated_at = null`
   - `AiConnectionController` เปลี่ยนไปใช้ `AiConnections` (พฤติกรรมเดิมต้องไม่เปลี่ยน ให้ `AiConnectionTest` ผ่านเหมือนเดิม)
 
-- [ ] **Step 1: เขียน test ที่ fail** (ใน `UserStatusTest.php` ใช้ helper `issueToken()` จาก `AiConnectionTest.php` โดยย้าย helper ไปไว้ใน `tests/Pest.php` เพื่อใช้ร่วมกัน)
+- [x] **Step 1: เขียน test ที่ fail** (ใน `UserStatusTest.php` ใช้ helper `issueToken()` จาก `AiConnectionTest.php` โดยย้าย helper ไปไว้ใน `tests/Pest.php` เพื่อใช้ร่วมกัน)
 
 ```php
 test('deactivated users cannot log in', function () {
@@ -161,23 +161,23 @@ test('the farm server refuses a deactivated user', function () {
 });
 ```
 
-- [ ] **Step 2: รัน test ให้เห็นว่า fail**
+- [x] **Step 2: รัน test ให้เห็นว่า fail**
 
 Run: `php artisan test --compact tests/Feature/Settings/UserStatusTest.php`
 Expected: FAIL
 
-- [ ] **Step 3: เขียนโค้ด**
+- [x] **Step 3: เขียนโค้ด**
 
 - `FortifyServiceProvider`: เพิ่ม `Fortify::authenticateUsing()` ให้ตรวจอีเมลและรหัสผ่านตามปกติ (`Hash::check`) ถ้ารหัสถูกแต่ `! $user->isActive()` ให้ throw `ValidationException::withMessages([Fortify::username() => 'บัญชีนี้ถูกปิดใช้งานแล้ว'])` ถ้ารหัสผิดให้คืน `null` (Fortify จะแสดงข้อความ `auth.failed` เดิม)
 - `EnsureUserIsActive::handle()`: ถ้ามี user และ `! isActive()` แล้ว request เป็น `mcp/*` หรือ `expectsJson()` ให้ `abort(403)` ถ้าไม่ใช่ ให้ logout guard `web`, invalidate session, regenerate token แล้ว redirect ไป `route('login')`
 - ลงทะเบียน middleware: append ใน `$middleware->web()` ของ `bootstrap/app.php` และเพิ่มต่อจาก `auth:api` ใน `routes/ai.php`
 
-- [ ] **Step 4: รัน test ให้ผ่าน**
+- [x] **Step 4: รัน test ให้ผ่าน**
 
 Run: `php artisan test --compact tests/Feature/Settings tests/Feature/Auth tests/Feature/Mcp/FarmServerAuthTest.php`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git commit -am "feat: lock deactivated users out of the app and the farm server"
@@ -211,7 +211,7 @@ git commit -am "feat: lock deactivated users out of the app and the farm server"
   - Inertia `settings/members` รับ props `members: Array<{id: number, name: string, email: string, isOwner: boolean, isActive: boolean, isConnected: boolean}>` (เรียงให้เจ้าของขึ้นก่อน ตามด้วยชื่อ) และ `passwordRules: string`
   - TS `User` type เพิ่ม `is_owner: boolean`
 
-- [ ] **Step 1: เขียน test ที่ fail**
+- [x] **Step 1: เขียน test ที่ fail**
 
 ```php
 beforeEach(function () {
@@ -255,12 +255,12 @@ test('the owner cannot deactivate the owner account', function () {
 test('the page says who has claude connected', function () { /* issueToken for one member → isConnected true, others false */ });
 ```
 
-- [ ] **Step 2: รัน test ให้เห็นว่า fail**
+- [x] **Step 2: รัน test ให้เห็นว่า fail**
 
 Run: `php artisan test --compact tests/Feature/Settings/MemberManagementTest.php`
 Expected: FAIL
 
-- [ ] **Step 3: เขียน backend**
+- [x] **Step 3: เขียน backend**
 
 - `StoreMemberRequest`: ใช้ `profileRules()` และ `'password' => ['required', 'string', Password::default()]` (ไม่ต้องมี confirmed เพราะเจ้าของพิมพ์รหัสเอง) กำหนด `attributes()` เป็นภาษาไทยแบบ `StoreFollowUpRequest`
 - `UpdateMemberRequest`: ใช้ `profileRules($this->route('user')->id)`
@@ -269,24 +269,24 @@ Expected: FAIL
 - `deactivate`: ถ้า `$user->is_owner` ให้ `abort(403)`
 - ทุก action flash toast ภาษาไทย เช่น "เพิ่มสมาชิกแล้ว", "บันทึกแล้ว", "ตั้งรหัสผ่านใหม่แล้ว", "ปิดใช้งานแล้ว", "เปิดใช้งานแล้ว" แล้ว `to_route('members.index')`
 
-- [ ] **Step 4: รัน test ให้ผ่าน**
+- [x] **Step 4: รัน test ให้ผ่าน**
 
 Run: `php artisan test --compact tests/Feature/Settings/MemberManagementTest.php`
 Expected: PASS
 
-- [ ] **Step 5: เขียนหน้า `settings/members.tsx` และเมนู settings**
+- [x] **Step 5: เขียนหน้า `settings/members.tsx` และเมนู settings**
 
 - หน้าตาตาม `.superpowers/brainstorm/*/content/members.html`: รายการบัญชี (มีป้าย "เจ้าของ" หรือ "ปิดใช้งาน" และบรรทัดรองเป็นอีเมลกับ "Claude เชื่อมอยู่" / "ยังไม่เชื่อม"), ปุ่ม "เพิ่มสมาชิก" ที่เปิด `Dialog` ฟอร์ม, และ `DropdownMenu` ต่อบัญชี (แก้ชื่อ/อีเมล, ตั้งรหัสผ่านใหม่, ปิดใช้งาน/เปิดใช้งาน) โดยแถวของเจ้าของไม่มีเมนูปิดใช้งาน
 - การปิดใช้งานต้องยืนยันด้วย `useConfirm` (destructive) และบอกว่า "จะล็อกอินไม่ได้ และ Claude ที่เชื่อมด้วยบัญชีนี้จะใช้ไม่ได้ทันที"
 - ใต้ช่องรหัสผ่านเขียนว่า "บอกรหัสนี้กับเขาเอง เขาเปลี่ยนเองได้ที่ ตั้งค่า → โปรไฟล์"
 - `settings/layout.tsx`: เพิ่มแท็บ "สมาชิก" เฉพาะเมื่อ `auth.user.is_owner` และแก้ description ของ Heading เป็น "บัญชีของคุณและสมาชิกในครอบครัว" เมื่อเป็นเจ้าของ
 
-- [ ] **Step 6: ตรวจ frontend**
+- [x] **Step 6: ตรวจ frontend**
 
 Run: `npx tsc --noEmit && npx eslint resources/js && npm run build`
 Expected: ไม่มี error
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add app routes resources/js tests
@@ -308,7 +308,7 @@ git commit -m "feat: owner manages family member accounts"
   - timeline entry เพิ่ม `aiBy: string | null` (คง `fromAi` ไว้)
   - row ของ `RecentAiRecords::latest()` เพิ่ม `by: string | null` (ชื่อคนสร้าง)
 
-- [ ] **Step 1: เขียน test ที่ fail**
+- [x] **Step 1: เขียน test ที่ fail**
 
 ```php
 test('the ai badge names whoever used ai', function () {
@@ -334,19 +334,19 @@ test('the ai badge names whoever used ai', function () {
 ```
 และ test ว่า prop `timeline.*.aiBy` ของหน้าต้นกับ `recentAiRecords.0.by` มีชื่อคนสร้าง
 
-- [ ] **Step 2: รัน test ให้เห็นว่า fail**
+- [x] **Step 2: รัน test ให้เห็นว่า fail**
 
 Run: `php artisan test --compact tests/Feature/Farm/ProvenanceTest.php tests/Feature/Settings/AiConnectionTest.php`
 Expected: FAIL
 
-- [ ] **Step 3: เขียนโค้ด** eager-load `creator:id,name` และ `updater:id,name` ใน `TreeTimeline` และ `creator:id,name` ใน `RecentAiRecords` เพื่อไม่ให้เกิด N+1 ในหน้า `trees/show.tsx` ให้ป้ายแสดง `AI · {entry.aiBy}` เมื่อมีชื่อ และแสดง `AI` เมื่อไม่มีชื่อ โดย `sr-only` ยังเป็น "บันทึกโดย"
+- [x] **Step 3: เขียนโค้ด** eager-load `creator:id,name` และ `updater:id,name` ใน `TreeTimeline` และ `creator:id,name` ใน `RecentAiRecords` เพื่อไม่ให้เกิด N+1 ในหน้า `trees/show.tsx` ให้ป้ายแสดง `AI · {entry.aiBy}` เมื่อมีชื่อ และแสดง `AI` เมื่อไม่มีชื่อ โดย `sr-only` ยังเป็น "บันทึกโดย"
 
-- [ ] **Step 4: รัน test ให้ผ่าน**
+- [x] **Step 4: รัน test ให้ผ่าน**
 
 Run: `php artisan test --compact tests/Feature/Farm tests/Feature/Settings && npx tsc --noEmit`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git commit -am "feat: show who recorded through ai on the badge"
@@ -373,7 +373,7 @@ git commit -am "feat: show who recorded through ai on the badge"
     - `setup: {mcpUrl: string, isPubliclyReachable: boolean} | null` (เฉพาะเจ้าของ ย้าย `isPubliclyReachable()` และค่าคงที่ `MCP_PATH` มาจากคอนโทรลเลอร์เดิม)
     - `members: Array<{userId: number, name: string, connections: Connection[]}> | null` (เฉพาะเจ้าของ นับเฉพาะบัญชีที่ active เจ้าของขึ้นก่อน)
 
-- [ ] **Step 1: เขียน test ที่ fail** ย้าย test จาก `AiConnectionTest.php` ให้เรียก `route('assistant.index')` และ component `assistant/index` แล้วเพิ่ม
+- [x] **Step 1: เขียน test ที่ fail** ย้าย test จาก `AiConnectionTest.php` ให้เรียก `route('assistant.index')` และ component `assistant/index` แล้วเพิ่ม
 
 ```php
 test('members see their own connection but not the setup or other people', function () {
@@ -404,19 +404,19 @@ test('the old settings address redirects to the assistant page', function () {
 });
 ```
 
-- [ ] **Step 2: รัน test ให้เห็นว่า fail**
+- [x] **Step 2: รัน test ให้เห็นว่า fail**
 
 Run: `php artisan test --compact tests/Feature/AssistantTest.php`
 Expected: FAIL
 
-- [ ] **Step 3: เขียน `AssistantController` และ route** แล้วรัน `php artisan wayfinder:generate` (หรือ build) เพื่อสร้างฟังก์ชัน `@/routes/assistant` ใน frontend ระหว่างรอ Task 6 ให้ `resources/js/pages/settings/ai-connection.tsx` ถูกลบพร้อมลิงก์ในเมนู settings เพื่อไม่ให้ import ที่หายไปทำให้ build พัง
+- [x] **Step 3: เขียน `AssistantController` และ route** แล้วรัน `php artisan wayfinder:generate` (หรือ build) เพื่อสร้างฟังก์ชัน `@/routes/assistant` ใน frontend ระหว่างรอ Task 6 ให้ `resources/js/pages/settings/ai-connection.tsx` ถูกลบพร้อมลิงก์ในเมนู settings เพื่อไม่ให้ import ที่หายไปทำให้ build พัง
 
-- [ ] **Step 4: รัน test ให้ผ่าน**
+- [x] **Step 4: รัน test ให้ผ่าน**
 
 Run: `php artisan test --compact tests/Feature/AssistantTest.php tests/Feature/Settings`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A app routes tests resources/js
@@ -437,9 +437,9 @@ git commit -m "feat: assistant page backend replaces the settings ai connection 
 **Interfaces:**
 - Consumes: props ของ `assistant/index` และ route `assistant.index` / `assistant.connections.destroy` (Task 5)
 
-- [ ] **Step 1: เพิ่มเมนู** ใน `mainNavItems` เพิ่ม `{ title: 'ผู้ช่วย AI', href: assistantIndex(), icon: Sparkles, matches: ['/assistant'] }` ต่อจาก "ค่าใช้จ่าย" ใน `app-bottom-nav.tsx` เปลี่ยน `grid-cols-3` เป็น `grid-cols-4`
+- [x] **Step 1: เพิ่มเมนู** ใน `mainNavItems` เพิ่ม `{ title: 'ผู้ช่วย AI', href: assistantIndex(), icon: Sparkles, matches: ['/assistant'] }` ต่อจาก "ค่าใช้จ่าย" ใน `app-bottom-nav.tsx` เปลี่ยน `grid-cols-3` เป็น `grid-cols-4`
 
-- [ ] **Step 2: เขียนหน้า** ตามลำดับใน spec ส่วนที่ 2 (ข้อ 1–8) และตาม mockup `ai-page.html` บนจอกว้างใช้สองคอลัมน์ได้แบบหน้าเดิม (`lg:grid-cols-2`)
+- [x] **Step 2: เขียนหน้า** ตามลำดับใน spec ส่วนที่ 2 (ข้อ 1–8) และตาม mockup `ai-page.html` บนจอกว้างใช้สองคอลัมน์ได้แบบหน้าเดิม (`lg:grid-cols-2`)
   - สถานะ: ถ้าเชื่อมแล้วเขียน "Claude ของคุณเชื่อมอยู่ · เชื่อมเมื่อ {วันที่}" ถ้ายังไม่เชื่อม (และไม่ใช่เจ้าของ) เขียน "ยังไม่ได้เชื่อม Claude · ขอให้เจ้าของสวนช่วยตั้งค่าให้"
   - ตัวอย่างประโยค: แต่ละประโยคเป็นปุ่มที่กดแล้วคัดลอก มี feedback "คัดลอกแล้ว" และ fallback แบบเดียวกับ `CopyableUrl` ประโยคให้ใช้ตามรายการด้านล่าง (ทุกข้อทำได้จริงด้วยเครื่องมือที่มี):
     - **ถามข้อมูล**: "วันนี้ต้นไหนต้องดูซ้ำบ้าง" · "ต้น A-012 ปีนี้เก็บได้กี่กิโล" · "เดือนนี้จ่ายค่าปุ๋ยไปเท่าไหร่"
@@ -453,14 +453,14 @@ git commit -m "feat: assistant page backend replaces the settings ai connection 
   - ส่วนเจ้าของ (render เมื่อ `members !== null`): รายการ "การเชื่อมต่อของทุกคน" ที่ยกเลิกได้ผ่าน `useConfirm` (คำอธิบายแบบหน้าเดิม แต่ใส่ชื่อคน) และบัญชีที่ไม่มีการเชื่อมต่อแสดง "ยังไม่เชื่อม" ต่อด้วยส่วน "ตั้งค่าให้คนในครอบครัว" ที่มี `CopyableUrl`, Alert เมื่อ `!setup.isPubliclyReachable` (ข้อความเดิม) และขั้นตอน 4 ข้อจากหน้าเดิม โดยข้อ 1 เปลี่ยนเป็น "ล็อกอิน claude.ai ด้วยบัญชี Claude ของคนนั้น" และข้อ 3 เน้นว่า "ล็อกอินแอปนี้ด้วยบัญชีของคนนั้น แล้วกดอนุญาต"
   - ถ้าสมาชิกยกเลิกการเชื่อมต่อของตัวเองได้ (ตาม Task 5) ให้มีปุ่มยกเลิกในสถานะของตัวเองด้วย
 
-- [ ] **Step 3: ตรวจ frontend**
+- [x] **Step 3: ตรวจ frontend**
 
 Run: `npx tsc --noEmit && npx eslint resources/js && npm run build && php artisan test --compact`
 Expected: ไม่มี error และ test ทั้งหมดผ่าน
 
-- [ ] **Step 4: ตรวจในเบราว์เซอร์** (skill `run`) ล็อกอินเป็นเจ้าของและเป็นสมาชิก ดูหน้า `/assistant` ที่ความกว้างมือถือ 375px และเดสก์ท็อป ลองกดคัดลอก ลองยกเลิกการเชื่อมต่อ และเช็กว่าแถบล่างมี 4 เมนูโดยไม่ล้น ใช้ `browser-logs` ดูว่าไม่มี error ใน console
+- [x] **Step 4: ตรวจในเบราว์เซอร์** (skill `run`) ล็อกอินเป็นเจ้าของและเป็นสมาชิก ดูหน้า `/assistant` ที่ความกว้างมือถือ 375px และเดสก์ท็อป ลองกดคัดลอก ลองยกเลิกการเชื่อมต่อ และเช็กว่าแถบล่างมี 4 เมนูโดยไม่ล้น ใช้ `browser-logs` ดูว่าไม่มี error ใน console
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add resources/js

@@ -6,6 +6,7 @@ import { AiBadge } from '@/components/farm/ai-badge';
 import { todayIso } from '@/components/farm/care-record-form';
 import { EmptyState } from '@/components/farm/empty-state';
 import { RecordFilters } from '@/components/farm/record-filters';
+import { RecordsPagination } from '@/components/farm/records-pagination';
 import { RowActions } from '@/components/farm/row-actions';
 import { ShareBar } from '@/components/farm/share-bar';
 import { SubmitButton } from '@/components/farm/submit-button';
@@ -29,6 +30,7 @@ import type {
     Expense,
     ExpenseCategory,
     ExpenseRow,
+    Paginated,
     RecordFilterOptions,
     RecordFilterValues,
 } from '@/types/farm';
@@ -137,7 +139,7 @@ export default function ExpensesIndex({
     members,
     categories,
 }: {
-    expenses: ExpenseRow[];
+    expenses: Paginated<ExpenseRow>;
     total: number;
     totalsByCategory: {
         category: ExpenseCategory;
@@ -198,7 +200,7 @@ export default function ExpensesIndex({
                             </span>
                         </p>
                         <p className="text-base text-muted-foreground md:text-sm">
-                            {expenses.length} รายการ
+                            {expenses.total.toLocaleString('th-TH')} รายการ
                         </p>
                     </div>
                     {totalsByCategory.length > 0 && (
@@ -221,7 +223,7 @@ export default function ExpensesIndex({
                 </section>
 
                 <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
-                    {expenses.length === 0 ? (
+                    {expenses.data.length === 0 ? (
                         <EmptyState>
                             {isFiltered
                                 ? 'ไม่มีค่าใช้จ่ายตามตัวกรองนี้'
@@ -229,7 +231,7 @@ export default function ExpensesIndex({
                         </EmptyState>
                     ) : (
                         <ul className="divide-y rounded-lg border bg-card">
-                            {expenses.map((expense) => (
+                            {expenses.data.map((expense) => (
                                 <li
                                     key={expense.id}
                                     className="flex items-center gap-3 py-3 pr-3 pl-4"
@@ -288,6 +290,7 @@ export default function ExpensesIndex({
                             ))}
                         </ul>
                     )}
+                    <RecordsPagination records={expenses} />
                 </div>
             </div>
 

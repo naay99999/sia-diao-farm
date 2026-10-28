@@ -12,22 +12,37 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use stdClass;
 
 class TrashController extends Controller
 {
     private const LIMIT = 200;
 
+    /**
+     * The newest deleted records of every type. Only ids and deletion times are read for the cut, then the
+     * records that make it are loaded with what their summary needs.
+     */
     public function index(): Response
     {
-        $items = collect(RecordTypes::DELETABLE)
-            ->flatMap(function (string $type): array {
+        $newest = collect(RecordTypes::DELETABLE)
+            ->flatMap(fn (string $type): array => RecordTypes::trashedQuery($type)
+                ->orderByDesc('deleted_at')
+                ->limit(self::LIMIT)
+                ->toBase()
+                ->get(['id', 'deleted_at'])
+                ->map(fn (stdClass $row): array => ['type' => $type, 'id' => (int) $row->id, 'deletedAt' => $row->deleted_at])
+                ->all())
+            ->sortByDesc('deletedAt')
+            ->take(self::LIMIT);
+
+        $items = $newest
+            ->groupBy('type')
+            ->flatMap(function ($rows, string $type): array {
                 $model = new (RecordTypes::modelClass($type));
 
-                return $model->newQuery()
-                    ->onlyTrashed()
+                return RecordTypes::trashedQuery($type)
                     ->with(RecordSummary::relations($model))
-                    ->orderByDesc('deleted_at')
-                    ->limit(self::LIMIT)
+                    ->whereKey($rows->pluck('id'))
                     ->get()
                     ->map(fn (Model $record): array => [
                         'type' => $type,
@@ -37,8 +52,7 @@ class TrashController extends Controller
                     ])
                     ->all();
             })
-            ->sortByDesc('deletedAt')
-            ->take(self::LIMIT)
+            ->sortBy([['deletedAt', 'desc'], ['id', 'desc']])
             ->values()
             ->all();
 

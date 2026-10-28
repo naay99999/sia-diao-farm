@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\DateFilter;
 use Carbon\CarbonInterface;
 use Database\Factories\SeasonFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -80,13 +81,11 @@ class Season extends Model
      */
     public function scopeCovering(Builder $query, int $orchardId, CarbonInterface $date): void
     {
-        $day = $date->toDateString();
-        $isPastOrToday = $day <= Date::today()->toDateString();
+        $isPastOrToday = $date->toDateString() <= Date::today()->toDateString();
 
-        $query->where('orchard_id', $orchardId)
-            ->whereDate('started_on', '<=', $day)
-            ->where(function (Builder $inner) use ($day, $isPastOrToday): void {
-                $inner->whereDate('ended_on', '>=', $day);
+        DateFilter::onOrBefore($query->where('orchard_id', $orchardId), 'started_on', $date)
+            ->where(function (Builder $inner) use ($date, $isPastOrToday): void {
+                DateFilter::onOrAfter($inner, 'ended_on', $date);
 
                 if ($isPastOrToday) {
                     $inner->orWhereNull('ended_on');
@@ -104,8 +103,10 @@ class Season extends Model
      */
     public function applyDateWindow(Builder $query, string $column): Builder
     {
-        return $query
-            ->whereDate($column, '>=', $this->started_on->toDateString())
-            ->whereDate($column, '<=', $this->effectiveEnd()->toDateString());
+        return DateFilter::onOrBefore(
+            DateFilter::onOrAfter($query, $column, $this->started_on),
+            $column,
+            $this->effectiveEnd(),
+        );
     }
 }

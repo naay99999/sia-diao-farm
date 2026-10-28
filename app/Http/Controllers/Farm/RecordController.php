@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\Tree;
 use App\Support\IssueSummary;
 use App\Support\RecordFilters;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -58,18 +59,18 @@ class RecordController extends Controller
 
     /**
      * What the care record form needs beyond the row itself: each orchard's standing trees and the open problems
-     * on them, in two queries however many rows the page shows.
+     * on them, in two queries however many rows the page shows. Lazy, so changing a filter or page can skip them.
      *
-     * @return array{orchardTrees: array<int, list<array{id: int, code: string}>>, openIssues: array<int, array<string, mixed>>}
+     * @return array{orchardTrees: Closure(): array<int, list<array{id: int, code: string}>>, openIssues: Closure(): array<int, array<string, mixed>>}
      */
     private function careEditOptions(): array
     {
         return [
-            'orchardTrees' => Tree::query()->active()->orderBy('code')->get(['id', 'orchard_id', 'code'])
+            'orchardTrees' => fn (): array => Tree::query()->active()->orderBy('code')->get(['id', 'orchard_id', 'code'])
                 ->groupBy('orchard_id')
                 ->map(fn ($trees) => $trees->map->only(['id', 'code'])->values()->all())
                 ->all(),
-            'openIssues' => IssueSummary::openForFarm(),
+            'openIssues' => fn (): array => IssueSummary::openForFarm(),
         ];
     }
 

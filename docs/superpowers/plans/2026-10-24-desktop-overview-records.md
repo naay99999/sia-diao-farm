@@ -43,7 +43,7 @@
   - `TreeLayout::forOrchard(Orchard $orchard): array<int, array{row: string|null, trees: array<int, array{id: int, code: string, position: int|null, status: 'due'|'issue'|'normal'}>}>` — `row` null is the "อื่นๆ" row.
   - `TreeLayout::statusCounts(array $layout): array{due: int, issue: int, normal: int}`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```php
 test('codes parse into row and position', function (string $code, ?array $expected) {
@@ -71,10 +71,10 @@ test('layout runs a constant number of queries', function () {
 });
 ```
 
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/TreeLayoutTest.php` — expect FAIL (class missing).
-- [ ] **Step 3: Implement `TreeLayout`.** Regex `/^([A-Za-z]+)-?(\d+)$/u`, row uppercased, position `(int)`. Status from one `TreeIssue::query()->open()` query over the orchard's active tree ids: any issue with `follow_up_on <= today` → `due`, else any open → `issue`, else `normal`. Rows sort by row length then alphabetically; trees by position then code; null row last, sorted by code. Skip `removed_on` trees (`Tree::active()`).
-- [ ] **Step 4: Run** the test file — expect PASS.
-- [ ] **Step 5: Commit** `feat: lay out an orchard's trees in rows from their codes`.
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/TreeLayoutTest.php` — expect FAIL (class missing).
+- [x] **Step 3: Implement `TreeLayout`.** Regex `/^([A-Za-z]+)-?(\d+)$/u`, row uppercased, position `(int)`. Status from one `TreeIssue::query()->open()` query over the orchard's active tree ids: any issue with `follow_up_on <= today` → `due`, else any open → `issue`, else `normal`. Rows sort by row length then alphabetically; trees by position then code; null row last, sorted by code. Skip `removed_on` trees (`Tree::active()`).
+- [x] **Step 4: Run** the test file — expect PASS.
+- [x] **Step 5: Commit** `feat: lay out an orchard's trees in rows from their codes`.
 
 ### Task 2: Orchard summaries and farm-wide issues
 
@@ -89,7 +89,7 @@ test('layout runs a constant number of queries', function () {
   - `OrchardSummary::all(): array<int, array{id: int, name: string, treeCount: int, statusCounts: array{due:int, issue:int, normal:int}, layout: array (TreeLayout shape), season: array{id:int, name:string, startedOn:string, yieldKg:float, salesTotal:float, expensesTotal:float}|null, latestFertilizer: array{date:string, product:string|null}|null, latestPesticide: array{date:string, product:string|null}|null}>` ordered by orchard name.
   - `IssueSummary::openForFarm(): array` and `IssueSummary::dueForFarm(): array` — same shape as `forIssue` plus `orchardId: int, orchardName: string`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```php
 test('summary carries season totals for the open season', function () {
@@ -104,10 +104,10 @@ test('latest fertilizer and pesticide are the newest of each type', function () 
 test('farm-wide due issues span orchards and name the orchard', function () { /* two orchards, one due each → 2 rows with orchardName */ });
 ```
 
-- [ ] **Step 2: Run** the test file — expect FAIL.
-- [ ] **Step 3: Implement.** Season totals use the same queries as `SeasonController::show` (`applyDateWindow` on harvests joined to trees, on `orchard->sales()`, and `season->expenses()->sum('amount')`); a later refactor may share them, do not change `SeasonController` here. Latest care: one query per orchard per type on `careRecords()` ordered `performed_on desc, id desc`. `IssueSummary` farm methods use the existing private query without the orchard filter, eager-loading `tree.orchard:id,name`.
-- [ ] **Step 4: Run** — expect PASS.
-- [ ] **Step 5: Commit** `feat: summarise each orchard and list issues across the farm`.
+- [x] **Step 2: Run** the test file — expect FAIL.
+- [x] **Step 3: Implement.** Season totals use the same queries as `SeasonController::show` (`applyDateWindow` on harvests joined to trees, on `orchard->sales()`, and `season->expenses()->sum('amount')`); a later refactor may share them, do not change `SeasonController` here. Latest care: one query per orchard per type on `careRecords()` ordered `performed_on desc, id desc`. `IssueSummary` farm methods use the existing private query without the orchard filter, eager-loading `tree.orchard:id,name`.
+- [x] **Step 4: Run** — expect PASS.
+- [x] **Step 5: Commit** `feat: summarise each orchard and list issues across the farm`.
 
 ### Task 3: Overview page backend and home redirect
 
@@ -120,11 +120,11 @@ test('farm-wide due issues span orchards and name the orchard', function () { /*
 - Consumes: `OrchardSummary::all()`, `IssueSummary::dueForFarm()`, `IssueSummary::openForFarm()`, `RecentAiRecords::latest()`, `TreeLayout::forOrchard()`.
 - Produces: route `GET /overview` named `overview` rendering `overview` with props `orchards`, `dueIssues`, `openIssues`, `recentAiRecords`; `orchards.show` gains prop `treeLayout`.
 
-- [ ] **Step 1: Write the failing tests**: `home redirects signed-in users to the overview` (`get('/')->assertRedirect(route('overview'))`), `guests are sent to login`, `overview renders orchards and farm-wide issues` (`assertInertia` component `overview`, `has('orchards', 2)`, `has('dueIssues', 1)`), `orchard page carries its tree layout` (`has('treeLayout.0.trees')`).
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement** the invokable-style `index(): Response` and wire routes inside the `auth, verified` group.
-- [ ] **Step 4: Run** both test files — expect PASS.
-- [ ] **Step 5: Commit** `feat: overview page backend and make it the home page`.
+- [x] **Step 1: Write the failing tests**: `home redirects signed-in users to the overview` (`get('/')->assertRedirect(route('overview'))`), `guests are sent to login`, `overview renders orchards and farm-wide issues` (`assertInertia` component `overview`, `has('orchards', 2)`, `has('dueIssues', 1)`), `orchard page carries its tree layout` (`has('treeLayout.0.trees')`).
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement** the invokable-style `index(): Response` and wire routes inside the `auth, verified` group.
+- [x] **Step 4: Run** both test files — expect PASS.
+- [x] **Step 5: Commit** `feat: overview page backend and make it the home page`.
 
 ### Task 4: Overview page and tree map UI
 
@@ -136,11 +136,11 @@ test('farm-wide due issues span orchards and name the orchard', function () { /*
 - Consumes: Task 3 props.
 - Produces: `<TreeMap rows={TreeMapRow[]} />` — draws only; no fetching. Each tree is a link to `trees.show` with `aria-label` like `ต้น A-05 ถึงวันดูซ้ำ`.
 
-- [ ] **Step 1: Build `TreeMap`.** Plain SVG grid: one line per row with the row label at the start ("อื่นๆ" for null), circles at `position` (gaps where positions are missing), status colours from tokens only — `due` = `destructive`, `issue` = `chart-3`, `normal` = `primary`; legend with counts in text. Scrolls inside its own box on narrow screens, never the page.
-- [ ] **Step 2: Build `overview.tsx`.** Desktop: two columns from `lg` — left a card per orchard (`OrchardSummaryCard`: name link, map, status counts, season numbers or "ยังไม่มีรอบที่เปิดอยู่", latest fertilizer/pesticide with date and product); right (sticky, per `DESIGN.md`) "ต้องดูซ้ำ", "ปัญหาค้าง" (each row: orchard · tree code · finding, links to tree), and recent Claude records. `EmptyState` when there are no orchards.
-- [ ] **Step 3: Add `TreeMap`** to the orchard page.
-- [ ] **Step 4: Verify** `npm run types:check && npm run lint:check && npm run build` — all succeed; open `/overview` at 1280px and 390px with seeded data and check no horizontal page scroll.
-- [ ] **Step 5: Commit** `feat: overview page with a tree map per orchard`.
+- [x] **Step 1: Build `TreeMap`.** Plain SVG grid: one line per row with the row label at the start ("อื่นๆ" for null), circles at `position` (gaps where positions are missing), status colours from tokens only — `due` = `destructive`, `issue` = `chart-3`, `normal` = `primary`; legend with counts in text. Scrolls inside its own box on narrow screens, never the page.
+- [x] **Step 2: Build `overview.tsx`.** Desktop: two columns from `lg` — left a card per orchard (`OrchardSummaryCard`: name link, map, status counts, season numbers or "ยังไม่มีรอบที่เปิดอยู่", latest fertilizer/pesticide with date and product); right (sticky, per `DESIGN.md`) "ต้องดูซ้ำ", "ปัญหาค้าง" (each row: orchard · tree code · finding, links to tree), and recent Claude records. `EmptyState` when there are no orchards.
+- [x] **Step 3: Add `TreeMap`** to the orchard page.
+- [x] **Step 4: Verify** `npm run types:check && npm run lint:check && npm run build` — all succeed; open `/overview` at 1280px and 390px with seeded data and check no horizontal page scroll.
+- [x] **Step 5: Commit** `feat: overview page with a tree map per orchard`.
 
 ### Task 5: One restore rule for app and MCP
 
@@ -154,11 +154,11 @@ test('farm-wide due issues span orchards and name the orchard', function () { /*
   - `RecordRestorer::conflict(Model $record): ?RestoreConflict` where `enum App\Enums\RestoreConflict: string { case NotDeleted = 'not_deleted'; case OpenIssueExists = 'open_issue_exists'; }` (create the enum in `app/Enums/RestoreConflict.php`).
   - `RecordRestorer::restore(Model $record): void` — calls `conflict` first and throws `LogicException` if one exists.
 
-- [ ] **Step 1: Write the failing tests**: `conflict is null for a deleted record`, `not deleted records report NotDeleted`, `app restore refuses an open issue beside another open one` (two open issues same tree+finding, one trashed → `OpenIssueExists`), `restore brings the record back`.
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement**; move `hasOtherOpenIssue` from `RestoreRecord` into `RecordRestorer`; `RestoreRecord` maps each `RestoreConflict` case to its current message.
-- [ ] **Step 4: Run** `php artisan test --compact tests/Feature/Farm/RecordRestorerTest.php tests/Feature/Mcp` — expect PASS.
-- [ ] **Step 5: Commit** `refactor: share the record restore rule between app and MCP`.
+- [x] **Step 1: Write the failing tests**: `conflict is null for a deleted record`, `not deleted records report NotDeleted`, `app restore refuses an open issue beside another open one` (two open issues same tree+finding, one trashed → `OpenIssueExists`), `restore brings the record back`.
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement**; move `hasOtherOpenIssue` from `RestoreRecord` into `RecordRestorer`; `RestoreRecord` maps each `RestoreConflict` case to its current message.
+- [x] **Step 4: Run** `php artisan test --compact tests/Feature/Farm/RecordRestorerTest.php tests/Feature/Mcp` — expect PASS.
+- [x] **Step 5: Commit** `refactor: share the record restore rule between app and MCP`.
 
 ### Task 6: Record filters and records index backend
 
@@ -174,7 +174,7 @@ test('farm-wide due issues span orchards and name the orchard', function () { /*
   - Route `GET /records/{type}` named `records.index`, `type` constrained to `care|observations|harvests|sales`; `GET /records/expenses` named `expenses.index` (path change only, name kept); `GET /expenses` named `expenses.legacy` redirecting to `expenses.index` with the same query string; `GET /records` redirects to `records.index` `care`.
   - Props for `records/index`: `type`, `records` (`paginate(50)->withQueryString()`), `filters`, `orchards` `[{id, name}]`, `seasons` `[{id, label}]`, `members` `[{id, name}]`. Every row carries `fromAi`, `aiBy`, `createdBy` (name or null), plus the fields its edit form needs (same keys `TreeTimeline` passes as `record`) and `orchard`/`tree` `{id, name|code}`. Observation rows add `issueStatus: 'open'|'resolved'|null`.
 
-- [ ] **Step 1: Write the failing tests**:
+- [x] **Step 1: Write the failing tests**:
 
 ```php
 test('records index lists each type newest first', fn (string $type) => /* 3 rows, assertInertia has('records.data', 3) */)
@@ -190,10 +190,10 @@ test('old expenses link keeps its query', fn () => /* get('/expenses?from=2026-0
 test('records index paginates at 50', function () { /* 51 harvests → records.data 50, records.last_page 2 */ });
 ```
 
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement.** Per type: care (`performed_on`, `orchard_id`), observations (`observed_on`, relation `tree`, with `tree.orchard`, `finding`, `issue`), harvests (`harvested_on`, relation `tree`), sales (`sold_on`, `orchard_id`), expenses (`spent_on`, relation `season`). Eager-load `creator:id,name`, `updater:id,name` to avoid N+1. Expenses keep `get()` and totals by category, now over the filtered query.
-- [ ] **Step 4: Run** both test files — expect PASS.
-- [ ] **Step 5: Commit** `feat: filtered records index for every record type`.
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement.** Per type: care (`performed_on`, `orchard_id`), observations (`observed_on`, relation `tree`, with `tree.orchard`, `finding`, `issue`), harvests (`harvested_on`, relation `tree`), sales (`sold_on`, `orchard_id`), expenses (`spent_on`, relation `season`). Eager-load `creator:id,name`, `updater:id,name` to avoid N+1. Expenses keep `get()` and totals by category, now over the filtered query.
+- [x] **Step 4: Run** both test files — expect PASS.
+- [x] **Step 5: Commit** `feat: filtered records index for every record type`.
 
 ### Task 7: Return to the records page after edit or delete
 
@@ -205,11 +205,11 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
 **Interfaces:**
 - Produces: `ReturnTo::recordsOr(Request $request, RedirectResponse $default): RedirectResponse` — if the `Referer` is same-host and its path starts with `/records/`, redirect to that full URL (query kept); otherwise return `$default`.
 
-- [ ] **Step 1: Write the failing tests**: `updating from the records page returns to it` (dataset over the four types; `->from(route('records.index', ['type' => 'care', 'orchard_id' => $id]))->patch(...)->assertRedirect(that url)`), `deleting from the records page returns to it`, `a foreign referer falls back to the usual page`.
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement** and wrap each existing `to_route(...)` return in `ReturnTo::recordsOr($request, ...)`.
-- [ ] **Step 4: Run** `php artisan test --compact tests/Feature/Farm` — expect PASS.
-- [ ] **Step 5: Commit** `feat: edits from the records page return to it`.
+- [x] **Step 1: Write the failing tests**: `updating from the records page returns to it` (dataset over the four types; `->from(route('records.index', ['type' => 'care', 'orchard_id' => $id]))->patch(...)->assertRedirect(that url)`), `deleting from the records page returns to it`, `a foreign referer falls back to the usual page`.
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement** and wrap each existing `to_route(...)` return in `ReturnTo::recordsOr($request, ...)`.
+- [x] **Step 4: Run** `php artisan test --compact tests/Feature/Farm` — expect PASS.
+- [x] **Step 5: Commit** `feat: edits from the records page return to it`.
 
 ### Task 8: Trash backend
 
@@ -225,11 +225,11 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
   - `GET /records/trash` named `records.trash` rendering `records/trash` with `items: array<int, {type: string, id: int, kind, title, subject, deletedAt: string}>` — newest deleted first, at most 200 across all types.
   - `PATCH /records/trash/{type}/{id}` named `records.trash.restore`, `type` constrained to `RecordTypes::DELETABLE`. Conflicts become validation errors on `id`: NotDeleted → `บันทึกนี้ไม่ได้อยู่ในถังขยะ`, OpenIssueExists → `ต้นนี้มีปัญหาเดียวกันที่ยังเปิดอยู่ ให้บันทึกการดูซ้ำในเรื่องเดิมแทน`. Success toast `กู้คืนแล้ว`, redirect back to `records.trash`.
 
-- [ ] **Step 1: Write the failing tests**: `trash lists deleted records of every type` (one trashed per type → 7 items, live records absent), `restoring brings the record back`, `restoring an open issue beside another open one shows the Thai error`, `unknown trash type is not found`.
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run** the trash and assistant tests — expect PASS.
-- [ ] **Step 5: Commit** `feat: trash page backend with restore`.
+- [x] **Step 1: Write the failing tests**: `trash lists deleted records of every type` (one trashed per type → 7 items, live records absent), `restoring brings the record back`, `restoring an open issue beside another open one shows the Thai error`, `unknown trash type is not found`.
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run** the trash and assistant tests — expect PASS.
+- [x] **Step 5: Commit** `feat: trash page backend with restore`.
 
 ### Task 9: Records and trash UI
 
@@ -242,12 +242,12 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
 - Consumes: Task 6 and 8 props, `ReturnTo` behaviour.
 - Produces: `<AiBadge by={string|null} />`; `<RecordFilters filters orchards seasons members types />` that updates the URL query with `router.get(..., { preserveState: true, preserveScroll: true })`.
 
-- [ ] **Step 1: `RecordsLayout`** — `Heading` "บันทึก", link tabs (การดูแล, สภาพต้น/ปัญหา, ผลผลิต, การขาย, ค่าใช้จ่าย, ถังขยะ) styled like the settings tabs, keeping the current filter query when switching type.
-- [ ] **Step 2: `records/index.tsx`** — filter bar, table on desktop (date, orchard/tree, what, amount, who + `AiBadge`, `RowActions`), rows on mobile, pagination links, `EmptyState` per type. Edit opens a `Dialog` with the matching existing form posting to the existing `update` route; delete uses `useConfirm` then the existing `destroy` route. "จดใหม่" is a dropdown of orchards: care → `orchards.care-records.create`, harvests → `orchards.harvests.create`, sales and observations → `orchards.show`.
-- [ ] **Step 3: `records/trash.tsx`** — list with kind, title, subject, deleted date and a "กู้คืน" button; show the `id` error as a toast or inline alert.
-- [ ] **Step 4: Move the expenses page** into `RecordsLayout`, behaviour unchanged except filters now come from `RecordFilters`.
-- [ ] **Step 5: Verify** `npm run types:check && npm run lint:check && npm run build`, then `php artisan test --compact tests/Feature/Farm/ExpenseControllerTest.php` (render name changed).
-- [ ] **Step 6: Commit** `feat: records pages with filters, tables and trash`.
+- [x] **Step 1: `RecordsLayout`** — `Heading` "บันทึก", link tabs (การดูแล, สภาพต้น/ปัญหา, ผลผลิต, การขาย, ค่าใช้จ่าย, ถังขยะ) styled like the settings tabs, keeping the current filter query when switching type.
+- [x] **Step 2: `records/index.tsx`** — filter bar, table on desktop (date, orchard/tree, what, amount, who + `AiBadge`, `RowActions`), rows on mobile, pagination links, `EmptyState` per type. Edit opens a `Dialog` with the matching existing form posting to the existing `update` route; delete uses `useConfirm` then the existing `destroy` route. "จดใหม่" is a dropdown of orchards: care → `orchards.care-records.create`, harvests → `orchards.harvests.create`, sales and observations → `orchards.show`.
+- [x] **Step 3: `records/trash.tsx`** — list with kind, title, subject, deleted date and a "กู้คืน" button; show the `id` error as a toast or inline alert.
+- [x] **Step 4: Move the expenses page** into `RecordsLayout`, behaviour unchanged except filters now come from `RecordFilters`.
+- [x] **Step 5: Verify** `npm run types:check && npm run lint:check && npm run build`, then `php artisan test --compact tests/Feature/Farm/ExpenseControllerTest.php` (render name changed).
+- [x] **Step 6: Commit** `feat: records pages with filters, tables and trash`.
 
 ### Task 10: Claude connection moves to settings
 
@@ -259,11 +259,11 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
 **Interfaces:**
 - Produces: `settings/ai` props `myConnections`, `setup` (owner only, else null), `members` (owner only, else null) — same shapes and logic as today's `AssistantController`.
 
-- [ ] **Step 1: Move the connection tests** from `AssistantTest` to `AiConnectionTest` against the new routes, and add `assistant page no longer carries connection setup` (`missing('setup')`).
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement** backend and the two page changes.
-- [ ] **Step 4: Run** `php artisan test --compact tests/Feature/AssistantTest.php tests/Feature/Settings` and the frontend checks — expect PASS.
-- [ ] **Step 5: Commit** `feat: move the Claude connection to settings`.
+- [x] **Step 1: Move the connection tests** from `AssistantTest` to `AiConnectionTest` against the new routes, and add `assistant page no longer carries connection setup` (`missing('setup')`).
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement** backend and the two page changes.
+- [x] **Step 4: Run** `php artisan test --compact tests/Feature/AssistantTest.php tests/Feature/Settings` and the frontend checks — expect PASS.
+- [x] **Step 5: Commit** `feat: move the Claude connection to settings`.
 
 ### Task 11: Findings settings
 
@@ -275,11 +275,11 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
 **Interfaces:**
 - Produces: `GET settings/findings` (`findings.index`, props `findings: [{id, name, kind, inUse: bool}]` grouped client-side by kind), `POST settings/findings` (`findings.store`), `PATCH settings/findings/{finding}` (`findings.update`), `DELETE settings/findings/{finding}` (`findings.destroy`). Open to every signed-in user. Name required, trimmed, max 100, unique; kind `in:problem,stage`, editable only while not in use.
 
-- [ ] **Step 1: Write the failing tests**: `members can list, add and rename findings`, `finding names are unique`, `unused finding can be deleted`, `finding in use cannot be deleted` (live observation), `finding used by a trashed observation cannot be deleted`, `finding used by a trashed issue cannot be deleted`. Refusal message: `รายการนี้มีบันทึกใช้อยู่ ลบไม่ได้`.
-- [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement**; `inUse` checks observations and tree issues with `withTrashed()`.
-- [ ] **Step 4: Run** the test file and frontend checks — expect PASS.
-- [ ] **Step 5: Commit** `feat: manage findings in settings`.
+- [x] **Step 1: Write the failing tests**: `members can list, add and rename findings`, `finding names are unique`, `unused finding can be deleted`, `finding in use cannot be deleted` (live observation), `finding used by a trashed observation cannot be deleted`, `finding used by a trashed issue cannot be deleted`. Refusal message: `รายการนี้มีบันทึกใช้อยู่ ลบไม่ได้`.
+- [x] **Step 2: Run** — expect FAIL.
+- [x] **Step 3: Implement**; `inUse` checks observations and tree issues with `withTrashed()`.
+- [x] **Step 4: Run** the test file and frontend checks — expect PASS.
+- [x] **Step 5: Commit** `feat: manage findings in settings`.
 
 ### Task 12: Desktop-first navigation
 
@@ -290,7 +290,7 @@ test('records index paginates at 50', function () { /* 51 harvests → records.d
 **Interfaces:**
 - Produces: `mainNavItems` = ภาพรวม (`/overview`, icon `LayoutDashboard`), สวน, บันทึก (`/records`, `desktop`, icon `NotebookText`), ผู้ช่วย AI, ตั้งค่า (`/settings`, `desktop`, icon `Settings`). Bottom bar shows items without `desktop` plus `accountNavItem` → exactly 4: ภาพรวม, สวน, ผู้ช่วย AI, บัญชี. Remove the old "ค่าใช้จ่าย" item (its page lives under บันทึก).
 
-- [ ] **Step 1: Implement** and keep `matches` so `/records`, `/expenses` highlight บันทึก and `/t/` still highlights สวน.
-- [ ] **Step 2: Verify** frontend checks pass, then click through `/overview`, `/records/care`, `/settings/ai` at 1280px and 390px.
-- [ ] **Step 3: Run** the whole suite `php artisan test --compact` — expect PASS.
-- [ ] **Step 4: Commit** `feat: desktop-first navigation with overview, records and settings`.
+- [x] **Step 1: Implement** and keep `matches` so `/records`, `/expenses` highlight บันทึก and `/t/` still highlights สวน.
+- [x] **Step 2: Verify** frontend checks pass, then click through `/overview`, `/records/care`, `/settings/ai` at 1280px and 390px.
+- [x] **Step 3: Run** the whole suite `php artisan test --compact` — expect PASS.
+- [x] **Step 4: Commit** `feat: desktop-first navigation with overview, records and settings`.

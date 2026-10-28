@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Farm\OrchardController;
 use App\Models\CareRecord;
 use App\Models\Expense;
 use App\Models\Harvest;
@@ -10,6 +11,7 @@ use App\Models\Season;
 use App\Models\Tree;
 use App\Models\TreeIssue;
 use App\Models\User;
+use Illuminate\Support\Facades\Date;
 
 test('guests are redirected to login from orchards index', function () {
     $this->get(route('orchards.index'))->assertRedirect(route('login'));
@@ -162,4 +164,48 @@ test('orchard page carries its tree layout', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('orchards.show', $orchard))
         ->assertInertia(fn ($page) => $page->has('treeLayout.0.trees'));
+});
+
+test('orchard page lists the newest sales with totals over all of them', function () {
+    $orchard = Orchard::factory()->create();
+    Sale::factory()->for($orchard)->count(OrchardController::RECENT_SALES + 2)->create(['amount' => 100, 'weight_kg' => 2]);
+    Sale::factory()->for($orchard)->create(['amount' => 999])->delete();
+    Sale::factory()->create(['amount' => 555]);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('orchards.show', $orchard))
+        ->assertInertia(fn ($page) => $page
+            ->has('sales', OrchardController::RECENT_SALES)
+            ->where('salesSummary', ['count' => OrchardController::RECENT_SALES + 2, 'amount' => 2200, 'weightKg' => 44]));
+});
+
+test('orchard page derives active trees, layout and due issues from one tree and one issue load', function () {
+    Date::setTestNow('2026-10-24');
+    $orchard = Orchard::factory()->create();
+    $due = Tree::factory()->for($orchard)->create(['code' => 'A1']);
+    $later = Tree::factory()->for($orchard)->create(['code' => 'A2']);
+    $healthy = Tree::factory()->for($orchard)->create(['code' => 'A3']);
+    $removed = Tree::factory()->for($orchard)->removed()->create(['code' => 'A4']);
+    TreeIssue::factory()->for($due)->create(['follow_up_on' => '2026-10-20', 'resolved_on' => null]);
+    TreeIssue::factory()->for($later)->create(['follow_up_on' => '2026-11-30', 'resolved_on' => null]);
+    TreeIssue::factory()->for($removed)->create(['follow_up_on' => '2026-10-01', 'resolved_on' => null]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('orchards.show', ['orchard' => $orchard, 'show_removed' => 1]))
+        ->assertInertia(fn ($page) => $page
+            ->has('trees', 4)
+            ->where('activeTrees', [['id' => $due->id, 'code' => 'A1'], ['id' => $later->id, 'code' => 'A2'], ['id' => $healthy->id, 'code' => 'A3']])
+            ->where('treeLayout.0.trees.0.status', 'due')
+            ->where('treeLayout.0.trees.1.status', 'issue')
+            ->where('treeLayout.0.trees.2.status', 'normal')
+            ->has('treeLayout.0.trees', 3)
+            ->has('openIssues', 2)
+            ->has('dueIssues', 1)
+            ->where('dueIssues.0.treeId', $due->id));
+
+    $this->actingAs($user)
+        ->get(route('orchards.show', $orchard))
+        ->assertInertia(fn ($page) => $page->has('trees', 3)->has('activeTrees', 3));
 });

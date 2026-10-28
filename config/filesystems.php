@@ -65,6 +65,8 @@ return [
             'root' => storage_path('app/private/photos'),
             'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/photos',
             'serve' => true,
+            // Let the web server send the file after Laravel checks the signed URL (see docker/Caddyfile).
+            'accel_redirect' => (bool) env('PHOTOS_ACCEL_REDIRECT', false),
             'throw' => false,
             'report' => false,
         ],

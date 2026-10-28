@@ -6,6 +6,7 @@ use App\Mcp\Support\RecordSerializer;
 use App\Mcp\Support\RecordTypes;
 use App\Mcp\Support\TreeLookup;
 use App\Models\Tree;
+use App\Support\DateFilter;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -76,11 +77,11 @@ class ListRecords extends Tool
         }
 
         if (! empty($validated['from'])) {
-            $query->whereDate($dateColumn, '>=', $validated['from']);
+            DateFilter::onOrAfter($query, $dateColumn, $validated['from']);
         }
 
         if (! empty($validated['to'])) {
-            $query->whereDate($dateColumn, '<=', $validated['to']);
+            DateFilter::onOrBefore($query, $dateColumn, $validated['to']);
         }
 
         $records = $query->orderByDesc($dateColumn)->orderByDesc('id')->limit($limit + 1)->get();

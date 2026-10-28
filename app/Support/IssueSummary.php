@@ -6,6 +6,7 @@ use App\Models\Orchard;
 use App\Models\Tree;
 use App\Models\TreeIssue;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Date;
 
 class IssueSummary
@@ -56,18 +57,6 @@ class IssueSummary
     }
 
     /**
-     * Open issues already due on the orchard's standing trees, soonest follow-up first.
-     *
-     * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool}>
-     */
-    public static function dueForOrchard(Orchard $orchard): array
-    {
-        return self::forIssues(
-            self::orchardQuery($orchard)->due(Date::today())->get(),
-        );
-    }
-
-    /**
      * Open issues on standing trees across every orchard, soonest follow-up first.
      *
      * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool, orchardId: int, orchardName: string}>
@@ -78,13 +67,16 @@ class IssueSummary
     }
 
     /**
-     * Open issues already due on standing trees across every orchard, soonest follow-up first.
+     * The open issue summaries already due, keeping their order.
      *
-     * @return array<int, array{id: int, treeId: int, treeCode: string, finding: string, openedOn: string, followUpOn: string, isDue: bool, orchardId: int, orchardName: string}>
+     * @template TSummary of array{isDue: bool}
+     *
+     * @param  array<int, TSummary>  $openIssues
+     * @return array<int, TSummary>
      */
-    public static function dueForFarm(): array
+    public static function due(array $openIssues): array
     {
-        return self::withOrchard(self::farmQuery()->due(Date::today())->get());
+        return array_values(Arr::where($openIssues, fn (array $issue): bool => $issue['isDue']));
     }
 
     /**

@@ -1,10 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Deferred, Head, Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { AiBadge } from '@/components/farm/ai-badge';
 import { EmptyState } from '@/components/farm/empty-state';
 import { OrchardSummaryCard } from '@/components/farm/orchard-summary-card';
 import Heading from '@/components/heading';
 import { PageContainer } from '@/components/page-container';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatThaiDate } from '@/lib/thai-date';
 import { show as showTree } from '@/routes/trees';
 import type {
@@ -17,7 +18,7 @@ type OverviewProps = {
     orchards: OrchardOverview[];
     dueIssues: FarmIssueSummary[];
     openIssues: FarmIssueSummary[];
-    recentAiRecords: RecentAiRecord[];
+    recentAiRecords?: RecentAiRecord[];
 };
 
 function IssueRows({
@@ -71,12 +72,31 @@ function IssueRows({
     );
 }
 
+const recentRecordsTitle = (
+    <h2 className="text-xl font-semibold md:text-lg">บันทึกล่าสุดจาก Claude</h2>
+);
+
+function RecentRecordsSkeleton() {
+    return (
+        <section className="space-y-2" aria-busy="true">
+            {recentRecordsTitle}
+            <span className="sr-only">กำลังโหลดบันทึกล่าสุดจาก Claude</span>
+            <div className="divide-y overflow-hidden rounded-lg border bg-card">
+                {[0, 1, 2].map((row) => (
+                    <div key={row} className="space-y-2 px-4 py-3">
+                        <Skeleton className="h-5 w-2/3" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 function RecentRecords({ records }: { records: RecentAiRecord[] }) {
     return (
         <section className="space-y-2">
-            <h2 className="text-xl font-semibold md:text-lg">
-                บันทึกล่าสุดจาก Claude
-            </h2>
+            {recentRecordsTitle}
             {records.length === 0 ? (
                 <EmptyState>ยังไม่มีบันทึกจาก Claude</EmptyState>
             ) : (
@@ -163,7 +183,12 @@ export default function Overview({
                             issues={otherOpenIssues}
                             emptyText="ไม่มีปัญหาค้าง"
                         />
-                        <RecentRecords records={recentAiRecords} />
+                        <Deferred
+                            data="recentAiRecords"
+                            fallback={<RecentRecordsSkeleton />}
+                        >
+                            <RecentRecords records={recentAiRecords ?? []} />
+                        </Deferred>
                     </div>
                 </div>
             )}

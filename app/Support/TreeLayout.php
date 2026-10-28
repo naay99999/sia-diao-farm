@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Orchard;
 use App\Models\Tree;
 use App\Models\TreeIssue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Date;
 
 class TreeLayout
@@ -28,21 +29,64 @@ class TreeLayout
      */
     public static function forOrchard(Orchard $orchard): array
     {
-        $trees = Tree::query()->active()->where('orchard_id', $orchard->id)->get(['id', 'code']);
+        return self::forOrchards(new Collection([$orchard]))[$orchard->id];
+    }
+
+    /**
+     * The layout of each orchard, keyed by orchard id, in two queries however many orchards there are.
+     *
+     * @param  Collection<int, Orchard>  $orchards
+     * @return array<int, array<int, array{row: string|null, trees: array<int, array{id: int, code: string, position: int|null, status: 'due'|'issue'|'normal'}>}>>
+     */
+    public static function forOrchards(Collection $orchards): array
+    {
+        $trees = Tree::query()->active()->whereIn('orchard_id', $orchards->modelKeys())->get(['id', 'orchard_id', 'code']);
 
         $today = Date::today()->toDateString();
-        $dueTreeIds = [];
-        $issueTreeIds = [];
+        $statuses = [];
 
-        TreeIssue::query()->open()->whereIn('tree_id', $trees->pluck('id'))->get(['tree_id', 'follow_up_on'])
-            ->each(function (TreeIssue $issue) use ($today, &$dueTreeIds, &$issueTreeIds): void {
-                $issueTreeIds[$issue->tree_id] = true;
-
-                if ($issue->follow_up_on->toDateString() <= $today) {
-                    $dueTreeIds[$issue->tree_id] = true;
-                }
+        TreeIssue::query()->open()->whereIn('tree_id', $trees->modelKeys())->get(['tree_id', 'follow_up_on'])
+            ->each(function (TreeIssue $issue) use ($today, &$statuses): void {
+                $isDue = $issue->follow_up_on->toDateString() <= $today;
+                $statuses[$issue->tree_id] = $isDue || ($statuses[$issue->tree_id] ?? null) === 'due' ? 'due' : 'issue';
             });
 
+        $treesByOrchard = $trees->groupBy('orchard_id');
+        $layouts = [];
+
+        foreach ($orchards as $orchard) {
+            $layouts[$orchard->id] = self::arrange($treesByOrchard->get($orchard->id, []), $statuses);
+        }
+
+        return $layouts;
+    }
+
+    /**
+     * Statuses by tree id from issue summaries the caller already has, for {@see self::arrange()}.
+     *
+     * @param  iterable<array{treeId: int, isDue: bool}>  $openIssues
+     * @return array<int, 'due'|'issue'>
+     */
+    public static function statusesOf(iterable $openIssues): array
+    {
+        $statuses = [];
+
+        foreach ($openIssues as $issue) {
+            $statuses[$issue['treeId']] = $issue['isDue'] || ($statuses[$issue['treeId']] ?? null) === 'due' ? 'due' : 'issue';
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * Lay out trees already loaded, marking each with its status (trees absent from `$statuses` are normal).
+     *
+     * @param  iterable<Tree>  $trees
+     * @param  array<int, 'due'|'issue'>  $statuses
+     * @return array<int, array{row: string|null, trees: array<int, array{id: int, code: string, position: int|null, status: 'due'|'issue'|'normal'}>}>
+     */
+    public static function arrange(iterable $trees, array $statuses): array
+    {
         $rows = [];
         $otherTrees = [];
 
@@ -52,7 +96,7 @@ class TreeLayout
                 'id' => $tree->id,
                 'code' => $tree->code,
                 'position' => $parsed['position'] ?? null,
-                'status' => isset($dueTreeIds[$tree->id]) ? 'due' : (isset($issueTreeIds[$tree->id]) ? 'issue' : 'normal'),
+                'status' => $statuses[$tree->id] ?? 'normal',
             ];
 
             if ($parsed === null) {

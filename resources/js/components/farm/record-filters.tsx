@@ -8,6 +8,19 @@ const selectClass =
     'flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-lg shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:h-9 md:text-base';
 
 /**
+ * Props that only feed the filter bar and the edit forms. Changing a filter or page reloads everything else and
+ * keeps these as they were.
+ */
+export const recordOptionProps = [
+    'orchards',
+    'seasons',
+    'members',
+    'orchardTrees',
+    'openIssues',
+    'categories',
+];
+
+/**
  * The filter bar every records tab shares. Each change reloads the current page with the new query, keeping scroll,
  * and starts again from the first page.
  */
@@ -30,7 +43,11 @@ export function RecordFilters({
             Object.entries(next).filter(([, value]) => value !== null),
         );
 
-        router.get(path, query, { preserveState: true, preserveScroll: true });
+        router.get(path, query, {
+            preserveState: true,
+            preserveScroll: true,
+            except: recordOptionProps,
+        });
     };
 
     const change = (key: keyof RecordFilterValues, value: string) =>
@@ -135,7 +152,11 @@ export function RecordFilters({
                         router.get(
                             path,
                             {},
-                            { preserveState: true, preserveScroll: true },
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                                except: recordOptionProps,
+                            },
                         )
                     }
                 >

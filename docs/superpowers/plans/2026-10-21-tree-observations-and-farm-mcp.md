@@ -58,16 +58,16 @@
   - trait `TracksProvenance` ตั้งค่าตอน `creating` (ทั้ง 4 คอลัมน์) และตอน `updating` (`updated_*`) จาก `auth()->id()` กับ `Context::get(Provenance::VIA_KEY, 'app')` และมี method `isFromAi(): bool` (true เมื่อ `created_via` หรือ `updated_via` เป็น `'mcp'`)
   - ทั้ง 4 model ใช้ `SoftDeletes` + `TracksProvenance`
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('records created in app store creator and via app')`: actingAs user แล้ว POST harvest ผ่าน `trees.harvests.store` → `created_by` = user id, `created_via` = `'app'`
   - `test('records created under mcp context store via mcp')`: `Context::add('record_via', 'mcp')` แล้ว `Harvest::factory()->create()` → `created_via` = `'mcp'` และ `isFromAi()` = true
   - `test('updating sets updated_by and updated_via only')`: สร้างใน context app แล้ว update ใน context mcp → `created_via` = `'app'`, `updated_via` = `'mcp'`
   - `test('deleting a harvest soft deletes it')`: DELETE `harvests.destroy` → `assertSoftDeleted`
   - `test('soft deleted harvests are excluded from orchard and season yields')`: harvest 10 กก. + harvest 5 กก. ที่ลบแล้ว อยู่ในฤดูกาลที่เปิดอยู่ → `orchards.index` prop `orchards.0.current_yield_kg` = 10 และ `trees.show` prop `seasonYields.0.weightKg` = 10
-- [ ] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ProvenanceTest.php` → ต้อง FAIL
-- [ ] **Step 3:** สร้าง migration ที่เพิ่ม `softDeletes()` และ `Provenance::columns()` ให้ทั้ง 4 ตาราง แล้วเขียน trait และเพิ่ม trait ใน model พร้อมอัปเดต `@property` PHPDoc
-- [ ] **Step 4:** รัน test ไฟล์นี้ และ `tests/Feature/Farm` ทั้งโฟลเดอร์ → ต้อง PASS ทั้งหมด (test เดิมที่เช็ก `assertDatabaseMissing` หลังลบ ให้เปลี่ยนเป็น `assertSoftDeleted`)
-- [ ] **Step 5:** Commit `feat: track record provenance and soft delete farm records`
+- [x] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ProvenanceTest.php` → ต้อง FAIL
+- [x] **Step 3:** สร้าง migration ที่เพิ่ม `softDeletes()` และ `Provenance::columns()` ให้ทั้ง 4 ตาราง แล้วเขียน trait และเพิ่ม trait ใน model พร้อมอัปเดต `@property` PHPDoc
+- [x] **Step 4:** รัน test ไฟล์นี้ และ `tests/Feature/Farm` ทั้งโฟลเดอร์ → ต้อง PASS ทั้งหมด (test เดิมที่เช็ก `assertDatabaseMissing` หลังลบ ให้เปลี่ยนเป็น `assertSoftDeleted`)
+- [x] **Step 5:** Commit `feat: track record provenance and soft delete farm records`
 
 ### Task 2: Schema และ model ของสิ่งที่พบ, ปัญหา, การสังเกต
 
@@ -97,15 +97,15 @@
   - `Tree::hasRecords()` นับ observations ด้วย
   - `TreeIssue` กับ `Observation` ใช้ `SoftDeletes` + `TracksProvenance` จาก Task 1
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('default findings are seeded by migration')`: `Finding::where('name','ไรแดง')->first()->kind` = `FindingKind::Problem` และ `Finding::count()` = 14
   - `test('resolveByName reuses existing finding and creates new ones')`: เรียก `'  ไรแดง '` แล้วได้ id เดิม เรียก `'ราดำ'` แล้ว count เพิ่ม 1
   - `test('due scope returns open issues due today or overdue on active trees')`: มี 4 issue คือ ครบกำหนดวันนี้, เลยกำหนดแล้ว, ยังไม่ครบกำหนด และปิดแล้ว อีก 1 issue อยู่บนต้นที่ถูก remove → ได้ 2 รายการ
   - `test('tree with observations cannot be hard deleted')`: DELETE `trees.destroy` → มี error `tree`
-- [ ] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ObservationModelTest.php` → ต้อง FAIL
-- [ ] **Step 3:** สร้าง enum, migration, model และ factory ทั้งหมด (`php artisan make:model -mf`)
-- [ ] **Step 4:** รัน test ไฟล์นี้ และ `TreeControllerTest` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: add findings, tree issues and observations schema`
+- [x] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ObservationModelTest.php` → ต้อง FAIL
+- [x] **Step 3:** สร้าง enum, migration, model และ factory ทั้งหมด (`php artisan make:model -mf`)
+- [x] **Step 4:** รัน test ไฟล์นี้ และ `TreeControllerTest` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: add findings, tree issues and observations schema`
 
 ### Task 3: Action บันทึกสภาพต้น/ดูซ้ำ + รูปบน R2 + route ฝั่งแอป
 
@@ -138,7 +138,7 @@
     - ทุก route redirect ไป `trees.show`
   - disk `photos`: driver อ่านจาก `PHOTOS_DISK_DRIVER` (default `local`, root `storage_path('app/private/photos')`, `serve => true`) และค่า R2 จาก `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`, `region` = `auto`, `use_path_style_endpoint` = true
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail** (`Storage::fake('photos')`, `Date::setTestNow('2026-10-21')`)
+- [x] **Step 1: เขียน test ที่ต้อง fail** (`Storage::fake('photos')`, `Date::setTestNow('2026-10-21')`)
   - `test('problem observation opens an issue with follow up seven days later')`: ไรแดง วันที่ 2026-10-21 → `tree_issues` 1 แถว, `follow_up_on` = `2026-10-28`
   - `test('same problem on same tree appends to the open issue')`: บันทึกไรแดงซ้ำ → issue ยังมี 1 แถว, observations 2 แถว, `follow_up_on` เท่าเดิม
   - `test('stage observation does not open an issue')`: ออกดอก → `tree_issues` 0 แถว
@@ -148,10 +148,10 @@
   - `test('follow up resolved closes the issue')` และ `test('follow up not resolved pushes follow up date')`: วันที่ 2026-10-28 → `follow_up_on` = `2026-11-04`
   - `test('follow up on closed issue is rejected')`
   - `test('update changes only date severity and notes')` และ `test('destroy soft deletes observation')`
-- [ ] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ObservationControllerTest.php` → ต้อง FAIL
-- [ ] **Step 3:** `composer require league/flysystem-aws-s3-v3` แล้วเพิ่ม disk, action, request, controller และ route ตาม Interfaces
-- [ ] **Step 4:** รัน test → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: record tree observations and follow-ups`
+- [x] **Step 2:** รัน `php artisan test --compact tests/Feature/Farm/ObservationControllerTest.php` → ต้อง FAIL
+- [x] **Step 3:** `composer require league/flysystem-aws-s3-v3` แล้วเพิ่ม disk, action, request, controller และ route ตาม Interfaces
+- [x] **Step 4:** รัน test → ต้อง PASS
+- [x] **Step 5:** Commit `feat: record tree observations and follow-ups`
 
 ### Task 4: Action บันทึกการดูแลที่ผูกกับปัญหา
 
@@ -172,17 +172,17 @@
   - `SaveCareRecord::defaultIssueIds(CareType $type, array $treeIds): array` คืน id ของ issue ที่เปิดอยู่บนต้นเหล่านั้น ถ้าเป็น `Pesticide` ถ้าไม่ใช่คืน `[]` (MCP ใช้เมื่อ AI ไม่ส่ง `issue_ids` มา และ UI ใช้ตัดสินว่าจะติ๊กไว้ให้หรือไม่)
   - `CareRecordController::store/update` เรียก action ส่วน `issue_ids` ที่ไม่ได้ส่งมาจากฟอร์มถือว่าเป็น `[]` (UI ส่งค่าที่ผู้ใช้เลือกมาเสมอ)
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('linking an issue moves its follow up to care date plus seven')`: issue follow_up 2026-10-28 + พ่นยาวันที่ 2026-10-25 → `2026-11-01`
   - `test('issue from a tree not on the record is rejected')`
   - `test('deleting a linked care record keeps the issue open and follow up unchanged')`
   - `test('removing a tree from a record unlinks its issues')`
   - `test('default issue ids are open issues for pesticide only')`: pesticide ได้ ids, fertilizer ได้ `[]`
   - test เดิมใน `CareRecordControllerTest.php` ต้องยังผ่าน
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** ย้าย logic จาก controller เข้า action ตาม Interfaces
-- [ ] **Step 4:** รัน `CareRecordIssueLinkTest.php` + `CareRecordControllerTest.php` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: link care records to tree issues`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** ย้าย logic จาก controller เข้า action ตาม Interfaces
+- [x] **Step 4:** รัน `CareRecordIssueLinkTest.php` + `CareRecordControllerTest.php` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: link care records to tree issues`
 
 ### Task 5: Props ของหน้าต้น/หน้าสวน + ไทม์ไลน์รวมการสังเกต
 
@@ -207,16 +207,16 @@
     - `openIssues: IssueSummary[]` (ปัญหาที่เปิดอยู่ทั้งหมดบนต้นที่ยังอยู่)
   - Props ของ `care-records.create` และหน้าที่ใช้ `CareRecordFields`: `openIssues: IssueSummary[]` ของสวนนั้น
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('tree page exposes open issues latest stage and findings')`
   - `test('latest stage outside current season is flagged')`: ระยะของปีก่อน → `inCurrentSeason` = false
   - `test('timeline includes observations with ai flag and photo urls')`
   - `test('orchard page lists due issues and excludes removed trees')`
   - `test('care record create page exposes open issues')`
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** เขียน `TreeTimeline` / `IssueSummary` แล้วต่อเข้ากับ controller
-- [ ] **Step 4:** รัน test ไฟล์นี้ + `TreeControllerTest` + `OrchardControllerTest` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: expose tree observations and due follow-ups to pages`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** เขียน `TreeTimeline` / `IssueSummary` แล้วต่อเข้ากับ controller
+- [x] **Step 4:** รัน test ไฟล์นี้ + `TreeControllerTest` + `OrchardControllerTest` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: expose tree observations and due follow-ups to pages`
 
 ### Task 6: UI — บันทึกสภาพต้น, ดูซ้ำ, รายการต้องดูซ้ำ, ผูกปัญหาในฟอร์มดูแล
 
@@ -242,11 +242,11 @@
   - หน้าสวน: `IssueList` สองกลุ่มบนแท็บต้นไม้ คือ "ต้องดูซ้ำ" (ไฮไลต์รายการที่เลยกำหนด) และ "ปัญหาค้างอยู่" แต่ละรายการลิงก์ไปหน้าต้น ถ้าว่างทั้งคู่ให้ซ่อน
   - ฟอร์มดูแล: เมื่อเลือกต้นที่มีปัญหาเปิดอยู่ ให้แสดง checkbox "ผูกกับปัญหา" ต่อปัญหา ถ้าประเภทเป็น `pesticide` ให้ติ๊กไว้ให้ ถ้าเป็นประเภทอื่นไม่ติ๊ก (ติ๊กตามค่าเริ่มต้นเฉพาะตอนสร้าง ตอนแก้ให้ติ๊กตามที่ผูกไว้เดิม) แล้วส่งเป็น `issue_ids[]`
 
-- [ ] **Step 1:** เพิ่ม type ใน `farm.ts`: `Finding`, `FindingKind`, `IssueSummary`, `LatestStage` และเพิ่ม kind `'observation'` ใน `TimelineEntry` พร้อม `fromAi`/`photos`
-- [ ] **Step 2:** สร้าง component 3 ตัว แล้วต่อเข้ากับหน้า โดยใช้ `Dialog`, `Button` และ `SectionTabs` ที่มีอยู่ และทำตาม `DESIGN.md`
-- [ ] **Step 3:** รัน `npm run types && npm run lint && npm run build` → ต้องไม่มี error
-- [ ] **Step 4:** รัน `php artisan test --compact tests/Feature/Farm` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: tree observation and follow-up UI`
+- [x] **Step 1:** เพิ่ม type ใน `farm.ts`: `Finding`, `FindingKind`, `IssueSummary`, `LatestStage` และเพิ่ม kind `'observation'` ใน `TimelineEntry` พร้อม `fromAi`/`photos`
+- [x] **Step 2:** สร้าง component 3 ตัว แล้วต่อเข้ากับหน้า โดยใช้ `Dialog`, `Button` และ `SectionTabs` ที่มีอยู่ และทำตาม `DESIGN.md`
+- [x] **Step 3:** รัน `npm run types && npm run lint && npm run build` → ต้องไม่มี error
+- [x] **Step 4:** รัน `php artisan test --compact tests/Feature/Farm` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: tree observation and follow-up UI`
 
 ### Task 7: Passport + MCP server + ล็อกอิน + เครื่องมือภาพรวม
 
@@ -270,14 +270,14 @@
   - `User` implements `OAuthenticatable` และใช้ `HasApiTokens`
   - convention ของทุก tool: คืนค่าเป็น `Response::json(...)` ส่วน error ใช้ `$request->validate()` พร้อมข้อความภาษาอังกฤษที่บอกวิธีแก้
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('mcp endpoint rejects unauthenticated requests')`: POST `/mcp/farm` ได้ 401
   - `test('oauth discovery route is registered')`: GET `/.well-known/oauth-protected-resource` ได้ 200 (ตรวจ path จริงใน `Mcp::oauthRoutes` ก่อน)
   - `test('overview lists orchards due issues and findings')`: `FarmServer::actingAs($user)->tool(GetFarmOverview::class)` → `assertOk()->assertSee(['สวนหน้าบ้าน', 'ไรแดง'])`
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** `composer require laravel/mcp laravel/passport` แล้วรัน `php artisan install:api --passport` (ตรวจ `--help` ก่อน และอย่าให้ไปทับ `routes/web.php`), `php artisan vendor:publish --tag=mcp-views` และตั้ง `Passport::authorizationView` จากนั้นเขียน server, tool และ middleware
-- [ ] **Step 4:** รัน `tests/Feature/Mcp` และทั้ง suite (`php artisan test --compact`) → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: farm MCP server with OAuth`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** `composer require laravel/mcp laravel/passport` แล้วรัน `php artisan install:api --passport` (ตรวจ `--help` ก่อน และอย่าให้ไปทับ `routes/web.php`), `php artisan vendor:publish --tag=mcp-views` และตั้ง `Passport::authorizationView` จากนั้นเขียน server, tool และ middleware
+- [x] **Step 4:** รัน `tests/Feature/Mcp` และทั้ง suite (`php artisan test --compact`) → ต้อง PASS
+- [x] **Step 5:** Commit `feat: farm MCP server with OAuth`
 
 ### Task 8: เครื่องมืออ่านข้อมูล
 
@@ -300,16 +300,16 @@
     - จัดกลุ่มตาม (ชื่อ finding, `care_records.product`) จาก issue ที่ผูกกับการดูแล
     - คืน `issues_treated`, `resolved`, `avg_days_to_resolve` (คิดเฉพาะเรื่องที่ปิดแล้ว: resolved_on − opened_on)
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('ambiguous tree code without orchard id is rejected')`: มี 2 สวน → `assertHasErrors(['Multiple orchards exist; pass orchard_id from get_farm_overview.'])`
   - `test('single orchard resolves code without orchard id')`
   - `test('get tree returns open issues and timeline')`
   - `test('list records filters by type date and excludes deleted by default')`
   - `test('treatment outcomes count resolved issues per product')`: ไรแดง 3 เรื่องที่ผูกกับ "อะบาเมกติน" ปิดแล้ว 2 เรื่อง (ใช้เวลา 7 และ 11 วัน) → `issues_treated` 3, `resolved` 2, `avg_days_to_resolve` 9
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** เขียน tool และลงทะเบียนใน `FarmServer::$tools`
-- [ ] **Step 4:** รัน `tests/Feature/Mcp` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: MCP read tools`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** เขียน tool และลงทะเบียนใน `FarmServer::$tools`
+- [x] **Step 4:** รัน `tests/Feature/Mcp` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: MCP read tools`
 
 ### Task 9: เครื่องมือเขียนข้อมูล
 
@@ -329,17 +329,17 @@
   - `save_expense`: `id?`, `season_id?`, `category`, `spent_on`, `amount`, `notes?`
   - description ของทุก tool ขึ้นต้นด้วย `"Only call after the user confirmed a summary in chat."`
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('save care record via mcp marks provenance mcp')`: `created_via` = `'mcp'`, `created_by` = user
   - `test('pesticide via mcp links open issues by default')`
   - `test('record observation for multiple trees appends to existing open issue')`: A1 มีไรแดงเปิดอยู่แล้ว + บันทึก A1, A2 → issue 2 เรื่อง (ไม่ใช่ 3)
   - `test('record follow up resolves issue')`
   - `test('save harvest on removed tree returns error')`
   - `test('update via id changes existing record and sets updated_via mcp')`
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** เขียน tool ทั้ง 6 ตัวให้เรียก action หรือ model ตาม Interfaces แล้วลงทะเบียน
-- [ ] **Step 4:** รัน `tests/Feature/Mcp` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: MCP write tools`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** เขียน tool ทั้ง 6 ตัวให้เรียก action หรือ model ตาม Interfaces แล้วลงทะเบียน
+- [x] **Step 4:** รัน `tests/Feature/Mcp` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: MCP write tools`
 
 ### Task 10: โน้ตความรู้ + ลบ/กู้คืน
 
@@ -357,15 +357,15 @@
   - `restore_record`: `type`, `id` → restore
   - การ map ประเภทเป็น model ใช้ `match` ในที่เดียว (`app/Mcp/Support/RecordTypes.php`) และใช้ร่วมกับ `ListRecords`
 
-- [ ] **Step 1: เขียน test ที่ต้อง fail**
+- [x] **Step 1: เขียน test ที่ต้อง fail**
   - `test('save and list notes filtered by finding includes general notes')`
   - `test('delete record soft deletes and restore brings it back')`: ทำกับ care record และ note
   - `test('deleting an issue hides it from overview due list')`
   - `test('delete tool is annotated destructive')`
-- [ ] **Step 2:** รัน test → ต้อง FAIL
-- [ ] **Step 3:** เขียน model และ tool (ย้าย type map ของ `ListRecords` มาใช้ `RecordTypes`)
-- [ ] **Step 4:** รันทั้ง suite (`php artisan test --compact`) + `vendor/bin/pint --dirty --format agent` → ต้อง PASS
-- [ ] **Step 5:** Commit `feat: farm notes and MCP delete/restore`
+- [x] **Step 2:** รัน test → ต้อง FAIL
+- [x] **Step 3:** เขียน model และ tool (ย้าย type map ของ `ListRecords` มาใช้ `RecordTypes`)
+- [x] **Step 4:** รันทั้ง suite (`php artisan test --compact`) + `vendor/bin/pint --dirty --format agent` → ต้อง PASS
+- [x] **Step 5:** Commit `feat: farm notes and MCP delete/restore`
 
 ---
 

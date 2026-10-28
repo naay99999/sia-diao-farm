@@ -1,0 +1,34 @@
+# The FrankenPHP image's default Caddyfile, trimmed, plus photo delivery by the web server.
+#
+# https://frankenphp.dev/docs/config
+# https://frankenphp.dev/docs/x-sendfile/
+
+{
+	skip_install_trust
+
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+}
+
+{$SERVER_NAME:localhost} {
+	root {$SERVER_ROOT:public/}
+	encode zstd br gzip
+
+	# Laravel checks a photo's signed URL, then answers with X-Accel-Redirect (the path inside the photos
+	# disk) and Caddy sends the file, so no PHP thread is held while the image goes out.
+	intercept {
+		@accel header X-Accel-Redirect *
+		handle_response @accel {
+			root * /app/storage/app/private/photos
+			rewrite * {resp.header.X-Accel-Redirect}
+			method * GET
+			header -X-Accel-Redirect
+			file_server
+		}
+	}
+
+	php_server
+}

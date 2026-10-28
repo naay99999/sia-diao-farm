@@ -18,11 +18,13 @@ class TreeTimeline
     /**
      * Newest first. Every entry carries `fromAi` and `aiBy`; observation entries also carry short-lived photo URLs.
      *
+     * Each kind loads at most `$limit` rows: the newest `$limit` overall can never come from further down any one list.
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function for(Tree $tree, int $limit = 50): array
     {
-        $care = $tree->careRecords()->with(['trees:id,code,removed_on', 'issues:id', 'creator:id,name', 'updater:id,name'])->get()->map(fn (CareRecord $record): array => [
+        $care = $tree->careRecords()->orderByDesc('care_records.performed_on')->orderByDesc('care_records.id')->limit($limit)->with(['trees:id,code,removed_on', 'issues:id', 'creator:id,name', 'updater:id,name'])->get()->map(fn (CareRecord $record): array => [
             'kind' => 'care',
             'id' => $record->id,
             'date' => $record->performed_on->toDateString(),
@@ -42,7 +44,7 @@ class TreeTimeline
             ],
         ]);
 
-        $harvests = $tree->harvests()->with(['creator:id,name', 'updater:id,name'])->get()->map(fn (Harvest $harvest): array => [
+        $harvests = $tree->harvests()->orderByDesc('harvested_on')->orderByDesc('id')->limit($limit)->with(['creator:id,name', 'updater:id,name'])->get()->map(fn (Harvest $harvest): array => [
             'kind' => 'harvest',
             'id' => $harvest->id,
             'date' => $harvest->harvested_on->toDateString(),
@@ -62,7 +64,7 @@ class TreeTimeline
             ],
         ]);
 
-        $observations = $tree->observations()->with(['finding', 'creator:id,name', 'updater:id,name', 'photos' => fn ($query) => $query->orderBy('id')])->get()->map(fn (Observation $observation): array => [
+        $observations = $tree->observations()->orderByDesc('observed_on')->orderByDesc('id')->limit($limit)->with(['finding', 'creator:id,name', 'updater:id,name', 'photos' => fn ($query) => $query->orderBy('id')])->get()->map(fn (Observation $observation): array => [
             'kind' => 'observation',
             'id' => $observation->id,
             'date' => $observation->observed_on->toDateString(),

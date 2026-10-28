@@ -70,6 +70,21 @@ class RecordTypes
     }
 
     /**
+     * Only the soft-deleted records of the given type.
+     *
+     * @return Builder<Model>
+     *
+     * @throws ValidationException
+     */
+    public static function trashedQuery(string $type): Builder
+    {
+        /** @var Builder<Model> $query */
+        $query = self::modelClass($type)::query();
+
+        return $query->withoutGlobalScope(SoftDeletingScope::class)->whereNotNull($query->qualifyColumn('deleted_at'));
+    }
+
+    /**
      * Bring a soft-deleted record back; every type in this class uses soft deletes.
      */
     public static function restore(Model $record): void

@@ -4,7 +4,8 @@ FROM dunglas/frankenphp:1.13-php8.5-bookworm AS base
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends sqlite3 unzip \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && install-php-extensions pdo_pgsql
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY docker/php.ini $PHP_INI_DIR/conf.d/zz-farm.ini
@@ -41,6 +42,7 @@ COPY --from=vendor /app/vendor ./vendor
 COPY --from=assets /app/public/build ./public/build
 RUN composer dump-autoload --no-dev --no-scripts --optimize --no-interaction
 
+COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY docker/entrypoint.sh /usr/local/bin/farm-entrypoint
 RUN chmod +x /usr/local/bin/farm-entrypoint
 

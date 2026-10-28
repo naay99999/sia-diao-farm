@@ -59,7 +59,7 @@
 - Create: `database/factories/ActivityTypeFactory.php`
 - Test: `tests/Feature/Farm/ActivityTypeModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/ActivityTypeModelTest`, then replace contents:
 
@@ -77,12 +77,12 @@ test('an activity type has many activities', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ActivityTypeModelTest`
 Expected: FAIL ("Class ActivityType not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_110000_create_activity_types_table.php`:
 
@@ -111,7 +111,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/ActivityType.php`:
 
@@ -149,7 +149,7 @@ class ActivityType extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/ActivityTypeFactory.php`:
 
@@ -175,12 +175,12 @@ class ActivityTypeFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test**
+- [x] **Step 6: Run test**
 
 Run: `php artisan test --compact --filter=ActivityTypeModelTest`
 Expected: PASS once Task 3 (`Activity`) lands. The `activities()` relation references the `Activity` model (Task 3). Run this test together with Task 3, or proceed — the autoloaded reference resolves once Task 3 is created.
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -199,7 +199,7 @@ git commit -m "feat: add ActivityType model"
 - Create: `database/factories/ExpenseCategoryFactory.php`
 - Test: `tests/Feature/Farm/ExpenseCategoryModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/ExpenseCategoryModelTest`, then:
 
@@ -221,12 +221,12 @@ test('an expense category casts its default scope and has many expenses', functi
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ExpenseCategoryModelTest`
 Expected: FAIL ("Class ExpenseScope not found")
 
-- [ ] **Step 3: Create the enum**
+- [x] **Step 3: Create the enum**
 
 `app/Enums/ExpenseScope.php`:
 
@@ -250,7 +250,7 @@ enum ExpenseScope: string
 }
 ```
 
-- [ ] **Step 4: Create the migration**
+- [x] **Step 4: Create the migration**
 
 `database/migrations/2026_06_27_110100_create_expense_categories_table.php`:
 
@@ -280,7 +280,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 5: Create the model**
+- [x] **Step 5: Create the model**
 
 `app/Models/ExpenseCategory.php`:
 
@@ -327,7 +327,7 @@ class ExpenseCategory extends Model
 }
 ```
 
-- [ ] **Step 6: Create the factory**
+- [x] **Step 6: Create the factory**
 
 `database/factories/ExpenseCategoryFactory.php`:
 
@@ -355,12 +355,12 @@ class ExpenseCategoryFactory extends Factory
 }
 ```
 
-- [ ] **Step 7: Run test**
+- [x] **Step 7: Run test**
 
 Run: `php artisan test --compact --filter=ExpenseCategoryModelTest`
 Expected: PASS once Task 4 (`Expense`) lands (the `expenses()` relation references it). Run together with Task 4 if needed.
 
-- [ ] **Step 8: Format and commit**
+- [x] **Step 8: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -378,7 +378,7 @@ git commit -m "feat: add ExpenseCategory model with scope enum"
 - Create: `database/factories/ActivityFactory.php`
 - Test: `tests/Feature/Farm/ActivityModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/ActivityModelTest`, then:
 
@@ -403,12 +403,12 @@ test('an activity belongs to a crop cycle and an activity type', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ActivityModelTest`
 Expected: FAIL ("Class Activity not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_110200_create_activities_table.php`:
 
@@ -441,7 +441,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/Activity.php`:
 
@@ -515,7 +515,7 @@ class Activity extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/ActivityFactory.php`:
 
@@ -548,12 +548,12 @@ class ActivityFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test**
+- [x] **Step 6: Run test**
 
 Run: `php artisan test --compact --filter="ActivityModelTest|ActivityTypeModelTest"`
 Expected: PASS (both Task 1 and Task 3 model tests). The `expenses()` relation references `Expense` (Task 4) but isn't exercised yet.
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -571,7 +571,7 @@ git commit -m "feat: add Activity model"
 - Create: `database/factories/ExpenseFactory.php`
 - Test: `tests/Feature/Farm/ExpenseModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create with `php artisan make:test --pest Farm/ExpenseModelTest`, then:
 
@@ -607,12 +607,12 @@ test('the direct and overhead query scopes filter correctly', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ExpenseModelTest`
 Expected: FAIL ("Class Expense not found")
 
-- [ ] **Step 3: Create the migration**
+- [x] **Step 3: Create the migration**
 
 `database/migrations/2026_06_27_110300_create_expenses_table.php`:
 
@@ -647,7 +647,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model**
+- [x] **Step 4: Create the model**
 
 `app/Models/Expense.php`:
 
@@ -757,7 +757,7 @@ class Expense extends Model
 
 Note: the `scope()` accessor exposes the `scope` attribute; the `scopeDirect`/`scopeOverhead` methods are Eloquent local query scopes (`Expense::direct()`, `Expense::overhead()`). These do not collide — local scopes are matched by the `scope` prefix + method name.
 
-- [ ] **Step 5: Create the factory**
+- [x] **Step 5: Create the factory**
 
 `database/factories/ExpenseFactory.php`:
 
@@ -799,12 +799,12 @@ class ExpenseFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `php artisan test --compact --filter="ExpenseModelTest|ExpenseCategoryModelTest"`
 Expected: PASS (Task 2 and Task 4 model tests).
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -823,7 +823,7 @@ git commit -m "feat: add Expense model with direct/overhead scopes"
 - Create: `resources/js/pages/farm/activity-types/index.tsx`
 - Test: `tests/Feature/Farm/ActivityTypeControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/ActivityTypeControllerTest`, then:
 
@@ -879,12 +879,12 @@ test('a user can delete an activity type', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ActivityTypeControllerTest`
 Expected: FAIL ("Route [activity-types.index] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StoreActivityTypeRequest.php`:
 
@@ -942,7 +942,7 @@ class UpdateActivityTypeRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/ActivityTypeController.php`:
 
@@ -997,7 +997,7 @@ class ActivityTypeController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import at top with the other Farm controller imports:
 
@@ -1012,16 +1012,16 @@ Route::resource('activity-types', ActivityTypeController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=ActivityTypeControllerTest`
 Expected: PASS (6 tests)
 
-- [ ] **Step 8: Add the ActivityType TS type**
+- [x] **Step 8: Add the ActivityType TS type**
 
 In `resources/js/types/farm.ts`, add near the top (after `FruitVariety`):
 
@@ -1035,7 +1035,7 @@ export type ActivityType = {
 };
 ```
 
-- [ ] **Step 9: Create the page**
+- [x] **Step 9: Create the page**
 
 `resources/js/pages/farm/activity-types/index.tsx` (inline-CRUD, same pattern as `fruit-types/index.tsx`):
 
@@ -1128,12 +1128,12 @@ ActivityTypesIndex.layout = {
 };
 ```
 
-- [ ] **Step 10: Build the frontend**
+- [x] **Step 10: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 11: Format and commit**
+- [x] **Step 11: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1152,7 +1152,7 @@ git commit -m "feat: add activity type management"
 - Create: `resources/js/pages/farm/expense-categories/index.tsx`
 - Test: `tests/Feature/Farm/ExpenseCategoryControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/ExpenseCategoryControllerTest`, then:
 
@@ -1223,12 +1223,12 @@ test('a user can delete an expense category', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ExpenseCategoryControllerTest`
 Expected: FAIL ("Route [expense-categories.index] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StoreExpenseCategoryRequest.php`:
 
@@ -1292,7 +1292,7 @@ class UpdateExpenseCategoryRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/ExpenseCategoryController.php`:
 
@@ -1347,7 +1347,7 @@ class ExpenseCategoryController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -1362,16 +1362,16 @@ Route::resource('expense-categories', ExpenseCategoryController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=ExpenseCategoryControllerTest`
 Expected: PASS (6 tests)
 
-- [ ] **Step 8: Add the ExpenseScope + ExpenseCategory TS types**
+- [x] **Step 8: Add the ExpenseScope + ExpenseCategory TS types**
 
 In `resources/js/types/farm.ts`, add:
 
@@ -1392,7 +1392,7 @@ export type ExpenseCategory = {
 };
 ```
 
-- [ ] **Step 9: Create the page**
+- [x] **Step 9: Create the page**
 
 `resources/js/pages/farm/expense-categories/index.tsx`:
 
@@ -1528,12 +1528,12 @@ ExpenseCategoriesIndex.layout = {
 };
 ```
 
-- [ ] **Step 10: Build the frontend**
+- [x] **Step 10: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 11: Format and commit**
+- [x] **Step 11: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1553,7 +1553,7 @@ git commit -m "feat: add expense category management"
 - Modify: `resources/js/pages/farm/plots/show.tsx` (link each cycle to its detail page)
 - Test: `tests/Feature/Farm/CropCycleControllerTest.php` (add show tests)
 
-- [ ] **Step 1: Add the failing show tests**
+- [x] **Step 1: Add the failing show tests**
 
 In the existing `tests/Feature/Farm/CropCycleControllerTest.php`, add these tests (keep all existing tests). Make sure `App\Models\CropCycle`, `App\Models\Plot`, `App\Models\User` are imported (they already are):
 
@@ -1573,12 +1573,12 @@ test('a user can view a crop cycle detail page', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: FAIL ("Route [crop-cycles.show] not defined")
 
-- [ ] **Step 3: Add the `show()` method to CropCycleController**
+- [x] **Step 3: Add the `show()` method to CropCycleController**
 
 In `app/Http/Controllers/Farm/CropCycleController.php`, add these imports at the top (alongside the existing imports):
 
@@ -1609,7 +1609,7 @@ public function show(CropCycle $cropCycle): Response
 }
 ```
 
-- [ ] **Step 4: Register the route**
+- [x] **Step 4: Register the route**
 
 In `routes/web.php`, inside the `auth`+`verified` group, add directly after the existing `crop-cycles.update` route:
 
@@ -1618,16 +1618,16 @@ Route::get('crop-cycles/{cropCycle}', [CropCycleController::class, 'show'])
     ->name('crop-cycles.show');
 ```
 
-- [ ] **Step 5: Generate Wayfinder helpers**
+- [x] **Step 5: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 6: Run backend tests**
+- [x] **Step 6: Run backend tests**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: PASS (8 tests — the original 6 plus 2 new show tests)
 
-- [ ] **Step 7: Add Activity + Expense TS types and extend CropCycle**
+- [x] **Step 7: Add Activity + Expense TS types and extend CropCycle**
 
 In `resources/js/types/farm.ts`:
 
@@ -1665,7 +1665,7 @@ Then extend the existing `CropCycle` type by adding these optional fields before
     expenses?: Expense[];
 ```
 
-- [ ] **Step 8: Create the crop-cycle detail page**
+- [x] **Step 8: Create the crop-cycle detail page**
 
 `resources/js/pages/farm/crop-cycles/show.tsx`. This task ships the read-only detail view (activities list, expenses list, cost summary). The record forms are added in Tasks 8 and 9.
 
@@ -1768,7 +1768,7 @@ CropCycleShow.layout = {
 export type { PageProps };
 ```
 
-- [ ] **Step 9: Link each crop cycle on the plot show page to its detail page**
+- [x] **Step 9: Link each crop cycle on the plot show page to its detail page**
 
 In `resources/js/pages/farm/plots/show.tsx`:
 
@@ -1806,12 +1806,12 @@ with:
 
 (`Link` is already imported in `show.tsx`.)
 
-- [ ] **Step 10: Build the frontend**
+- [x] **Step 10: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 11: Format and commit**
+- [x] **Step 11: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1830,7 +1830,7 @@ git commit -m "feat: add crop cycle detail page with cost summary"
 - Modify: `resources/js/pages/farm/crop-cycles/show.tsx` (add create + delete forms)
 - Test: `tests/Feature/Farm/ActivityControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/ActivityControllerTest`, then:
 
@@ -1930,12 +1930,12 @@ test('a user can delete an activity', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ActivityControllerTest`
 Expected: FAIL ("Route [crop-cycles.activities.store] not defined")
 
-- [ ] **Step 3: Create the FormRequest**
+- [x] **Step 3: Create the FormRequest**
 
 `app/Http/Requests/Farm/StoreActivityRequest.php`:
 
@@ -1969,7 +1969,7 @@ class StoreActivityRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/ActivityController.php`:
 
@@ -2027,7 +2027,7 @@ class ActivityController extends Controller
 
 Note: deleting an activity cascade-deletes its linked expenses (the `expenses.activity_id` FK uses `cascadeOnDelete`).
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -2044,16 +2044,16 @@ Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])
     ->name('activities.destroy');
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=ActivityControllerTest`
 Expected: PASS (6 tests)
 
-- [ ] **Step 8: Add the record-activity + delete UI to the cycle page**
+- [x] **Step 8: Add the record-activity + delete UI to the cycle page**
 
 In `resources/js/pages/farm/crop-cycles/show.tsx`:
 
@@ -2167,12 +2167,12 @@ Then, at the bottom of the activities `<Card>` (after the activities list), add 
                 </div>
 ```
 
-- [ ] **Step 9: Build the frontend**
+- [x] **Step 9: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 10: Format and commit**
+- [x] **Step 10: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2192,7 +2192,7 @@ git commit -m "feat: add activity recording with optional linked expense"
 - Modify: `resources/js/pages/farm/crop-cycles/show.tsx` (add direct-expense form + delete)
 - Test: `tests/Feature/Farm/ExpenseControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test**
+- [x] **Step 1: Write the failing controller test**
 
 Create with `php artisan make:test --pest Farm/ExpenseControllerTest`, then:
 
@@ -2274,12 +2274,12 @@ test('a user can delete an expense', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=ExpenseControllerTest`
 Expected: FAIL ("Route [expenses.index] not defined")
 
-- [ ] **Step 3: Create the FormRequest**
+- [x] **Step 3: Create the FormRequest**
 
 `app/Http/Requests/Farm/StoreExpenseRequest.php`:
 
@@ -2312,7 +2312,7 @@ class StoreExpenseRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller**
+- [x] **Step 4: Create the controller**
 
 `app/Http/Controllers/Farm/ExpenseController.php`:
 
@@ -2384,7 +2384,7 @@ class ExpenseController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -2402,16 +2402,16 @@ Route::post('crop-cycles/{cropCycle}/expenses', [ExpenseController::class, 'stor
 Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=ExpenseControllerTest`
 Expected: PASS (6 tests)
 
-- [ ] **Step 8: Create the overhead expenses page**
+- [x] **Step 8: Create the overhead expenses page**
 
 `resources/js/pages/farm/expenses/index.tsx`:
 
@@ -2539,7 +2539,7 @@ ExpensesIndex.layout = {
 };
 ```
 
-- [ ] **Step 9: Add direct-expense form + delete to the cycle page**
+- [x] **Step 9: Add direct-expense form + delete to the cycle page**
 
 In `resources/js/pages/farm/crop-cycles/show.tsx`:
 
@@ -2622,12 +2622,12 @@ Then add the create form at the bottom of the expenses `<Card>`:
                 </div>
 ```
 
-- [ ] **Step 10: Build the frontend**
+- [x] **Step 10: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 11: Format and commit**
+- [x] **Step 11: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2642,7 +2642,7 @@ git commit -m "feat: add direct and overhead expense recording"
 **Files:**
 - Modify: `resources/js/components/app-sidebar.tsx`
 
-- [ ] **Step 1: Add module-2 nav items**
+- [x] **Step 1: Add module-2 nav items**
 
 In `resources/js/components/app-sidebar.tsx`:
 
@@ -2680,17 +2680,17 @@ Add these three items to `mainNavItems` after the existing `พันธุ์�
     },
 ```
 
-- [ ] **Step 2: Build the frontend**
+- [x] **Step 2: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors. If any of `Wallet`, `ClipboardList`, `Tags` are unavailable in the installed lucide-react, substitute an available icon (e.g. `Receipt`, `ListChecks`, `Tag`).
 
-- [ ] **Step 3: Run the full farm test suite**
+- [x] **Step 3: Run the full farm test suite**
 
 Run: `php artisan test --compact --filter=Farm`
 Expected: PASS (all Module 1 + Module 2 farm tests)
 
-- [ ] **Step 4: Format and commit**
+- [x] **Step 4: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2702,10 +2702,10 @@ git commit -m "feat: add activity and expense navigation to sidebar"
 
 ## Final Verification
 
-- [ ] Run the full test suite: `php artisan test --compact`
-- [ ] Run linting: `vendor/bin/pint --test --format agent` and `npm run lint`
-- [ ] Build: `npm run build`
-- [ ] Manually verify: create activity type → expense category → open a plot → open a crop cycle → record an activity with a cost → confirm a linked direct expense appears and the cost summary updates → record a standalone direct expense → record an overhead expense on the farm-wide page → delete each and confirm redirects
+- [x] Run the full test suite: `php artisan test --compact`
+- [x] Run linting: `vendor/bin/pint --test --format agent` and `npm run lint`
+- [x] Build: `npm run build`
+- [x] Manually verify: create activity type → expense category → open a plot → open a crop cycle → record an activity with a cost → confirm a linked direct expense appears and the cost summary updates → record a standalone direct expense → record an overhead expense on the farm-wide page → delete each and confirm redirects
 
 ---
 

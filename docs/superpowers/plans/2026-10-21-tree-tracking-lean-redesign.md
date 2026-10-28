@@ -41,15 +41,15 @@
 **Interfaces:**
 - Produces: routes `profile.edit` (GET `settings/profile`), `profile.update` (PATCH), `user-password.update` (PUT `settings/password`, throttle 6,1) — all handled by `ProfileController` (`edit`, `update`, `updatePassword(PasswordUpdateRequest)`). `settings` redirects to `settings/profile`.
 
-- [ ] **Step 1: Update tests first**
+- [x] **Step 1: Update tests first**
   - `ProfileUpdateTest`: delete the two account-deletion tests; move "password can be updated" and "correct password must be provided to update password" from `SecurityTest` here, posting to `route('user-password.update')` and asserting redirect to `route('profile.edit')`.
   - Add `test('account deletion route no longer exists')`: `expect(Route::has('profile.destroy'))->toBeFalse()`; same file, `test('appearance and security pages no longer exist')` for `appearance.edit` and `security.edit`.
   - `AuthenticationTest`: delete the two-factor test; add `test('password reset routes are disabled')`: `expect(Route::has('password.request'))->toBeFalse()`.
   - `AppBrandingTest`: delete the appearance-cookie test.
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Settings tests/Feature/Auth tests/Feature/AppBrandingTest.php` — expect FAIL (routes still exist).
-- [ ] **Step 3: Apply the deletions/modifications above.** Profile page renders the existing profile form and the password form stacked on one page.
-- [ ] **Step 4: Run** the same tests + `npm run types` (or `npx tsc --noEmit`) + `npm run lint` — expect PASS / no errors.
-- [ ] **Step 5: Commit** `refactor: remove roles, appearance, account deletion, password reset and starter-kit leftovers`
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Settings tests/Feature/Auth tests/Feature/AppBrandingTest.php` — expect FAIL (routes still exist).
+- [x] **Step 3: Apply the deletions/modifications above.** Profile page renders the existing profile form and the password form stacked on one page.
+- [x] **Step 4: Run** the same tests + `npm run types` (or `npx tsc --noEmit`) + `npm run lint` — expect PASS / no errors.
+- [x] **Step 5: Commit** `refactor: remove roles, appearance, account deletion, password reset and starter-kit leftovers`
 
 ---
 
@@ -63,11 +63,11 @@
 **Interfaces:**
 - Produces: `Orchard { id, name: string, location: ?string, notes: ?string }`; routes `orchards.index|store|show|update|destroy` (`Route::resource(...)->except(['create','edit'])`, forms are dialogs/inline on index/show); `/` redirects authenticated users to `orchards.index` (guests to `login`); `dashboard` route removed. TS type `Orchard` exported from `@/types/farm`.
 
-- [ ] **Step 1: Write failing tests** in `OrchardControllerTest`: guests redirected to login from `orchards.index`; `test('home redirects to orchards')` (`get('/')` as user → redirect `route('orchards.index')`); store with `name='สวนบ้านล่าง'` creates row and redirects to `orchards.show`; `name` required; update changes name; destroy removes an orchard with no trees.
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/OrchardControllerTest.php` — FAIL.
-- [ ] **Step 3: Do the deletions, then create migration/model/factory/controller/request/pages.** Index lists orchards (cards; details filled in Task 9). Show page is a skeleton with header + edit/delete; later tasks add sections. Toasts: `เพิ่มสวนแล้ว`, `บันทึกสวนแล้ว`, `ลบสวนแล้ว`; delete confirm `ลบสวนนี้และข้อมูลทั้งหมดในสวน?`.
-- [ ] **Step 4: Run** `php artisan migrate:fresh --seed`, the test file, `npx tsc --noEmit`, `npm run lint` — PASS.
-- [ ] **Step 5: Commit** `refactor: replace plot/crop-cycle domain with orchards`
+- [x] **Step 1: Write failing tests** in `OrchardControllerTest`: guests redirected to login from `orchards.index`; `test('home redirects to orchards')` (`get('/')` as user → redirect `route('orchards.index')`); store with `name='สวนบ้านล่าง'` creates row and redirects to `orchards.show`; `name` required; update changes name; destroy removes an orchard with no trees.
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/OrchardControllerTest.php` — FAIL.
+- [x] **Step 3: Do the deletions, then create migration/model/factory/controller/request/pages.** Index lists orchards (cards; details filled in Task 9). Show page is a skeleton with header + edit/delete; later tasks add sections. Toasts: `เพิ่มสวนแล้ว`, `บันทึกสวนแล้ว`, `ลบสวนแล้ว`; delete confirm `ลบสวนนี้และข้อมูลทั้งหมดในสวน?`.
+- [x] **Step 4: Run** `php artisan migrate:fresh --seed`, the test file, `npx tsc --noEmit`, `npm run lint` — PASS.
+- [x] **Step 5: Commit** `refactor: replace plot/crop-cycle domain with orchards`
 
 ---
 
@@ -83,11 +83,11 @@
   - `Tree::scopeActive(Builder $query): void` (`removed_on` null); `Tree::isRemoved(): bool`; `Orchard::trees(): HasMany`. (`Tree::hasRecords()` and the destroy guard arrive in Task 6, once both record relations exist.)
   - Routes: `orchards.trees.store` POST `orchards/{orchard}/trees`; `orchards.trees.batch` POST `orchards/{orchard}/trees/batch` (`prefix` string, `start` int ≥1, `count` int 1–500, `variety` ?string → codes `{prefix}{start…}` zero-padded to 3 digits, e.g. `A-001`; skips none — duplicate code fails validation for the whole batch); `trees.show` GET `trees/{tree}`; `trees.update` PATCH; `trees.remove` PATCH `trees/{tree}/remove` (`removed_on` date, default today); `trees.restore` PATCH `trees/{tree}/restore`; `trees.destroy` DELETE (guarded in Task 6); `trees.qr` GET `t/{tree}` → redirect to `trees.show`, inside `auth` middleware so Laravel stores the intended URL.
 
-- [ ] **Step 1: Write failing tests:** store single tree; batch with `prefix='A-', start=1, count=3` creates `A-001..A-003`; batch fails when `A-002` already exists (no rows created); code unique per orchard but same code allowed in another orchard; `test('scanning a QR while logged out returns to the tree after login')` — `get('/t/'.$tree->id)` → redirect login; `post(route('login.store'), creds)` → `assertRedirect(route('trees.show', $tree))`; remove sets `removed_on` and the orchard show prop `trees` excludes it unless `show_removed=1`; restore clears it; destroy works for a tree with no records.
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/TreeControllerTest.php tests/Feature/Farm/TreeModelTest.php` — FAIL.
-- [ ] **Step 3: Implement.** Tree page (mobile-first): header `code` · orchard name · variety, badge `ไม่อยู่แล้ว` when removed, edit/remove/restore actions in a menu; placeholder area for action buttons and timeline (Tasks 5–6).
-- [ ] **Step 4: Run** tests + `npx tsc --noEmit` — PASS.
-- [ ] **Step 5: Commit** `feat: add trees with removal and QR short URL`
+- [x] **Step 1: Write failing tests:** store single tree; batch with `prefix='A-', start=1, count=3` creates `A-001..A-003`; batch fails when `A-002` already exists (no rows created); code unique per orchard but same code allowed in another orchard; `test('scanning a QR while logged out returns to the tree after login')` — `get('/t/'.$tree->id)` → redirect login; `post(route('login.store'), creds)` → `assertRedirect(route('trees.show', $tree))`; remove sets `removed_on` and the orchard show prop `trees` excludes it unless `show_removed=1`; restore clears it; destroy works for a tree with no records.
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/TreeControllerTest.php tests/Feature/Farm/TreeModelTest.php` — FAIL.
+- [x] **Step 3: Implement.** Tree page (mobile-first): header `code` · orchard name · variety, badge `ไม่อยู่แล้ว` when removed, edit/remove/restore actions in a menu; placeholder area for action buttons and timeline (Tasks 5–6).
+- [x] **Step 4: Run** tests + `npx tsc --noEmit` — PASS.
+- [x] **Step 5: Commit** `feat: add trees with removal and QR short URL`
 
 ---
 
@@ -105,11 +105,11 @@
   - Routes: `orchards.seasons.store`, `seasons.show`, `seasons.update`, `seasons.close` (PATCH, `ended_on` default today, must be ≥ `started_on`), `seasons.destroy`.
   - Validation (in request, using route orchard / season's orchard, ignoring self on update): `ended_on` after_or_equal `started_on`; no overlap with any other season of the orchard (treat null end as +∞ for the open one and for the candidate); creating an open season when one is already open → error on `started_on` `มีรอบที่ยังไม่ปิดอยู่แล้ว`; overlap error `ช่วงวันซ้อนกับรอบอื่น`.
 
-- [ ] **Step 1: Write failing tests:** create open season; second open season rejected; closed season 2025-06-01..2026-03-31 then new season starting 2026-03-31 rejected, starting 2026-04-01 accepted; open season starting 2026-06-01 exists → closed season 2026-05-01..2026-07-01 rejected; `test('boundary dates belong to the season')` — season 2025-06-01..2026-03-31: `containsDate('2025-06-01')` and `containsDate('2026-03-31')` true, `'2026-04-01'` false; `Season::covering($orchard->id, date)` returns the right one across two adjacent seasons; close sets `ended_on`.
-- [ ] **Step 2: Run** the two test files — FAIL.
-- [ ] **Step 3: Implement.** Default season name suggestion in the UI: `ฤดู {พ.ศ. of started_on}`.
-- [ ] **Step 4: Run** — PASS.
-- [ ] **Step 5: Commit** `feat: add per-orchard seasons with overlap rules`
+- [x] **Step 1: Write failing tests:** create open season; second open season rejected; closed season 2025-06-01..2026-03-31 then new season starting 2026-03-31 rejected, starting 2026-04-01 accepted; open season starting 2026-06-01 exists → closed season 2026-05-01..2026-07-01 rejected; `test('boundary dates belong to the season')` — season 2025-06-01..2026-03-31: `containsDate('2025-06-01')` and `containsDate('2026-03-31')` true, `'2026-04-01'` false; `Season::covering($orchard->id, date)` returns the right one across two adjacent seasons; close sets `ended_on`.
+- [x] **Step 2: Run** the two test files — FAIL.
+- [x] **Step 3: Implement.** Default season name suggestion in the UI: `ฤดู {พ.ศ. of started_on}`.
+- [x] **Step 4: Run** — PASS.
+- [x] **Step 5: Commit** `feat: add per-orchard seasons with overlap rules`
 
 ---
 
@@ -127,11 +127,11 @@
   - Validation: each `tree_ids.*` must exist, belong to the route orchard, and have `removed_on` null.
   - Toasts: `บันทึกการดูแลแล้ว`, `ลบบันทึกแล้ว`.
 
-- [ ] **Step 1: Write failing tests:** bulk record for 3 trees creates 1 care record with 3 pivot rows; single-tree record from tree page redirects to `trees.show`; `test('bulk care rejects removed trees and trees from other orchards')` — both cases error on `tree_ids.0` and create no rows; empty `tree_ids` rejected; update replaces tree set; destroy removes record and pivot.
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/CareRecordControllerTest.php` — FAIL.
-- [ ] **Step 3: Implement.** Bulk page: select-all / select-none toggle, list of active trees with checkboxes (large tap targets), type as three big toggle buttons. Tree page: three buttons `ใส่ปุ๋ย` `ฉีดยา` `ผลผลิต` (last wired in Task 6); first two open the form dialog with type preset and date = today.
-- [ ] **Step 4: Run** tests + `npx tsc --noEmit` — PASS.
-- [ ] **Step 5: Commit** `feat: record fertilizer and pesticide care per tree or in bulk`
+- [x] **Step 1: Write failing tests:** bulk record for 3 trees creates 1 care record with 3 pivot rows; single-tree record from tree page redirects to `trees.show`; `test('bulk care rejects removed trees and trees from other orchards')` — both cases error on `tree_ids.0` and create no rows; empty `tree_ids` rejected; update replaces tree set; destroy removes record and pivot.
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/CareRecordControllerTest.php` — FAIL.
+- [x] **Step 3: Implement.** Bulk page: select-all / select-none toggle, list of active trees with checkboxes (large tap targets), type as three big toggle buttons. Tree page: three buttons `ใส่ปุ๋ย` `ฉีดยา` `ผลผลิต` (last wired in Task 6); first two open the form dialog with type preset and date = today.
+- [x] **Step 4: Run** tests + `npx tsc --noEmit` — PASS.
+- [x] **Step 5: Commit** `feat: record fertilizer and pesticide care per tree or in bulk`
 
 ---
 
@@ -148,11 +148,11 @@
   - Batch rule: rows with empty `weight_kg` are dropped before validation (`prepareForValidation`); after filtering `rows` must be non-empty (error `กรอกน้ำหนักอย่างน้อย 1 ต้น` on `rows`); each `tree_id` belongs to the orchard and is active.
   - Tree show props: `timeline: list<{kind: 'care'|'harvest', id, date, title, detail}>` newest first (care title = `CareType::label()` + product), limit 50; `seasonYields: list<{seasonId, seasonName, weightKg, fruitCount}>` via `Season::applyDateWindow`.
 
-- [ ] **Step 1: Write failing tests:** single harvest stores and redirects to tree; `test('harvest grid saves only filled rows')` — 3 rows, one with `weight_kg=''` → 2 harvests; `test('harvest grid with no filled rows fails')` → error on `rows`; grid rejects removed tree / other-orchard tree; `weight_kg=0` rejected; tree `hasRecords()` true after a harvest and `trees.destroy` then errors with `ลบไม่ได้เพราะต้นนี้มีบันทึกแล้ว`; tree show `timeline` merges a care record and a harvest in date-desc order; `seasonYields` sums only harvests inside each season.
-- [ ] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/HarvestControllerTest.php tests/Feature/Farm/TreeControllerTest.php` — FAIL.
-- [ ] **Step 3: Implement.** Grid: one date input, then one row per tree (`code`, kg input `inputMode="decimal"`, count input `inputMode="numeric"`), sticky save button.
-- [ ] **Step 4: Run** — PASS.
-- [ ] **Step 5: Commit** `feat: record harvests per tree and by orchard grid; tree timeline`
+- [x] **Step 1: Write failing tests:** single harvest stores and redirects to tree; `test('harvest grid saves only filled rows')` — 3 rows, one with `weight_kg=''` → 2 harvests; `test('harvest grid with no filled rows fails')` → error on `rows`; grid rejects removed tree / other-orchard tree; `weight_kg=0` rejected; tree `hasRecords()` true after a harvest and `trees.destroy` then errors with `ลบไม่ได้เพราะต้นนี้มีบันทึกแล้ว`; tree show `timeline` merges a care record and a harvest in date-desc order; `seasonYields` sums only harvests inside each season.
+- [x] **Step 2: Run** `php artisan test --compact tests/Feature/Farm/HarvestControllerTest.php tests/Feature/Farm/TreeControllerTest.php` — FAIL.
+- [x] **Step 3: Implement.** Grid: one date input, then one row per tree (`code`, kg input `inputMode="decimal"`, count input `inputMode="numeric"`), sticky save button.
+- [x] **Step 4: Run** — PASS.
+- [x] **Step 5: Commit** `feat: record harvests per tree and by orchard grid; tree timeline`
 
 ---
 
@@ -165,9 +165,9 @@
 **Interfaces:**
 - Produces: `sales`: `orchard_id` (cascade), `sold_on`, `buyer_name` ?, `weight_kg` decimal(10,2) >0, `amount` decimal(12,2) >0, `notes` ?. Routes `orchards.sales.store`, `sales.update`, `sales.destroy` → redirect `orchards.show`. UI shows computed price/kg (`amount / weight_kg`, 2 decimals). Toasts `บันทึกการขายแล้ว`, `ลบการขายแล้ว`.
 
-- [ ] **Step 1: Write failing tests:** store/update/destroy; `weight_kg` and `amount` required and > 0; `buyer_name` optional.
-- [ ] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS.
-- [ ] **Step 5: Commit** `feat: record orchard sales`
+- [x] **Step 1: Write failing tests:** store/update/destroy; `weight_kg` and `amount` required and > 0; `buyer_name` optional.
+- [x] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS.
+- [x] **Step 5: Commit** `feat: record orchard sales`
 
 ---
 
@@ -184,9 +184,9 @@
   - Routes `expenses.index` (query `from`, `to` optional dates), `expenses.store`, `expenses.update`, `expenses.destroy`.
   - Index props: `expenses` (filtered, newest first, with `season.orchard`), `total: float`, `totalsByCategory: list<{category, label, total}>`, `seasons` (for the optional select, labelled `{orchard} · {season}`), `categories` (value/label list).
 
-- [ ] **Step 1: Write failing tests:** store without season; store with season; category must be a valid enum value; `amount` > 0; filter `from=2026-01-01&to=2026-01-31` excludes a 2026-02-01 expense and `total` equals the sum of included ones; `totalsByCategory` groups correctly.
-- [ ] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS.
-- [ ] **Step 5: Commit** `feat: track expenses with fixed categories and optional season`
+- [x] **Step 1: Write failing tests:** store without season; store with season; category must be a valid enum value; `amount` > 0; filter `from=2026-01-01&to=2026-01-31` excludes a 2026-02-01 expense and `total` equals the sum of included ones; `totalsByCategory` groups correctly.
+- [x] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS.
+- [x] **Step 5: Commit** `feat: track expenses with fixed categories and optional season`
 
 ---
 
@@ -202,9 +202,9 @@
   - `seasons.show` props: `season` (with orchard), `totalYieldKg`, `totalFruitCount`, `treeYields: list<{treeId, code, weightKg, fruitCount}>` (all trees of the orchard incl. removed ones that have harvests in the window, sorted weight desc), `salesTotal`, `salesWeightKg`, `sales`, `expensesTotal` (only expenses with this `season_id`), `careRecordCount`.
   - `orchards.index` props per orchard: `trees_count` (active), `current_season` (name or null), `current_yield_kg`.
 
-- [ ] **Step 1: Write failing tests:** season summary counts a harvest of a removed tree; excludes harvests/sales dated outside the window; `expensesTotal` ignores expenses without `season_id`; orchard index `current_yield_kg` equals sum of harvests in the open season only.
-- [ ] **Step 2: Run** — FAIL. **Step 3: Implement** (aggregate with SQL `sum`; no N+1 — one query per metric). **Step 4: Run** — PASS.
-- [ ] **Step 5: Commit** `feat: season summaries and orchard overview`
+- [x] **Step 1: Write failing tests:** season summary counts a harvest of a removed tree; excludes harvests/sales dated outside the window; `expensesTotal` ignores expenses without `season_id`; orchard index `current_yield_kg` equals sum of harvests in the open season only.
+- [x] **Step 2: Run** — FAIL. **Step 3: Implement** (aggregate with SQL `sum`; no N+1 — one query per metric). **Step 4: Run** — PASS.
+- [x] **Step 5: Commit** `feat: season summaries and orchard overview`
 
 ---
 
@@ -218,9 +218,9 @@
 - Produces: `TreeQrCode::svg(Tree $tree): string` — SVG for `route('trees.qr', $tree)` (absolute URL), via `BaconQrCode\Writer` + `SvgImageBackEnd`, 200px. Route `orchards.qr` GET `orchards/{orchard}/qr` → props `labels: list<{code, orchardName, svg}>` for active trees only, ordered by code.
 - Page: no app chrome when printing (`@media print` hides sidebar/header), A4 grid 4 columns × 6 rows of labels (QR + `code` large + orchard name small), each label `break-inside: avoid`; on-screen button `พิมพ์` calls `window.print()`.
 
-- [ ] **Step 1: Write failing tests:** `TreeQrCode::svg($tree)` starts with `<?xml` or `<svg` and contains no error; `orchards.qr` returns labels for active trees only (removed tree excluded), in code order.
-- [ ] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS; manually confirm a printed label scans to `/t/{id}` (phone camera against browser print preview).
-- [ ] **Step 5: Commit** `feat: printable QR labels per orchard`
+- [x] **Step 1: Write failing tests:** `TreeQrCode::svg($tree)` starts with `<?xml` or `<svg` and contains no error; `orchards.qr` returns labels for active trees only (removed tree excluded), in code order.
+- [x] **Step 2: Run** — FAIL. **Step 3: Implement.** **Step 4: Run** — PASS; manually confirm a printed label scans to `/t/{id}` (phone camera against browser print preview).
+- [x] **Step 5: Commit** `feat: printable QR labels per orchard`
 
 ---
 
@@ -230,8 +230,8 @@
 - Modify: `database/seeders/DatabaseSeeder.php`, `package.json`/lockfile, `README.md`; delete `docs/screenshots/*` and the README screenshots table; delete unused `resources/js/components/ui/*`
 - Test: full suite
 
-- [ ] **Step 1: Seeder:** one owner user (`name` `เจ้าของสวน`, email/password from `env('OWNER_EMAIL', 'owner@example.com')` / `env('OWNER_PASSWORD', 'password')`); in `local` env also 2 orchards × 20 trees, one open season each, a few care records/harvests/sales/expenses. Add `OWNER_EMAIL`/`OWNER_PASSWORD` to `.env.example`.
-- [ ] **Step 2: Remove unused UI components and npm packages:** for each file in `components/ui` and each `@radix-ui/*` dependency, `grep -r` for imports; delete/uninstall the unreferenced ones (expected at least `navigation-menu`, `toggle-group`, `toggle` if unused).
-- [ ] **Step 3: README:** features list and getting-started match the new system (orchards, trees + QR, seasons, care, harvest, sales, expenses; seeding the owner; resetting a password via `php artisan tinker`).
-- [ ] **Step 4: Verify:** `php artisan migrate:fresh --seed`, `php artisan test --compact`, `vendor/bin/phpstan analyse` (if configured), `vendor/bin/pint --dirty --format agent`, `npx tsc --noEmit`, `npm run lint`, `npm run build` — all clean. `grep -rn "Plot\|CropCycle\|Grade\|FruitType\|isAdmin\|recorded_by" app resources/js tests database` returns nothing.
-- [ ] **Step 5: Commit** `chore: seed owner, drop unused components and dependencies, update README`
+- [x] **Step 1: Seeder:** one owner user (`name` `เจ้าของสวน`, email/password from `env('OWNER_EMAIL', 'owner@example.com')` / `env('OWNER_PASSWORD', 'password')`); in `local` env also 2 orchards × 20 trees, one open season each, a few care records/harvests/sales/expenses. Add `OWNER_EMAIL`/`OWNER_PASSWORD` to `.env.example`.
+- [x] **Step 2: Remove unused UI components and npm packages:** for each file in `components/ui` and each `@radix-ui/*` dependency, `grep -r` for imports; delete/uninstall the unreferenced ones (expected at least `navigation-menu`, `toggle-group`, `toggle` if unused).
+- [x] **Step 3: README:** features list and getting-started match the new system (orchards, trees + QR, seasons, care, harvest, sales, expenses; seeding the owner; resetting a password via `php artisan tinker`).
+- [x] **Step 4: Verify:** `php artisan migrate:fresh --seed`, `php artisan test --compact`, `vendor/bin/phpstan analyse` (if configured), `vendor/bin/pint --dirty --format agent`, `npx tsc --noEmit`, `npm run lint`, `npm run build` — all clean. `grep -rn "Plot\|CropCycle\|Grade\|FruitType\|isAdmin\|recorded_by" app resources/js tests database` returns nothing.
+- [x] **Step 5: Commit** `chore: seed owner, drop unused components and dependencies, update README`

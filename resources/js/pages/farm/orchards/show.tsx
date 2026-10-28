@@ -52,6 +52,7 @@ import { formatThaiDate } from '@/lib/thai-date';
 import { index, qr, show } from '@/routes/orchards';
 import { create as createCareRecord } from '@/routes/orchards/care-records';
 import { create as createHarvest } from '@/routes/orchards/harvests';
+import { index as recordsIndex } from '@/routes/records';
 import { show as showSeason } from '@/routes/seasons';
 import { show as showTree } from '@/routes/trees';
 import { careTypeLabels } from '@/types/farm';
@@ -100,6 +101,7 @@ export default function OrchardShow({
     recentCareRecords,
     activeTrees,
     sales,
+    salesSummary,
     currentSeasonYieldKg,
     dueIssues,
     openIssues,
@@ -113,6 +115,7 @@ export default function OrchardShow({
     recentCareRecords: CareRecord[];
     activeTrees: Pick<Tree, 'id' | 'code'>[];
     sales: Sale[];
+    salesSummary: SalesSummary;
     currentSeasonYieldKg: Record<number, number>;
     dueIssues: IssueSummary[];
     openIssues: IssueSummary[];
@@ -491,7 +494,9 @@ export default function OrchardShow({
 
                     {tab === 'sales' && (
                         <SalesPanel
+                            orchardId={orchard.id}
                             sales={sales}
+                            summary={salesSummary}
                             onCreate={() => setSaleDialog('new')}
                             onEdit={setSaleDialog}
                         />
@@ -960,24 +965,22 @@ function SeasonPanel({
     );
 }
 
+type SalesSummary = { count: number; amount: number; weightKg: number };
+
 function SalesPanel({
+    orchardId,
     sales,
+    summary,
     onCreate,
     onEdit,
 }: {
+    orchardId: number;
     sales: Sale[];
+    summary: SalesSummary;
     onCreate: () => void;
     onEdit: (sale: Sale) => void;
 }) {
     const confirm = useConfirm();
-    const totalAmount = sales.reduce(
-        (sum, sale) => sum + Number(sale.amount),
-        0,
-    );
-    const totalWeight = sales.reduce(
-        (sum, sale) => sum + Number(sale.weight_kg),
-        0,
-    );
 
     return (
         <section
@@ -991,10 +994,11 @@ function SalesPanel({
                     <h2 className="text-xl font-semibold md:text-lg">
                         การขายทั้งหมด
                     </h2>
-                    {sales.length > 0 && (
+                    {summary.count > 0 && (
                         <p className="text-base text-muted-foreground md:text-sm">
-                            {sales.length} ครั้ง · {formatBaht(totalAmount)} บาท
-                            · {formatNumber(totalWeight)} กก.
+                            {summary.count.toLocaleString('th-TH')} ครั้ง ·{' '}
+                            {formatBaht(summary.amount)} บาท ·{' '}
+                            {formatNumber(summary.weightKg)} กก.
                         </p>
                     )}
                 </div>
@@ -1055,6 +1059,18 @@ function SalesPanel({
                         </li>
                     ))}
                 </ul>
+            )}
+            {summary.count > sales.length && (
+                <Link
+                    href={recordsIndex.url('sales', {
+                        query: { orchard_id: orchardId },
+                    })}
+                    className="inline-flex min-h-12 items-center gap-1 text-base font-medium text-primary underline-offset-4 hover:underline md:min-h-9 md:text-sm"
+                >
+                    ดูการขายทั้งหมด {summary.count.toLocaleString('th-TH')}{' '}
+                    รายการ
+                    <ChevronRight aria-hidden="true" className="size-4" />
+                </Link>
             )}
         </section>
     );

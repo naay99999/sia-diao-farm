@@ -1,27 +1,34 @@
 # Production stack for Dokploy. Dokploy attaches its Traefik network and
 # routes the domain set in its UI to port 80 of this service.
+#
+# Settings come from .env, with the same keys as .env.example (on Dokploy, the
+# Environment tab is written to that .env). The values under `environment`
+# override it: they describe paths inside the container, or keep production safe
+# even when a local .env is copied over.
+#
+# The database is a separate Dokploy PostgreSQL service. Joining
+# dokploy-network lets the app reach it by its internal host name, given in the
+# Environment tab as DB_CONNECTION=pgsql and DB_HOST, DB_DATABASE and the rest.
 services:
   app:
     build: .
     restart: unless-stopped
     expose:
       - "80"
+    env_file: .env
     environment:
-      APP_NAME: "Sia Diao Farm"
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_KEY: ${APP_KEY:?Set APP_KEY}
-      APP_URL: ${APP_URL:?Set APP_URL to the https address of the farm}
-      APP_LOCALE: th
-      APP_FALLBACK_LOCALE: th
-      DB_CONNECTION: sqlite
-      DB_DATABASE: /app/storage/database/database.sqlite
       LOG_CHANNEL: stderr
-      LOG_LEVEL: warning
-      OWNER_EMAIL: ${OWNER_EMAIL:?Set OWNER_EMAIL}
-      OWNER_PASSWORD: ${OWNER_PASSWORD:?Set OWNER_PASSWORD}
+      PHOTOS_ACCEL_REDIRECT: "true"
     volumes:
       - farm-storage:/app/storage
+    networks:
+      - dokploy-network
 
 volumes:
   farm-storage:
+
+networks:
+  dokploy-network:
+    external: true

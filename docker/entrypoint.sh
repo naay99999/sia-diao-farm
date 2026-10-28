@@ -13,7 +13,7 @@ mkdir -p \
     storage/framework/views \
     storage/logs
 
-if [ -n "$DB_DATABASE" ] && [ ! -f "$DB_DATABASE" ]; then
+if [ "$DB_CONNECTION" = "sqlite" ] && [ -n "$DB_DATABASE" ] && [ ! -f "$DB_DATABASE" ]; then
     touch "$DB_DATABASE"
 fi
 

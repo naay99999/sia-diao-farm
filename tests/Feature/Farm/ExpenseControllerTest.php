@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ExpenseCategory;
+use App\Http\Controllers\Farm\RecordController;
 use App\Models\Expense;
 use App\Models\Orchard;
 use App\Models\Season;
@@ -78,7 +79,7 @@ test('index filters by inclusive date range and totals the filtered set', functi
     $this->actingAs($this->user)
         ->get(route('expenses.index', ['from' => '2026-01-01', 'to' => '2026-01-31']))
         ->assertInertia(fn (Assert $page) => $page
-            ->has('expenses', 2)
+            ->has('expenses.data', 2)
             ->where('total', 300)
             ->has('categories', 6));
 });
@@ -90,8 +91,8 @@ test('index lists newest first without filters', function () {
     $this->actingAs($this->user)
         ->get(route('expenses.index'))
         ->assertInertia(fn (Assert $page) => $page
-            ->has('expenses', 2)
-            ->where('expenses.0.spent_on', fn ($value) => str_starts_with($value, '2026-03-01')));
+            ->has('expenses.data', 2)
+            ->where('expenses.data.0.spent_on', fn ($value) => str_starts_with($value, '2026-03-01')));
 });
 
 test('index groups totals by category', function () {
@@ -115,4 +116,25 @@ test('index labels seasons with their orchard', function () {
     $this->actingAs($this->user)
         ->get(route('expenses.index'))
         ->assertInertia(fn (Assert $page) => $page->where('seasons.0.label', 'สวนบน · ฤดู 2569'));
+});
+
+test('index pages the list but totals every matching expense', function () {
+    Expense::factory()->count(RecordController::PER_PAGE + 5)->create(['category' => 'labor', 'amount' => 10, 'spent_on' => '2026-01-10']);
+    Expense::factory()->create(['category' => 'labor', 'amount' => 999, 'spent_on' => '2025-01-10']);
+
+    $this->actingAs($this->user)
+        ->get(route('expenses.index', ['from' => '2026-01-01', 'page' => 2]))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('expenses.data', 5)
+            ->where('expenses.total', RecordController::PER_PAGE + 5)
+            ->where('total', (RecordController::PER_PAGE + 5) * 10)
+            ->where('totalsByCategory.0.total', (RecordController::PER_PAGE + 5) * 10));
+});
+
+test('index sends a page past the end back to the last page', function () {
+    Expense::factory()->create();
+
+    $this->actingAs($this->user)
+        ->get(route('expenses.index', ['page' => 9]))
+        ->assertRedirect(route('expenses.index', ['page' => 1]));
 });

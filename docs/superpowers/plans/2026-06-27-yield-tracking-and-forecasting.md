@@ -61,7 +61,7 @@
 - Modify: `app/Models/FruitType.php`
 - Test: `tests/Feature/Farm/GradeModelTest.php`
 
-- [ ] **Step 1: Write the failing test** (`php artisan make:test --pest Farm/GradeModelTest`)
+- [x] **Step 1: Write the failing test** (`php artisan make:test --pest Farm/GradeModelTest`)
 
 ```php
 <?php
@@ -85,12 +85,12 @@ test('a fruit type has many grades', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=GradeModelTest`
 Expected: FAIL ("Class Grade not found")
 
-- [ ] **Step 3: Create the migration** `database/migrations/2026_06_27_120000_create_grades_table.php`
+- [x] **Step 3: Create the migration** `database/migrations/2026_06_27_120000_create_grades_table.php`
 
 ```php
 <?php
@@ -119,7 +119,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model** `app/Models/Grade.php`
+- [x] **Step 4: Create the model** `app/Models/Grade.php`
 
 ```php
 <?php
@@ -157,7 +157,7 @@ class Grade extends Model
 }
 ```
 
-- [ ] **Step 5: Add `grades()` to `app/Models/FruitType.php`**
+- [x] **Step 5: Add `grades()` to `app/Models/FruitType.php`**
 
 Add this method after `varieties()` (the `HasMany` import already exists):
 
@@ -171,7 +171,7 @@ Add this method after `varieties()` (the `HasMany` import already exists):
     }
 ```
 
-- [ ] **Step 6: Create the factory** `database/factories/GradeFactory.php`
+- [x] **Step 6: Create the factory** `database/factories/GradeFactory.php`
 
 ```php
 <?php
@@ -198,12 +198,12 @@ class GradeFactory extends Factory
 }
 ```
 
-- [ ] **Step 7: Run test**
+- [x] **Step 7: Run test**
 
 Run: `php artisan test --compact --filter=GradeModelTest`
 Expected: PASS (2 tests)
 
-- [ ] **Step 8: Format and commit**
+- [x] **Step 8: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -221,7 +221,7 @@ git commit -m "feat: add Grade model"
 - Create: `database/factories/HarvestFactory.php`
 - Test: `tests/Feature/Farm/HarvestModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```php
 <?php
@@ -240,12 +240,12 @@ test('a harvest belongs to a crop cycle and has many items', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=HarvestModelTest`
 Expected: FAIL ("Class Harvest not found")
 
-- [ ] **Step 3: Create the migration** `database/migrations/2026_06_27_120100_create_harvests_table.php`
+- [x] **Step 3: Create the migration** `database/migrations/2026_06_27_120100_create_harvests_table.php`
 
 ```php
 <?php
@@ -275,7 +275,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model** `app/Models/Harvest.php`
+- [x] **Step 4: Create the model** `app/Models/Harvest.php`
 
 ```php
 <?php
@@ -338,7 +338,7 @@ class Harvest extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory** `database/factories/HarvestFactory.php`
+- [x] **Step 5: Create the factory** `database/factories/HarvestFactory.php`
 
 ```php
 <?php
@@ -367,12 +367,12 @@ class HarvestFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test**
+- [x] **Step 6: Run test**
 
 Run: `php artisan test --compact --filter=HarvestModelTest`
 Expected: PASS once Task 3 (`HarvestItem`) lands (the `items()` relation + factory reference it). Run together with Task 3.
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -390,7 +390,7 @@ git commit -m "feat: add Harvest model"
 - Create: `database/factories/HarvestItemFactory.php`
 - Test: `tests/Feature/Farm/HarvestItemModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```php
 <?php
@@ -411,12 +411,12 @@ test('a harvest item belongs to a harvest and a grade with a weight', function (
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=HarvestItemModelTest`
 Expected: FAIL ("Class HarvestItem not found")
 
-- [ ] **Step 3: Create the migration** `database/migrations/2026_06_27_120200_create_harvest_items_table.php`
+- [x] **Step 3: Create the migration** `database/migrations/2026_06_27_120200_create_harvest_items_table.php`
 
 ```php
 <?php
@@ -445,7 +445,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model** `app/Models/HarvestItem.php`
+- [x] **Step 4: Create the model** `app/Models/HarvestItem.php`
 
 ```php
 <?php
@@ -498,7 +498,7 @@ class HarvestItem extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory** `database/factories/HarvestItemFactory.php`
+- [x] **Step 5: Create the factory** `database/factories/HarvestItemFactory.php`
 
 ```php
 <?php
@@ -526,12 +526,12 @@ class HarvestItemFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `php artisan test --compact --filter="HarvestModelTest|HarvestItemModelTest"`
 Expected: PASS (both)
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -549,7 +549,7 @@ git commit -m "feat: add HarvestItem model"
 - Create: `database/factories/SaleFactory.php`
 - Test: `tests/Feature/Farm/SaleModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```php
 <?php
@@ -569,12 +569,12 @@ test('a sale belongs to a crop cycle and has many items', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=SaleModelTest`
 Expected: FAIL ("Class Sale not found")
 
-- [ ] **Step 3: Create the migration** `database/migrations/2026_06_27_120300_create_sales_table.php`
+- [x] **Step 3: Create the migration** `database/migrations/2026_06_27_120300_create_sales_table.php`
 
 ```php
 <?php
@@ -605,7 +605,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model** `app/Models/Sale.php`
+- [x] **Step 4: Create the model** `app/Models/Sale.php`
 
 ```php
 <?php
@@ -669,7 +669,7 @@ class Sale extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory** `database/factories/SaleFactory.php`
+- [x] **Step 5: Create the factory** `database/factories/SaleFactory.php`
 
 ```php
 <?php
@@ -699,12 +699,12 @@ class SaleFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run test**
+- [x] **Step 6: Run test**
 
 Run: `php artisan test --compact --filter=SaleModelTest`
 Expected: PASS once Task 5 (`SaleItem`) lands. Run together with Task 5.
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -722,7 +722,7 @@ git commit -m "feat: add Sale model"
 - Create: `database/factories/SaleItemFactory.php`
 - Test: `tests/Feature/Farm/SaleItemModelTest.php`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```php
 <?php
@@ -749,12 +749,12 @@ test('a sale item belongs to a sale and a grade and stores a subtotal', function
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=SaleItemModelTest`
 Expected: FAIL ("Class SaleItem not found")
 
-- [ ] **Step 3: Create the migration** `database/migrations/2026_06_27_120400_create_sale_items_table.php`
+- [x] **Step 3: Create the migration** `database/migrations/2026_06_27_120400_create_sale_items_table.php`
 
 ```php
 <?php
@@ -785,7 +785,7 @@ return new class extends Migration
 };
 ```
 
-- [ ] **Step 4: Create the model** `app/Models/SaleItem.php`
+- [x] **Step 4: Create the model** `app/Models/SaleItem.php`
 
 ```php
 <?php
@@ -842,7 +842,7 @@ class SaleItem extends Model
 }
 ```
 
-- [ ] **Step 5: Create the factory** `database/factories/SaleItemFactory.php`
+- [x] **Step 5: Create the factory** `database/factories/SaleItemFactory.php`
 
 ```php
 <?php
@@ -875,12 +875,12 @@ class SaleItemFactory extends Factory
 }
 ```
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `php artisan test --compact --filter="SaleModelTest|SaleItemModelTest"`
 Expected: PASS (both)
 
-- [ ] **Step 7: Format and commit**
+- [x] **Step 7: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -900,7 +900,7 @@ git commit -m "feat: add SaleItem model"
 - Create: `resources/js/pages/farm/grades/index.tsx`
 - Test: `tests/Feature/Farm/GradeControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/GradeControllerTest`)
+- [x] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/GradeControllerTest`)
 
 ```php
 <?php
@@ -970,12 +970,12 @@ test('a user can delete a grade', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=GradeControllerTest`
 Expected: FAIL ("Route [grades.index] not defined")
 
-- [ ] **Step 3: Create the FormRequests**
+- [x] **Step 3: Create the FormRequests**
 
 `app/Http/Requests/Farm/StoreGradeRequest.php`:
 
@@ -1037,7 +1037,7 @@ class UpdateGradeRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller** `app/Http/Controllers/Farm/GradeController.php`
+- [x] **Step 4: Create the controller** `app/Http/Controllers/Farm/GradeController.php`
 
 ```php
 <?php
@@ -1101,7 +1101,7 @@ class GradeController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -1116,16 +1116,16 @@ Route::resource('grades', GradeController::class)
     ->only(['index', 'store', 'update', 'destroy']);
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=GradeControllerTest`
 Expected: PASS (6 tests)
 
-- [ ] **Step 8: Add the Grade TS type**
+- [x] **Step 8: Add the Grade TS type**
 
 In `resources/js/types/farm.ts`, add after `FruitVariety`:
 
@@ -1139,7 +1139,7 @@ export type Grade = {
 };
 ```
 
-- [ ] **Step 9: Create the page** `resources/js/pages/farm/grades/index.tsx`
+- [x] **Step 9: Create the page** `resources/js/pages/farm/grades/index.tsx`
 
 Mirror `resources/js/pages/farm/fruit-varieties/index.tsx` exactly (per-fruit-type select + inline edit). Content:
 
@@ -1290,12 +1290,12 @@ GradesIndex.layout = {
 };
 ```
 
-- [ ] **Step 10: Build the frontend**
+- [x] **Step 10: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 11: Format and commit**
+- [x] **Step 11: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1314,7 +1314,7 @@ git commit -m "feat: add grade management"
 - Modify: `resources/js/pages/farm/crop-cycles/show.tsx` (analytics summary + harvest/sale read-only lists)
 - Test: `tests/Feature/Farm/CropCycleControllerTest.php` (add analytics test)
 
-- [ ] **Step 1: Add the failing analytics test**
+- [x] **Step 1: Add the failing analytics test**
 
 In the existing `tests/Feature/Farm/CropCycleControllerTest.php`, ensure these are imported at the top: `App\Models\Grade`, `App\Models\Harvest`, `App\Models\HarvestItem`, `App\Models\Sale`, `App\Models\SaleItem`, `App\Models\Expense`, `App\Models\ExpenseCategory` (add any missing `use` lines). Append:
 
@@ -1353,12 +1353,12 @@ test('the crop cycle page exposes yield, revenue, cost-per-kg and profit', funct
 
 Note: if the test file does not already `use Inertia\Testing\AssertableInertia;`, the `assertInertia(fn ($page) => ...)` closure style works without an explicit import (the closure receives an `AssertableInertia`). Match whatever assertion style sibling tests use; if unsure, this closure form is correct for Inertia v3 + Pest.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: FAIL (`totalYield` prop missing / undefined)
 
-- [ ] **Step 3: Add `harvests()` and `sales()` to `app/Models/CropCycle.php`**
+- [x] **Step 3: Add `harvests()` and `sales()` to `app/Models/CropCycle.php`**
 
 The `HasMany` import already exists (added in Module 2). Add:
 
@@ -1380,7 +1380,7 @@ The `HasMany` import already exists (added in Module 2). Add:
     }
 ```
 
-- [ ] **Step 4: Extend `show()` in `CropCycleController`**
+- [x] **Step 4: Extend `show()` in `CropCycleController`**
 
 Add imports: `use App\Models\Grade;`. Replace the existing `show()` method body with:
 
@@ -1418,12 +1418,12 @@ public function show(CropCycle $cropCycle): Response
 }
 ```
 
-- [ ] **Step 5: Run backend tests**
+- [x] **Step 5: Run backend tests**
 
 Run: `php artisan test --compact --filter=CropCycleControllerTest`
 Expected: PASS (9 tests — the 8 from Module 2 plus the new analytics test)
 
-- [ ] **Step 6: Add Harvest/Sale TS types and extend CropCycle**
+- [x] **Step 6: Add Harvest/Sale TS types and extend CropCycle**
 
 In `resources/js/types/farm.ts`, add after `Grade`:
 
@@ -1471,7 +1471,7 @@ Extend the `CropCycle` type by adding before its closing brace:
     sales?: Sale[];
 ```
 
-- [ ] **Step 7: Add the analytics summary + read-only harvest/sale lists to `crop-cycles/show.tsx`**
+- [x] **Step 7: Add the analytics summary + read-only harvest/sale lists to `crop-cycles/show.tsx`**
 
 In `resources/js/pages/farm/crop-cycles/show.tsx`:
 
@@ -1592,12 +1592,12 @@ export default function CropCycleShow({ cropCycle, totalDirectCost, totalYield, 
             </Card>
 ```
 
-- [ ] **Step 8: Build the frontend**
+- [x] **Step 8: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 9: Format and commit**
+- [x] **Step 9: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1616,7 +1616,7 @@ git commit -m "feat: add crop cycle yield and revenue analytics"
 - Modify: `resources/js/pages/farm/crop-cycles/show.tsx` (harvest record form + delete)
 - Test: `tests/Feature/Farm/HarvestControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/HarvestControllerTest`)
+- [x] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/HarvestControllerTest`)
 
 ```php
 <?php
@@ -1694,12 +1694,12 @@ test('a user can delete a harvest', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=HarvestControllerTest`
 Expected: FAIL ("Route [crop-cycles.harvests.store] not defined")
 
-- [ ] **Step 3: Create the FormRequest** `app/Http/Requests/Farm/StoreHarvestRequest.php`
+- [x] **Step 3: Create the FormRequest** `app/Http/Requests/Farm/StoreHarvestRequest.php`
 
 ```php
 <?php
@@ -1731,7 +1731,7 @@ class StoreHarvestRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller** `app/Http/Controllers/Farm/HarvestController.php`
+- [x] **Step 4: Create the controller** `app/Http/Controllers/Farm/HarvestController.php`
 
 ```php
 <?php
@@ -1784,7 +1784,7 @@ class HarvestController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -1801,16 +1801,16 @@ Route::delete('harvests/{harvest}', [HarvestController::class, 'destroy'])
     ->name('harvests.destroy');
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=HarvestControllerTest`
 Expected: PASS (5 tests)
 
-- [ ] **Step 8: Add the harvest record form + delete to `crop-cycles/show.tsx`**
+- [x] **Step 8: Add the harvest record form + delete to `crop-cycles/show.tsx`**
 
 In `resources/js/pages/farm/crop-cycles/show.tsx`:
 
@@ -1937,12 +1937,12 @@ import HarvestController, { store as harvestStore } from '@/actions/App/Http/Con
                 </div>
 ```
 
-- [ ] **Step 9: Build the frontend**
+- [x] **Step 9: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 10: Format and commit**
+- [x] **Step 10: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -1961,7 +1961,7 @@ git commit -m "feat: add harvest recording with graded line items"
 - Modify: `resources/js/pages/farm/crop-cycles/show.tsx` (sale record form + delete)
 - Test: `tests/Feature/Farm/SaleControllerTest.php`
 
-- [ ] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/SaleControllerTest`)
+- [x] **Step 1: Write the failing controller test** (`php artisan make:test --pest Farm/SaleControllerTest`)
 
 ```php
 <?php
@@ -2041,12 +2041,12 @@ test('a user can delete a sale', function () {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `php artisan test --compact --filter=SaleControllerTest`
 Expected: FAIL ("Route [crop-cycles.sales.store] not defined")
 
-- [ ] **Step 3: Create the FormRequest** `app/Http/Requests/Farm/StoreSaleRequest.php`
+- [x] **Step 3: Create the FormRequest** `app/Http/Requests/Farm/StoreSaleRequest.php`
 
 ```php
 <?php
@@ -2080,7 +2080,7 @@ class StoreSaleRequest extends FormRequest
 }
 ```
 
-- [ ] **Step 4: Create the controller** `app/Http/Controllers/Farm/SaleController.php`
+- [x] **Step 4: Create the controller** `app/Http/Controllers/Farm/SaleController.php`
 
 ```php
 <?php
@@ -2136,7 +2136,7 @@ class SaleController extends Controller
 }
 ```
 
-- [ ] **Step 5: Register routes**
+- [x] **Step 5: Register routes**
 
 In `routes/web.php`, add the import:
 
@@ -2153,16 +2153,16 @@ Route::delete('sales/{sale}', [SaleController::class, 'destroy'])
     ->name('sales.destroy');
 ```
 
-- [ ] **Step 6: Generate Wayfinder helpers**
+- [x] **Step 6: Generate Wayfinder helpers**
 
 Run: `php artisan wayfinder:generate`
 
-- [ ] **Step 7: Run backend tests**
+- [x] **Step 7: Run backend tests**
 
 Run: `php artisan test --compact --filter=SaleControllerTest`
 Expected: PASS (5 tests)
 
-- [ ] **Step 8: Add the sale record form + delete to `crop-cycles/show.tsx`**
+- [x] **Step 8: Add the sale record form + delete to `crop-cycles/show.tsx`**
 
 In `resources/js/pages/farm/crop-cycles/show.tsx`:
 
@@ -2307,12 +2307,12 @@ import SaleController, { store as saleStore } from '@/actions/App/Http/Controlle
                 </div>
 ```
 
-- [ ] **Step 9: Build the frontend**
+- [x] **Step 9: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds with no TypeScript errors
 
-- [ ] **Step 10: Format and commit**
+- [x] **Step 10: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2327,7 +2327,7 @@ git commit -m "feat: add sale recording with computed subtotals"
 **Files:**
 - Modify: `resources/js/components/app-sidebar.tsx`
 
-- [ ] **Step 1: Add the grades nav item**
+- [x] **Step 1: Add the grades nav item**
 
 In `resources/js/components/app-sidebar.tsx`:
 
@@ -2353,17 +2353,17 @@ Add this item to `mainNavItems` directly after the `พันธุ์ผลไ�
     },
 ```
 
-- [ ] **Step 2: Build the frontend**
+- [x] **Step 2: Build the frontend**
 
 Run: `npm run build`
 Expected: build succeeds. If `Award` is unavailable in the installed lucide-react, substitute an available icon (e.g. `Medal`, `Star`).
 
-- [ ] **Step 3: Run the full farm test suite**
+- [x] **Step 3: Run the full farm test suite**
 
 Run: `php artisan test --compact --filter=Farm`
 Expected: PASS (all Module 1 + 2 + 3 farm tests)
 
-- [ ] **Step 4: Format and commit**
+- [x] **Step 4: Format and commit**
 
 ```bash
 vendor/bin/pint --dirty --format agent
@@ -2375,10 +2375,10 @@ git commit -m "feat: add grade navigation to sidebar"
 
 ## Final Verification
 
-- [ ] Run the full test suite: `php artisan test --compact`
-- [ ] Run linting: `vendor/bin/pint --test --format agent` (ignore pre-existing failures in files this module didn't touch) and `npm run lint`
-- [ ] Build: `npm run build`
-- [ ] Manually verify: add grades for a fruit type → open a crop cycle → record a harvest with two grade rows → confirm yield total updates → record a sale with a grade row and price → confirm revenue, cost/kg and profit update → delete a harvest and a sale and confirm the summary recalculates
+- [x] Run the full test suite: `php artisan test --compact`
+- [x] Run linting: `vendor/bin/pint --test --format agent` (ignore pre-existing failures in files this module didn't touch) and `npm run lint`
+- [x] Build: `npm run build`
+- [x] Manually verify: add grades for a fruit type → open a crop cycle → record a harvest with two grade rows → confirm yield total updates → record a sale with a grade row and price → confirm revenue, cost/kg and profit update → delete a harvest and a sale and confirm the summary recalculates
 
 ---
 

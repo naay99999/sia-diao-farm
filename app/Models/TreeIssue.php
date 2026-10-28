@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\TracksProvenance;
+use App\Support\DateFilter;
 use Carbon\CarbonInterface;
 use Database\Factories\TreeIssueFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -103,8 +104,7 @@ class TreeIssue extends Model
      */
     public function scopeDue(Builder $query, CarbonInterface $today): void
     {
-        $query->open()
-            ->whereDate('follow_up_on', '<=', $today->toDateString())
+        DateFilter::onOrBefore($query->open(), 'follow_up_on', $today)
             ->whereIn('tree_id', Tree::query()->active()->select('id'));
     }
 

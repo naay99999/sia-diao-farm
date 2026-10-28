@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Orchard;
 use App\Models\Season;
 use App\Models\User;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -43,8 +44,8 @@ class RecordFilters
         }
 
         return $query
-            ->when($filters['from'] ?? null, fn (Builder $q, string $from) => $q->whereDate($dateColumn, '>=', $from))
-            ->when($filters['to'] ?? null, fn (Builder $q, string $to) => $q->whereDate($dateColumn, '<=', $to))
+            ->when($filters['from'] ?? null, fn (Builder $q, string $from) => DateFilter::onOrAfter($q, $dateColumn, $from))
+            ->when($filters['to'] ?? null, fn (Builder $q, string $to) => DateFilter::onOrBefore($q, $dateColumn, $to))
             ->when($filters['created_by'] ?? null, fn (Builder $q, int|string $userId) => $q->where('created_by', $userId))
             ->when($filters['via'] ?? null, fn (Builder $q, string $via) => $q->where('created_via', $via));
     }
@@ -62,15 +63,15 @@ class RecordFilters
     }
 
     /**
-     * The choices every records filter bar offers.
+     * The choices every records filter bar offers, as lazy props so changing a filter or page can skip them.
      *
-     * @return array{orchards: Collection<int, Orchard>, seasons: SupportCollection<int, array{id: int, label: non-falsy-string}>, members: Collection<int, User>}
+     * @return array{orchards: Closure(): Collection<int, Orchard>, seasons: Closure(): SupportCollection<int, array{id: int, label: non-falsy-string}>, members: Closure(): Collection<int, User>}
      */
     public static function options(): array
     {
         return [
-            'orchards' => Orchard::query()->orderBy('name')->get(['id', 'name']),
-            'seasons' => Season::query()
+            'orchards' => fn (): Collection => Orchard::query()->orderBy('name')->get(['id', 'name']),
+            'seasons' => fn (): SupportCollection => Season::query()
                 ->with('orchard')
                 ->orderByDesc('started_on')
                 ->get()
@@ -79,7 +80,7 @@ class RecordFilters
                     'label' => "{$season->orchard->name} · {$season->name}",
                 ])
                 ->values(),
-            'members' => User::query()->orderBy('name')->get(['id', 'name']),
+            'members' => fn (): Collection => User::query()->orderBy('name')->get(['id', 'name']),
         ];
     }
 }

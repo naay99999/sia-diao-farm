@@ -5,10 +5,12 @@ use App\Models\Expense;
 use App\Models\FarmNote;
 use App\Models\Harvest;
 use App\Models\Observation;
+use App\Models\Orchard;
 use App\Models\Sale;
 use App\Models\Tree;
 use App\Models\TreeIssue;
 use App\Models\User;
+use Illuminate\Support\Facades\Date;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -68,4 +70,30 @@ test('restoring a live record or a missing id fails', function () {
 
 test('unknown trash type is not found', function () {
     $this->patch('/records/trash/banana/1')->assertNotFound();
+});
+
+test('trash keeps the 200 newest deletions across types, newest first', function () {
+    $orchard = Orchard::factory()->create();
+
+    foreach (range(1, 200) as $minute) {
+        Date::setTestNow(Date::parse('2026-10-01 08:00')->addMinutes($minute));
+        Sale::factory()->for($orchard)->create()->delete();
+    }
+
+    Date::setTestNow('2026-10-01 07:00');
+    $oldest = Harvest::factory()->create();
+    $oldest->delete();
+
+    Date::setTestNow('2026-10-02 08:00');
+    $newest = Harvest::factory()->create();
+    $newest->delete();
+
+    $this->get(route('records.trash'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('items', 200)
+            ->where('items.0.type', 'harvest')
+            ->where('items.0.id', $newest->id)
+            ->where('items.1.deletedAt', '2026-10-01 11:20:00')
+            ->where('items.199.deletedAt', '2026-10-01 08:02:00')
+            ->where('items', fn ($items) => collect($items)->doesntContain(fn ($item) => $item['type'] === 'harvest' && $item['id'] === $oldest->id)));
 });
