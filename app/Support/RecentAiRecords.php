@@ -9,7 +9,6 @@ use App\Models\Harvest;
 use App\Models\Observation;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 
 /**
  * The latest records an AI client wrote through MCP, newest first, so the owner can see the connection at work.
@@ -45,10 +44,12 @@ class RecentAiRecords
     }
 
     /**
-     * @param  Builder<CareRecord|Harvest|Observation|Sale|Expense|FarmNote>  $query
-     * @return Collection<int, array{kind:string, title:string, subject:string, recordedOn:string, href:string|null, by:string|null, createdAt:string}>
+     * @template TRecord of CareRecord|Harvest|Observation|Sale|Expense|FarmNote
+     *
+     * @param  Builder<TRecord>  $query
+     * @return array<int, array{kind:string, title:string, subject:string, href:string|null, recordedOn:string, by:string|null, createdAt:string}>
      */
-    private static function fetch(Builder $query, int $limit): Collection
+    private static function fetch(Builder $query, int $limit): array
     {
         return $query
             ->with([...RecordSummary::relations($query->getModel()), 'creator:id,name'])
@@ -59,6 +60,7 @@ class RecentAiRecords
                 'recordedOn' => $record->created_at?->toDateString() ?? '',
                 'by' => $record->creator?->name,
                 'createdAt' => $record->created_at?->toDateTimeString() ?? '',
-            ]);
+            ])
+            ->all();
     }
 }

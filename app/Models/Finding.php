@@ -16,6 +16,9 @@ use Illuminate\Support\Carbon;
  * @property FindingKind $kind
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read bool|null $in_use_by_observations
+ * @property-read bool|null $in_use_by_issues
+ * @property-read bool|null $in_use_by_notes
  */
 #[Fillable(['name', 'kind'])]
 class Finding extends Model

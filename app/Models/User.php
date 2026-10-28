@@ -27,6 +27,7 @@ use Laravel\Passport\HasApiTokens;
  * @property string|null $remember_token
  * @property CarbonInterface|null $created_at
  * @property CarbonInterface|null $updated_at
+ * @property-read bool|null $passkeys_exists
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]

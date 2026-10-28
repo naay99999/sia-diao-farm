@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Fortify\Fortify;
+use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\Passkeys;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -71,8 +72,8 @@ class FortifyServiceProvider extends ServiceProvider
             return $user;
         });
 
-        Passkeys::authorizeLoginUsing(function (Request $request, User $user): bool {
-            if (! $user->isActive()) {
+        Passkeys::authorizeLoginUsing(function (Request $request, PasskeyUser $user): bool {
+            if ($user instanceof User && ! $user->isActive()) {
                 throw ValidationException::withMessages([
                     'passkey' => self::DEACTIVATED_MESSAGE,
                 ]);
