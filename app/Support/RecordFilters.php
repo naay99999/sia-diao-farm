@@ -65,7 +65,7 @@ class RecordFilters
     /**
      * The choices every records filter bar offers, as lazy props so changing a filter or page can skip them.
      *
-     * @return array{orchards: Closure(): Collection<int, Orchard>, seasons: Closure(): SupportCollection<int, array{id: int, label: non-falsy-string}>, members: Closure(): Collection<int, User>}
+     * @return array{orchards: Closure(): Collection<int, Orchard>, seasons: Closure(): SupportCollection<int, array{id: int, label: string}>, members: Closure(): Collection<int, User>}
      */
     public static function options(): array
     {

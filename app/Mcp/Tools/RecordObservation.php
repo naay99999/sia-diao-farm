@@ -60,7 +60,7 @@ class RecordObservation extends FarmWriteTool
             'kind' => $updating ? ['nullable'] : ['required', Rule::enum(FindingKind::class)],
             'observed_on' => $updating ? ['sometimes', 'required', 'date'] : ['required', 'date'],
             'severity' => ['nullable', Rule::enum(Severity::class)],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'follow_up_on' => ['nullable', 'date', 'after_or_equal:observed_on'],
         ], [
             'tree_codes.required' => 'tree_codes is required; pass the tree codes, for example ["A-001"].',

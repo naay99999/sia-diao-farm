@@ -94,7 +94,6 @@ class OrchardController extends Controller
                 }),
             'dueIssues' => IssueSummary::due($openIssues),
             'openIssues' => $openIssues,
-            'activeTrees' => $activeTrees->map->only(['id', 'code'])->values(),
             'sales' => $orchard->sales()->latest('sold_on')->latest('id')->limit(self::RECENT_SALES)->get(),
             'salesSummary' => $this->salesSummary($orchard),
             'currentSeason' => $currentSeason,
@@ -126,16 +125,16 @@ class OrchardController extends Controller
 
     public function qr(Orchard $orchard): Response
     {
+        $trees = $orchard->trees()->active()->orderBy('code')->get();
+        $svgs = TreeQrCode::svgs($trees);
+
         return Inertia::render('farm/orchards/qr', [
             'orchard' => $orchard,
-            'labels' => $orchard->trees()
-                ->active()
-                ->orderBy('code')
-                ->get()
+            'labels' => $trees
                 ->map(fn (Tree $tree): array => [
                     'code' => $tree->code,
                     'orchardName' => $orchard->name,
-                    'svg' => TreeQrCode::svg($tree),
+                    'svg' => $svgs[$tree->id],
                 ])
                 ->all(),
         ]);

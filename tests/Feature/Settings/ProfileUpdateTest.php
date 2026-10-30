@@ -72,6 +72,30 @@ test('password can be updated', function () {
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
 
+test('changing the password keeps this session and ends the others', function () {
+    $user = User::factory()->create();
+    $oldHash = $user->password;
+
+    $this->actingAs($user)
+        ->put(route('user-password.update'), [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ])
+        ->assertSessionHasNoErrors();
+
+    $this->get(route('profile.edit'))->assertOk();
+
+    $this->flushSession();
+
+    $this->actingAs($user->refresh())
+        ->withSession(['password_hash_web' => $oldHash])
+        ->get(route('profile.edit'))
+        ->assertRedirect(route('login'));
+
+    $this->assertGuest();
+});
+
 test('correct password must be provided to update password', function () {
     $user = User::factory()->create();
 

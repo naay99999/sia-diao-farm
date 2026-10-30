@@ -28,7 +28,7 @@ class StoreTreeRequest extends FormRequest
             ],
             'variety' => ['nullable', 'string', 'max:255'],
             'planted_on' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 }

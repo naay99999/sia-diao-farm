@@ -21,7 +21,7 @@ class StoreFollowUpRequest extends FormRequest
         return [
             'observed_on' => ['required', 'date'],
             'outcome' => ['required', Rule::enum(FollowUpOutcome::class)],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'next_follow_up_on' => ['nullable', 'date', 'after_or_equal:observed_on'],
             'photos' => ['nullable', 'array', 'max:3'],
             'photos.*' => ['image', 'max:8192'],

@@ -5,6 +5,8 @@
 
 node_modules
 vendor
+frankenphp
+**/caddy
 public/build
 public/hot
 public/storage

@@ -23,7 +23,7 @@ class StoreSeasonRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'started_on' => ['required', 'date'],
             'ended_on' => ['nullable', 'date', 'after_or_equal:started_on'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 

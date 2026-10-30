@@ -43,7 +43,7 @@ class RecordFollowUp extends FarmWriteTool
             'issue_id' => ['required', 'integer'],
             'observed_on' => ['required', 'date'],
             'outcome' => ['required', Rule::enum(FollowUpOutcome::class)],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'next_follow_up_on' => ['nullable', 'date', 'after_or_equal:observed_on'],
         ], [
             'issue_id.required' => 'issue_id is required; use an issue id from get_farm_overview or get_tree.',

@@ -62,6 +62,11 @@ test('looking up rows by their foreign key uses an index', function (string $sql
     'expenses of a season' => 'select * from expenses where season_id = ?',
     'seasons of an orchard' => 'select * from seasons where orchard_id = ?',
     'notes of a tree' => 'select * from farm_notes where tree_id = ?',
+    'follow-ups of an issue' => 'select * from observations where tree_issue_id = ?',
+    'observations of a finding' => 'select * from observations where finding_id = ?',
+    'issues of a finding' => 'select * from tree_issues where finding_id = ?',
+    'open issue of a tree and finding' => 'select * from tree_issues where tree_id = ? and finding_id = 1',
+    'tokens of a client' => "select * from oauth_access_tokens where client_id = '00000000-0000-0000-0000-000000000000' and 1 = ?",
 ]);
 
 test('due issues filter the follow-up date on the issue index', function () {

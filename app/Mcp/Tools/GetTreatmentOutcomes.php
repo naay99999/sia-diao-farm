@@ -2,17 +2,17 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\CareRecord;
-use App\Models\TreeIssue;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Database\Query\Builder;
 use Illuminate\JsonSchema\Types\Type;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Tool;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+use stdClass;
 
 #[Name('get_treatment_outcomes')]
 #[Description('The farm\'s own track record of treatments. For each combination of finding (problem name) and care product linked to an issue, returns issues_treated, resolved and avg_days_to_resolve (days from opening to resolving, resolved issues only; null when none resolved). Use it before recommending a treatment, and say how small the sample is. Pass finding (the exact name from get_farm_overview) to limit it to one problem.')]
@@ -34,48 +34,42 @@ class GetTreatmentOutcomes extends Tool
         $validated = $request->validate(['finding' => ['nullable', 'string']]);
         $finding = trim((string) ($validated['finding'] ?? ''));
 
-        $issues = TreeIssue::query()
-            ->whereHas('careRecords')
-            ->when($finding !== '', fn ($query) => $query->whereRelation('finding', 'name', $finding))
-            ->with(['finding:id,name', 'careRecords:id,product'])
-            ->get();
-
-        /** @var Collection<string, array{finding: string, product: string, issues: Collection<int, TreeIssue>}> $groups */
-        $groups = collect();
-
-        foreach ($issues as $issue) {
-            $products = $issue->careRecords
-                ->map(fn (CareRecord $record): string => trim((string) $record->product))
-                ->filter()
-                ->unique();
-
-            foreach ($products as $product) {
-                $key = $issue->finding->name."\0".$product;
-                $group = $groups->get($key, ['finding' => $issue->finding->name, 'product' => $product, 'issues' => collect()]);
-                $group['issues']->push($issue);
-                $groups->put($key, $group);
-            }
-        }
-
-        $outcomes = $groups
-            ->map(function (array $group): array {
-                $resolved = $group['issues']->reject(fn (TreeIssue $issue): bool => $issue->isOpen());
-
-                return [
-                    'finding' => $group['finding'],
-                    'product' => $group['product'],
-                    'issues_treated' => $group['issues']->count(),
-                    'resolved' => $resolved->count(),
-                    'avg_days_to_resolve' => $resolved->isEmpty() ? null : round(
-                        $resolved->avg(fn (TreeIssue $issue): int => (int) $issue->opened_on->diffInDays($issue->resolved_on)),
-                        1,
-                    ),
-                ];
-            })
+        $outcomes = DB::query()
+            ->fromSub($this->treatedIssues($finding), 'treated')
+            ->groupBy('finding', 'product')
+            ->select(['finding', 'product'])
+            ->selectRaw('count(*) as issues_treated, count(resolved_on) as resolved, avg(resolved_on - opened_on) as avg_days_to_resolve')
+            ->get()
+            ->map(fn (stdClass $row): array => [
+                'finding' => $row->finding,
+                'product' => $row->product,
+                'issues_treated' => (int) $row->issues_treated,
+                'resolved' => (int) $row->resolved,
+                'avg_days_to_resolve' => $row->avg_days_to_resolve === null ? null : round((float) $row->avg_days_to_resolve, 1),
+            ])
             ->sortBy([['finding', 'asc'], ['issues_treated', 'desc'], ['product', 'asc']])
             ->values()
             ->all();
 
         return Response::json(['outcomes' => $outcomes]);
+    }
+
+    /**
+     * One row per finding, product and live issue it was used on, so an issue treated twice with the same
+     * product counts once. Deleted issues and care records are left out.
+     */
+    private function treatedIssues(string $finding): Builder
+    {
+        return DB::table('tree_issues')
+            ->join('findings', 'findings.id', '=', 'tree_issues.finding_id')
+            ->join('care_record_tree_issue', 'care_record_tree_issue.tree_issue_id', '=', 'tree_issues.id')
+            ->join('care_records', 'care_records.id', '=', 'care_record_tree_issue.care_record_id')
+            ->whereNull('tree_issues.deleted_at')
+            ->whereNull('care_records.deleted_at')
+            ->when($finding !== '', fn (Builder $query) => $query->where('findings.name', $finding))
+            ->whereRaw("trim(care_records.product) <> ''")
+            ->distinct()
+            ->select(['findings.name as finding', 'tree_issues.id', 'tree_issues.opened_on', 'tree_issues.resolved_on'])
+            ->selectRaw('trim(care_records.product) as product');
     }
 }

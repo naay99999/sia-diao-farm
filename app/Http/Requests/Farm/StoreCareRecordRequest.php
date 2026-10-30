@@ -23,7 +23,7 @@ class StoreCareRecordRequest extends FormRequest
             'performed_on' => ['required', 'date'],
             'product' => ['nullable', 'string', 'max:255'],
             'quantity' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'tree_ids' => ['required', 'array', 'min:1'],
             'tree_ids.*' => ['integer', 'distinct', 'exists:trees,id'],
             'issue_ids' => ['nullable', 'array'],

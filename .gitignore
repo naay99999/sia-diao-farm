@@ -30,3 +30,6 @@ yarn-error.log
 /.zed
 /.taste-skill
 .superpowers/
+
+**/caddy
+frankenphp

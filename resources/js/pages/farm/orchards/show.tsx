@@ -99,7 +99,6 @@ export default function OrchardShow({
     currentSeason,
     seasons,
     recentCareRecords,
-    activeTrees,
     sales,
     salesSummary,
     currentSeasonYieldKg,
@@ -113,7 +112,6 @@ export default function OrchardShow({
     currentSeason: Season | null;
     seasons: Season[];
     recentCareRecords: CareRecord[];
-    activeTrees: Pick<Tree, 'id' | 'code'>[];
     sales: Sale[];
     salesSummary: SalesSummary;
     currentSeasonYieldKg: Record<number, number>;
@@ -161,6 +159,7 @@ export default function OrchardShow({
         }
     };
 
+    const activeTrees = trees.filter((tree) => !tree.removed_on);
     const normalizedQuery = treeQuery.trim().toLowerCase();
     const visibleTrees = normalizedQuery
         ? trees.filter((tree) =>

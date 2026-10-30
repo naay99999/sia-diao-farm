@@ -40,7 +40,7 @@ class UpdateTree extends FarmWriteTool
             'new_code' => ['nullable', 'string', 'max:50'],
             'variety' => ['nullable', 'string', 'max:255'],
             'planted_on' => ['nullable', 'date'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ], [
             'code.required' => 'code is required; pass the tree code, for example A-001.',
             ...$this->dateMessages('planted_on'),

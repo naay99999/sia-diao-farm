@@ -21,7 +21,7 @@ class StoreSaleRequest extends FormRequest
             'buyer_name' => ['nullable', 'string', 'max:255'],
             'weight_kg' => ['required', 'numeric', 'gt:0', 'max:99999999'],
             'amount' => ['required', 'numeric', 'gt:0', 'max:9999999999'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 }

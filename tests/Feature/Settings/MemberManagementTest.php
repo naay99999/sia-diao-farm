@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Support\AiConnections;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Passport\Client;
@@ -64,6 +65,27 @@ test('the owner edits a member and resets their password', function () {
     ])->assertRedirect(route('members.index'));
 
     expect(Hash::check('new-password', $member->fresh()->password))->toBeTrue();
+});
+
+test('resetting a member\'s password ends their sessions and claude connections', function () {
+    $member = User::factory()->create();
+    $oldHash = $member->password;
+    issueToken($member, Client::factory()->create());
+
+    $this->actingAs($this->user)->put(route('members.password', $member), [
+        'password' => 'new-password',
+    ])->assertRedirect(route('members.index'));
+
+    expect(AiConnections::forUser($member->id))->toBe([]);
+
+    $this->flushSession();
+
+    $this->actingAs($member->refresh())
+        ->withSession(['password_hash_web' => $oldHash])
+        ->get(route('overview'))
+        ->assertRedirect(route('login'));
+
+    $this->assertGuest();
 });
 
 test('the owner deactivates and reactivates a member', function () {
