@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
@@ -62,11 +63,14 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Use the Thai authorization screen for the MCP OAuth flow.
+     * Use the Thai authorization screen for the MCP OAuth flow. Access tokens are short-lived and MCP clients
+     * refresh them on their own, so a leaked token stops working within the hour.
      */
     protected function configurePassport(): void
     {
         Passport::authorizationView('mcp.authorize');
+        Passport::tokensExpireIn(CarbonInterval::hour());
+        Passport::refreshTokensExpireIn(CarbonInterval::days(30));
     }
 
     /**

@@ -50,7 +50,7 @@ class SaveCareRecord extends FarmWriteTool
             'performed_on' => ['required', 'date'],
             'product' => ['nullable', 'string', 'max:255'],
             'quantity' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'tree_codes' => ['required', 'array', 'min:1'],
             'tree_codes.*' => ['required', 'string'],
             'issue_ids' => ['nullable', 'array'],

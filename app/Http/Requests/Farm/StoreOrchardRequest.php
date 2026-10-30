@@ -19,7 +19,7 @@ class StoreOrchardRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 }

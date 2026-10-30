@@ -68,7 +68,7 @@ class RecordController extends Controller
         return [
             'orchardTrees' => fn (): array => Tree::query()->active()->orderBy('code')->get(['id', 'orchard_id', 'code'])
                 ->groupBy('orchard_id')
-                ->map(fn ($trees) => $trees->map->only(['id', 'code'])->values()->all())
+                ->map(fn ($trees): array => array_values($trees->map(fn (Tree $tree): array => ['id' => $tree->id, 'code' => $tree->code])->all()))
                 ->all(),
             'openIssues' => fn (): array => IssueSummary::openForFarm(),
         ];

@@ -64,11 +64,14 @@ class MemberController extends Controller
     }
 
     /**
-     * Set a new password for a member who forgot theirs.
+     * Set a new password for a member who forgot theirs, or whose account may be in the wrong hands. Their
+     * other sessions end on their next request (auth.session); their Claude connections are cut off now.
      */
     public function resetPassword(ResetMemberPasswordRequest $request, User $user): RedirectResponse
     {
         $user->update(['password' => $request->validated('password')]);
+
+        AiConnections::revokeAll($user->id);
 
         return $this->done('ตั้งรหัสผ่านใหม่แล้ว');
     }

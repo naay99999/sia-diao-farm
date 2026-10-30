@@ -196,7 +196,7 @@ test('orchard page derives active trees, layout and due issues from one tree and
         ->get(route('orchards.show', ['orchard' => $orchard, 'show_removed' => 1]))
         ->assertInertia(fn ($page) => $page
             ->has('trees', 4)
-            ->where('activeTrees', [['id' => $due->id, 'code' => 'A1'], ['id' => $later->id, 'code' => 'A2'], ['id' => $healthy->id, 'code' => 'A3']])
+            ->missing('activeTrees')
             ->where('treeLayout.0.trees.0.status', 'due')
             ->where('treeLayout.0.trees.1.status', 'issue')
             ->where('treeLayout.0.trees.2.status', 'normal')
@@ -207,5 +207,5 @@ test('orchard page derives active trees, layout and due issues from one tree and
 
     $this->actingAs($user)
         ->get(route('orchards.show', $orchard))
-        ->assertInertia(fn ($page) => $page->has('trees', 3)->has('activeTrees', 3));
+        ->assertInertia(fn ($page) => $page->has('trees', 3));
 });

@@ -162,9 +162,7 @@ export default function Findings({ findings }: { findings: Finding[] }) {
                                                 onEdit={() =>
                                                     setEditing(finding)
                                                 }
-                                                onDelete={() =>
-                                                    remove(finding)
-                                                }
+                                                onDelete={() => remove(finding)}
                                             />
                                         </li>
                                     ))}

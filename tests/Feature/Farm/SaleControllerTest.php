@@ -45,6 +45,18 @@ test('weight and amount are required and greater than zero', function (array $da
     'negative amount' => [['weight_kg' => 10, 'amount' => -5], ['amount']],
 ]);
 
+test('notes are capped at 5000 characters', function () {
+    $sale = ['sold_on' => '2026-06-10', 'weight_kg' => 10, 'amount' => 1000];
+
+    $this->actingAs($this->user)
+        ->post(route('orchards.sales.store', $this->orchard), [...$sale, 'notes' => str_repeat('ก', 5001)])
+        ->assertSessionHasErrors('notes');
+
+    $this->actingAs($this->user)
+        ->post(route('orchards.sales.store', $this->orchard), [...$sale, 'notes' => str_repeat('ก', 5000)])
+        ->assertSessionHasNoErrors();
+});
+
 test('sale updates', function () {
     $sale = Sale::factory()->for($this->orchard)->create();
 

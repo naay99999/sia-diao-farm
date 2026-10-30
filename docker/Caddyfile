@@ -1,6 +1,7 @@
-# The FrankenPHP image's default Caddyfile, trimmed, plus photo delivery by the web server.
+# The FrankenPHP image's default Caddyfile, trimmed, plus Laravel Octane's worker and photo delivery by the web server.
 #
 # https://frankenphp.dev/docs/config
+# https://frankenphp.dev/docs/worker/
 # https://frankenphp.dev/docs/x-sendfile/
 
 {
@@ -8,14 +9,32 @@
 
 	{$CADDY_GLOBAL_OPTIONS}
 
+	# Octane's worker boots Laravel once and serves many requests with it, instead of booting per request.
+	# Each worker restarts after MAX_REQUESTS requests, so a slow leak cannot grow without bound.
 	frankenphp {
 		{$FRANKENPHP_CONFIG}
+
+		worker {
+			file ./public/frankenphp-worker.php
+			env MAX_REQUESTS {$OCTANE_MAX_REQUESTS:500}
+		}
 	}
 }
 
 {$SERVER_NAME:localhost} {
 	root {$SERVER_ROOT:public/}
 	encode zstd br gzip
+
+	# Traefik terminates TLS in front of this server, so HSTS is safe to send. No page is meant to be
+	# framed: denying it stops other sites from tricking someone into clicking the OAuth approve button.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options "DENY"
+		Content-Security-Policy "frame-ancestors 'none'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
 
 	# Laravel checks a photo's signed URL, then answers with X-Accel-Redirect (the path inside the photos
 	# disk) and Caddy sends the file, so no PHP thread is held while the image goes out.
@@ -30,5 +49,8 @@
 		}
 	}
 
-	php_server
+	php_server {
+		index frankenphp-worker.php
+		try_files {path} frankenphp-worker.php
+	}
 }

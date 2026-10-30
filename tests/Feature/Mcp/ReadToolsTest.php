@@ -290,3 +290,27 @@ test('treatment outcomes ignore deleted rows, report null average and filter by 
             'avg_days_to_resolve' => null,
         ]]);
 });
+
+test('treatment outcomes count an issue once per product and skip blank products', function () {
+    $issue = TreeIssue::factory()->for($this->tree)->create([
+        'finding_id' => $this->redMite->id,
+        'opened_on' => '2026-09-01',
+        'resolved_on' => '2026-09-05',
+    ]);
+    $issue->careRecords()->attach([
+        CareRecord::factory()->for($this->orchard)->create(['product' => 'ยา ก'])->id,
+        CareRecord::factory()->for($this->orchard)->create(['product' => ' ยา ก '])->id,
+        CareRecord::factory()->for($this->orchard)->create(['product' => null])->id,
+        CareRecord::factory()->for($this->orchard)->create(['product' => '  '])->id,
+    ]);
+
+    $payload = FarmServer::actingAs($this->user)->tool(GetTreatmentOutcomes::class)->assertOk()->payload();
+
+    expect($payload['outcomes'])->toEqual([[
+        'finding' => 'ไรแดง',
+        'product' => 'ยา ก',
+        'issues_treated' => 1,
+        'resolved' => 1,
+        'avg_days_to_resolve' => 4.0,
+    ]]);
+});

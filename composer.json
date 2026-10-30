@@ -16,6 +16,7 @@
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
         "laravel/mcp": "^0.8",
+        "laravel/octane": "^2.22",
         "laravel/passport": "^13.10",
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14"
@@ -72,7 +73,7 @@
             "@test"
         ],
         "types:check": [
-            "phpstan analyse"
+            "phpstan analyse --memory-limit=1G"
         ],
         "test": [
             "@php artisan config:clear --ansi",

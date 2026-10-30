@@ -19,7 +19,8 @@ type Props = {
     myConnections: Connection[];
     setup: { mcpUrl: string; isPubliclyReachable: boolean } | null;
     members:
-        { userId: number; name: string; connections: Connection[] }[] | null;
+        | { userId: number; name: string; connections: Connection[] }[]
+        | null;
 };
 
 function Section({

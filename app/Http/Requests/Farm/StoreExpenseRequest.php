@@ -23,7 +23,7 @@ class StoreExpenseRequest extends FormRequest
             'category' => ['required', Rule::enum(ExpenseCategory::class)],
             'spent_on' => ['required', 'date'],
             'amount' => ['required', 'numeric', 'gt:0', 'max:9999999999'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 }

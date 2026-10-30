@@ -146,7 +146,12 @@ export type Sale = {
 };
 
 export type ExpenseCategory =
-    'fertilizer' | 'pesticide' | 'labor' | 'utilities' | 'equipment' | 'other';
+    | 'fertilizer'
+    | 'pesticide'
+    | 'labor'
+    | 'utilities'
+    | 'equipment'
+    | 'other';
 
 export type Expense = {
     id: number;

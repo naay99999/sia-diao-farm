@@ -25,7 +25,7 @@ class StoreObservationRequest extends FormRequest
             'kind' => ['nullable', 'required_with:finding_name', Rule::enum(FindingKind::class)],
             'observed_on' => ['required', 'date'],
             'severity' => ['nullable', Rule::enum(Severity::class)],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
             'follow_up_on' => ['nullable', 'date', 'after_or_equal:observed_on'],
             'photos' => ['nullable', 'array', 'max:3'],
             'photos.*' => ['image', 'max:8192'],

@@ -15,7 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Safe only because the container is reachable solely through Traefik on dokploy-network
+        // (compose.yaml exposes port 80 there and publishes nothing). If the port is ever published,
+        // clients could spoof X-Forwarded-For and dodge the login throttle, which is keyed by IP.
         $middleware->trustProxies(at: '*');
+
+        // Remember each session's password hash, so changing or resetting a password ends every other session.
+        $middleware->authenticateSessions();
 
         $middleware->encryptCookies(except: ['sidebar_state']);
 

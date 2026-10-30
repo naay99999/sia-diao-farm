@@ -35,6 +35,11 @@ jobs:
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
           npm install
 
+      - name: Audit Dependencies
+        run: |
+          composer audit
+          npm audit --audit-level=high
+
       - name: Run Pint
         run: composer lint
 

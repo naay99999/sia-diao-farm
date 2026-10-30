@@ -8,6 +8,7 @@ import { logout } from '@/routes';
 import { index as aiConnectionsIndex } from '@/routes/ai-connections';
 import { index as findingsIndex } from '@/routes/findings';
 import { index as membersIndex } from '@/routes/members';
+import { index as notesIndex } from '@/routes/notes';
 import { edit as profileEdit } from '@/routes/profile';
 import { index as recordsIndex } from '@/routes/records';
 
@@ -20,6 +21,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
         { title: 'โปรไฟล์', href: profileEdit() },
         ...(isOwner ? [{ title: 'สมาชิก', href: membersIndex() }] : []),
         { title: 'สิ่งที่พบ', href: findingsIndex() },
+        { title: 'ความรู้ที่จดไว้', href: notesIndex() },
         { title: 'เชื่อมต่อ Claude', href: aiConnectionsIndex() },
     ];
 

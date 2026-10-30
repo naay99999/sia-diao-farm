@@ -22,7 +22,7 @@ class StoreHarvestRequest extends FormRequest
             'harvested_on' => ['required', 'date'],
             'weight_kg' => ['required', 'numeric', 'gt:0', 'max:99999999'],
             'fruit_count' => ['nullable', 'integer', 'min:1'],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 

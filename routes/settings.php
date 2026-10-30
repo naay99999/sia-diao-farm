@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\AiConnectionController;
+use App\Http\Controllers\Settings\FarmNoteController;
 use App\Http\Controllers\Settings\FindingController;
 use App\Http\Controllers\Settings\MemberController;
 use App\Http\Controllers\Settings\ProfileController;
@@ -31,6 +32,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('settings/findings', [FindingController::class, 'store'])->name('findings.store');
     Route::patch('settings/findings/{finding}', [FindingController::class, 'update'])->name('findings.update');
     Route::delete('settings/findings/{finding}', [FindingController::class, 'destroy'])->name('findings.destroy');
+
+    Route::get('settings/notes', [FarmNoteController::class, 'index'])->name('notes.index');
+    Route::post('settings/notes', [FarmNoteController::class, 'store'])->name('notes.store');
+    Route::patch('settings/notes/{note}', [FarmNoteController::class, 'update'])->name('notes.update');
+    Route::delete('settings/notes/{note}', [FarmNoteController::class, 'destroy'])->name('notes.destroy');
 
     Route::get('settings/ai', [AiConnectionController::class, 'index'])->name('ai-connections.index');
     Route::delete('settings/ai/{user}/{client}', [AiConnectionController::class, 'destroy'])->name('ai-connections.destroy');

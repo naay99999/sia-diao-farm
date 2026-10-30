@@ -4,6 +4,7 @@ use App\Models\Orchard;
 use App\Models\Tree;
 use App\Models\User;
 use App\Support\TreeQrCode;
+use Illuminate\Support\Facades\Cache;
 
 test('tree qr code is an svg', function () {
     $svg = TreeQrCode::svg(Tree::factory()->create());
@@ -33,4 +34,16 @@ test('qr page lists active trees only in code order', function () {
 
 test('guests cannot open the qr page', function () {
     $this->get(route('orchards.qr', Orchard::factory()->create()))->assertRedirect(route('login'));
+});
+
+test('qr codes are drawn once and then read from the cache', function () {
+    $drawn = Tree::factory()->create();
+    $cached = Tree::factory()->create();
+    Cache::put('tree-qr:'.sha1(route('trees.qr', $cached)), '<svg>cached</svg>');
+
+    $svgs = TreeQrCode::svgs(collect([$drawn, $cached]));
+
+    expect($svgs[$drawn->id])->toBe(TreeQrCode::svg($drawn))
+        ->and($svgs[$cached->id])->toBe('<svg>cached</svg>')
+        ->and(Cache::get('tree-qr:'.sha1(route('trees.qr', $drawn))))->toBe($svgs[$drawn->id]);
 });

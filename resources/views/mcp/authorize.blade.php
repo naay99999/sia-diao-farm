@@ -67,6 +67,15 @@
 
             <!-- Content -->
             <div class="p-6 pt-0 space-y-4">
+                <!-- Redirect Destination: the client picks its own name, so show where the approval really goes -->
+                @php($redirectHost = parse_url((string) ($request->query('redirect_uri') ?? ($client->redirect_uris[0] ?? '')), PHP_URL_HOST))
+                @if($redirectHost)
+                    <div class="rounded-lg border p-4 bg-muted/50">
+                        <p class="text-sm text-muted-foreground mb-2">สิทธิ์จะถูกส่งไปที่:</p>
+                        <p class="font-medium break-all">{{ $redirectHost }}</p>
+                    </div>
+                @endif
+
                 <!-- User Info -->
                 <div class="rounded-lg border p-4 bg-muted/50">
                     <p class="text-sm text-muted-foreground mb-2">เข้าสู่ระบบในชื่อ:</p>

@@ -21,7 +21,7 @@ class UpdateObservationRequest extends FormRequest
         return [
             'observed_on' => ['required', 'date'],
             'severity' => ['nullable', Rule::enum(Severity::class)],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
