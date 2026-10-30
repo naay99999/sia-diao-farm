@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 return [
 
     /*
@@ -125,12 +123,11 @@ return [
     | the framework. Typically, you should not need to change this value
     | since doing so does not grant a meaningful security improvement.
     |
+    | APP_NAME is Thai, which slugs to an empty string, so the name is fixed.
+    |
     */
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')).'-session',
-    ),
+    'cookie' => env('SESSION_COOKIE', 'sia-diao-farm-session'),
 
     /*
     |--------------------------------------------------------------------------
