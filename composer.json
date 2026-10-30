@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "naay99999/orchard-management",
     "type": "project",
-    "description": "internal farm ERP",
+    "description": "Orchard management app for tracking farms tree by tree, with an MCP server for Claude",
     "keywords": [
         "laravel",
         "framework"
