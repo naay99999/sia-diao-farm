@@ -1,4 +1,4 @@
-# Sia Diao Farm
+# Orchard Management
 
 A personal farm management app for a family's orchards. This is a hobby project — not production-grade software, but it works well enough for daily use in the field.
 
@@ -6,7 +6,7 @@ Feel free to fork it and adapt it for your own farm. No license restrictions.
 
 ## About
 
-Sia Diao Farm (เสี่ยเดียวฟาร์ม) is a farm management app for one owner with several orchards, tracked tree by tree. It supports durian today; the data model is meant to take more crops later.
+Orchard Management is a farm management app for one owner with several orchards, tracked tree by tree. It supports durian today; the data model is meant to take more crops later.
 
 - **Desktop first.** The web app covers everything: orchards, trees, records, edits, reports.
 - **Mobile for viewing.** Every page is responsive, and each tree's QR label opens its page on the phone.
@@ -41,8 +41,8 @@ Product direction: [`docs/superpowers/specs/2026-10-24-product-direction-design.
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/sia-diao-farm.git
-cd sia-diao-farm
+git clone https://github.com/your-username/orchard-management.git
+cd orchard-management
 
 # 2. Environment
 cp .env.example .env
@@ -188,7 +188,7 @@ post_max_size = 30M
 Everything lives on the server: the farm data in `database/database.sqlite`, the photos in `storage/app/private/photos` and the OAuth keys in `storage/oauth-*.key`. If the server's disk is lost, so is the farm, so copy all three off the server every day. A daily cron that snapshots the database and syncs to any off-site storage with [rclone](https://rclone.org) (an S3-compatible bucket, Google Drive, another machine):
 
 ```bash
-cd /path/to/sia-diao-farm
+cd /path/to/orchard-management
 mkdir -p ~/farm-db && sqlite3 database/database.sqlite ".backup '$HOME/farm-db/farm.sqlite'"
 rclone sync ~/farm-db remote:farm-backup/database --backup-dir remote:farm-backup/database-old/$(date +%F)
 rclone sync storage/app/private/photos remote:farm-backup/photos
